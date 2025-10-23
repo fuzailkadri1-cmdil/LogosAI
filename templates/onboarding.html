@@ -50,7 +50,10 @@
                                         </td>
                                         <td>
                                             <button class="btn btn-sm btn-outline-primary test-integration" data-integration-id="{{ integration.id }}">
-                                                Test
+                                                <i class="bi bi-play-circle"></i> Test
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger delete-integration" data-integration-id="{{ integration.id }}" data-provider-name="{{ integration.provider_name }}">
+                                                <i class="bi bi-trash"></i> Delete
                                             </button>
                                         </td>
                                     </tr>
@@ -190,13 +193,45 @@ document.querySelectorAll('.test-integration').forEach(button => {
                 } else {
                     alert('Integration test failed: ' + data.error);
                     this.disabled = false;
-                    this.textContent = 'Test';
+                    this.innerHTML = '<i class="bi bi-play-circle"></i> Test';
                 }
             })
             .catch(error => {
                 alert('Error testing integration');
                 this.disabled = false;
-                this.textContent = 'Test';
+                this.innerHTML = '<i class="bi bi-play-circle"></i> Test';
+            });
+    });
+});
+
+document.querySelectorAll('.delete-integration').forEach(button => {
+    button.addEventListener('click', function() {
+        const integrationId = this.dataset.integrationId;
+        const providerName = this.dataset.providerName;
+        
+        if (!confirm(`Are you sure you want to delete the "${providerName}" integration? This action cannot be undone.`)) {
+            return;
+        }
+        
+        this.disabled = true;
+        this.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Deleting...';
+        
+        fetch(`/delete_integration/${integrationId}`, { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Integration deleted successfully!');
+                    location.reload();
+                } else {
+                    alert('Failed to delete integration: ' + data.error);
+                    this.disabled = false;
+                    this.innerHTML = '<i class="bi bi-trash"></i> Delete';
+                }
+            })
+            .catch(error => {
+                alert('Error deleting integration');
+                this.disabled = false;
+                this.innerHTML = '<i class="bi bi-trash"></i> Delete';
             });
     });
 });

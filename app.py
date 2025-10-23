@@ -83,7 +83,24 @@ def register():
             flash('Email already registered.', 'danger')
             return render_template('register.html')
         
-        company = Company(name=company_name)
+        default_greeting = "Thank you for calling. How can I help you today?"
+        default_menu = json.dumps({
+            '1': 'Order Status',
+            '2': 'Business Hours',
+            '3': 'Speak to Agent',
+            '4': 'Leave Voicemail'
+        })
+        default_hours = json.dumps({
+            'monday-friday': '9am-5pm',
+            'saturday-sunday': 'Closed'
+        })
+        
+        company = Company(
+            name=company_name,
+            greeting_message=default_greeting,
+            menu_options=default_menu,
+            business_hours=default_hours
+        )
         db.session.add(company)
         db.session.flush()
         
@@ -323,8 +340,13 @@ def voice_webhook():
     
     session_key = f'call_state_{call_sid}'
     if session_key not in session:
-        engine.log_call(from_number, call_sid, None, 'in_progress', provider_type=provider_type)
+        engine.log_call(from_number, call_sid, None, 'in_progress')
         session[session_key] = {'step': 'greeting'}
+    
+    if not company.greeting_message or not company.greeting_message.strip():
+        default_message = "Thank you for calling. Please configure your company greeting message in the settings to enable full voice automation features. Goodbye."
+        response = provider.create_call_response(default_message)
+        return response, 200, {'Content-Type': 'text/xml' if provider_type != 'sip' else 'application/json'}
     
     greeting_with_menu = engine.get_greeting_with_menu()
     response = provider.create_gather_response(
@@ -483,6 +505,31 @@ def test_integration(integration_id):
     except Exception as e:
         integration.test_status = 'failed'
         db.session.commit()
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/delete_integration/<int:integration_id>', methods=['POST', 'DELETE'])
+@login_required
+def delete_integration(integration_id):
+    integration = Integration.query.get_or_404(integration_id)
+    
+    if integration.company_id != session['company_id']:
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    try:
+        provider_name = integration.provider_name
+        db.session.delete(integration)
+        db.session.commit()
+        
+        flash(f'{provider_name} integration deleted successfully!', 'success')
+        return jsonify({
+            'success': True,
+            'message': f'{provider_name} integration deleted!'
+        })
+    except Exception as e:
+        db.session.rollback()
         return jsonify({
             'success': False,
             'error': str(e)
