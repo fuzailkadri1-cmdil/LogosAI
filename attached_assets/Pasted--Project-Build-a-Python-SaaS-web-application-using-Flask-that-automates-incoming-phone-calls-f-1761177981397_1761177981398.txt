@@ -1,0 +1,70 @@
+**Project:** Build a Python SaaS web application (using Flask) that automates incoming phone calls for small/medium business call centers. The app includes an AI voice assistant for calls and a web dashboard for configuration and analytics.
+
+**Overview:** We are creating a prototype of a call-center automation service (inspired by Flip CX) that can answer calls, handle simple customer requests via AI, integrate with existing support tools, and provide an admin dashboard. The prototype will simulate call handling for a retail scenario (with future extensibility to other domains).
+
+**Requirements & Features:**
+
+1. **Voice Call Handling (IVR/Bot):** Use Twilio Programmable Voice to receive incoming calls. When a call comes in, our Flask app should:
+   - Answer the call with a greeting (text-to-speech via Twilio).
+   - Offer a menu or simply listen for the caller’s request (support both DTMF and speech input if possible).
+   - If using DTMF: e.g., "Press 1 for order status, 2 for store hours, 3 to speak to an agent."
+   - If using speech: capture the caller’s speech (Twilio’s `<Gather input="speech">`) and transcribe it to text.
+   - Based on input (digit or transcribed text), determine the **intent**:
+     - Example intents: "OrderStatus", "StoreHours", "ConnectAgent", "UnknownRequest".
+     - Implement a function `determine_intent(input_text)` that returns an intent.
+       - For simplicity, use keyword matching (e.g., if input contains "order" → OrderStatus; if "hour" → StoreHours; if "agent" or no keyword recognized → ConnectAgent as fallback).
+   - Handle each intent:
+     - **OrderStatus:** Simulate an order lookup (use a dummy dictionary of order statuses). Prompt the caller for an order number if not provided yet (this could be a next step in the call flow), then respond with a fake status like "Your order 12345 is out for delivery and will arrive tomorrow."
+     - **StoreHours:** Respond with static info (e.g., "Our store is open Monday-Friday 9am to 9pm...").
+     - **ConnectAgent:** Apologize and inform the caller they will be transferred to a human. In a real system, we would transfer the call; in the prototype, just simulate by saying "Connecting you to an agent..." and end the flow (or actually use Twilio’s `<Dial>` to forward to a preset number if we have one).
+     - **Fallback/Unknown:** If the bot cannot understand, have it say "I’m sorry, I didn’t catch that. Could you repeat or press a number for options?" and repeat the menu or end with an option to leave a voicemail.
+   - Include the ability to **record a voicemail** if no agents are available (for after-hours or certain intents). For prototype, if the intent is still not determined or user chooses to leave message, use Twilio `<Record>` to record a voicemail, then end call.
+   - After call completion, gather **call details**: the determined intent, any information collected (like order number), call duration, etc., and save this to a call log (database).
+
+2. **Integration with Support System (Zendesk):** After handling a call (especially if it wasn’t fully resolved by the bot):
+   - If intent was something like ConnectAgent or a voicemail was left, create a support ticket via Zendesk API. Implement a function `create_support_ticket(call_details)` that (for now) prints or logs a statement instead of actually calling Zendesk (to avoid external dependency, unless we can configure a Zendesk API key).
+   - The ticket should contain relevant info: caller phone number, call intent, and if available, the voicemail transcription or summary of the request.
+   - Ensure `create_support_ticket` is modular so it could be adapted for other systems (Salesforce, etc.) in the future.
+
+3. **Backend & Database:**
+   - Use Flask to set up routes:
+     - `@app.route("/voice", methods=["POST"])`: for Twilio voice webhook (this will handle the TwiML responses for call flows as described in #1).
+     - Additional Flask routes for web pages (dashboard) and API endpoints (e.g., to fetch data for charts).
+   - Use SQLite (Flask-SQLAlchemy or direct sqlite3) to store:
+     - **CallLog table:** fields like id, timestamp, caller, intent, outcome (resolved by bot or transferred), any captured message, etc.
+     - ** maybe Config table:** to store API keys or settings (in prototype, this can be just a dictionary in code or config file, for simplicity).
+   - After each call, insert a record into CallLog. Also, store the text transcript of the call or voicemail if available (this can be a separate table or JSON field).
+   - Make sure to handle database initialization (create tables if not exist).
+
+4. **Web Dashboard (Flask routes and HTML/JS):**
+   - Protect the dashboard with a simple login (even a hardcoded password or basic auth for the prototype) since it contains sensitive data.
+   - **Dashboard Home** (`/dashboard` route): Display key metrics:
+     - Total calls handled, % handled by AI vs human (transferred), etc. Compute these from the CallLog.
+     - List of recent calls (say, last 5) with columns: Time, Caller, Intent, Outcome, Duration.
+   - **Call Details Page** (`/calls/<id>` route): (Optional) A page to show full details of one call, including transcript if any.
+   - **Configuration Page** (`/dashboard/settings`): Form to input or view current config (e.g., Twilio number, Zendesk credentials placeholder). Since on Replit we might just use environment variables, this page can simply show what would be configurable. The form doesn’t need to actually function for prototype (unless we choose to allow updating a config JSON file).
+   - Use a basic HTML template with Bootstrap for styling. Include a simple nav bar for Dashboard vs Settings.
+   - Include a chart or two:
+     - e.g., a pie chart of Automated vs Agent-Handled calls.
+     - Perhaps a bar chart of call volume by day or intent frequency.
+     - You can use a library like Chart.js; serve a small JS snippet and an API route that returns JSON data (Flask route `/api/stats` that queries CallLog and returns counts).
+   - Ensure the Flask app serves the static files (CSS, JS) correctly (you may put them in a `/static` folder).
+
+5. **Simulation & Testing:**
+   - Create a mechanism to simulate incoming calls for demo purposes:
+     - Perhaps a command-line trigger or a special debug route like `/simulate_call?intent=OrderStatus` that will call the call handling logic with a fake phone number and a given intent or phrase. This can insert a record in CallLog as if a call occurred.
+     - Provide instructions in README or comments on how to test the voice functionality. (For example: "To test with a real call, set up a Twilio number webhook to https://<your-repl>.repl.co/voice. To simulate without a call, visit /simulate_call in the browser.")
+   - Write print statements or logging to the console for important actions (so we can see in Replit logs what’s happening during a call flow, especially since the call itself is not visible).
+
+6. **Comments and Clarity:** 
+   - Comment the code generously, explaining each part of the call flow, each route, and the decision logic. 
+   - Also comment where one would plug in actual credentials or adjust configurations for a real deployment.
+   - Provide a brief usage guide in comments or at the bottom of the code (e.g., "Steps to run: ...").
+
+**Tech Stack:** Python 3, Flask, Twilio API/SDK, SQLite, HTML/CSS/JS for front-end (Bootstrap, Chart.js for charts). Use any necessary Python packages (`flask`, `twilio`, etc.). Ensure the final code runs on Replit (which uses a Linux environment, so include any needed Replit-specific config if any).
+
+**Output:** Provide the complete Flask application code (you can combine everything in one `app.py` for simplicity, plus possibly a `templates` folder with separate HTML files using Flask’s template system). If code is split into files, make it clear. Include sample data or dummy functions as needed to simulate external interactions. The result should be a *working prototype* that can be run on Replit and demonstrate the described functionality.
+
+Make sure to verify that the Flask app starts without errors (perhaps include a simple `if __name__ == "__main__": app.run()` for local testing). Also, ensure Twilio webhook handling returns proper TwiML (or use `twilio.twiml.Response` object if using twilio library).
+
+Now, please generate the code for this Flask-based SaaS call center automation prototype with the above specifications.
