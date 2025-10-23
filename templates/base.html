@@ -7,17 +7,31 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
-        body { background-color: #f8f9fa; }
+        :root {
+            --primary-blue: #1e40af;
+            --primary-dark: #1e3a8a;
+            --accent-green: #10b981;
+            --accent-orange: #f59e0b;
+            --text-dark: #1f2937;
+            --text-muted: #6b7280;
+            --bg-light: #f9fafb;
+            --bg-white: #ffffff;
+        }
+        body { background-color: var(--bg-light); color: var(--text-dark); }
         .navbar-brand { font-weight: bold; }
         .sidebar { min-height: 100vh; background-color: #343a40; }
         .sidebar a { color: #fff; text-decoration: none; padding: 10px 15px; display: block; }
         .sidebar a:hover { background-color: #495057; }
-        .sidebar a.active { background-color: #007bff; }
-        .card { box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075); margin-bottom: 1.5rem; }
-        .stat-card { border-left: 4px solid #007bff; }
-        .stat-card.success { border-left-color: #28a745; }
-        .stat-card.warning { border-left-color: #ffc107; }
-        .stat-card.danger { border-left-color: #dc3545; }
+        .sidebar a.active { background-color: var(--primary-blue); }
+        .card { box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 1.5rem; border: none; border-radius: 12px; }
+        .stat-card { border-left: 4px solid var(--primary-blue); }
+        .stat-card.success { border-left-color: var(--accent-green); }
+        .stat-card.warning { border-left-color: var(--accent-orange); }
+        .stat-card.danger { border-left-color: #ef4444; }
+        .bg-primary { background-color: var(--primary-blue) !important; }
+        .text-primary { color: var(--primary-blue) !important; }
+        .btn-primary { background-color: var(--primary-blue); border-color: var(--primary-blue); }
+        .btn-primary:hover { background-color: var(--primary-dark); border-color: var(--primary-dark); }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
