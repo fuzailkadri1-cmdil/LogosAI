@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Call Details - {{ call.id }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="mb-3">
+        <a href="{{ url_for('calls') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Call Logs
+        </a>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">
+            <h4 class="mb-0">Call Details #{{ call.id }}</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-4">Caller Phone:</dt>
+                        <dd class="col-sm-8">{{ call.caller_phone }}</dd>
+                        
+                        <dt class="col-sm-4">Call SID:</dt>
+                        <dd class="col-sm-8"><code>{{ call.call_sid }}</code></dd>
+                        
+                        <dt class="col-sm-4">Intent:</dt>
+                        <dd class="col-sm-8"><span class="badge bg-info">{{ call.intent or 'Unknown' }}</span></dd>
+                        
+                        <dt class="col-sm-4">Outcome:</dt>
+                        <dd class="col-sm-8">
+                            {% if call.outcome == 'resolved' %}
+                                <span class="badge bg-success">Resolved</span>
+                            {% elif call.outcome == 'transferred' %}
+                                <span class="badge bg-warning">Transferred</span>
+                            {% elif call.outcome == 'voicemail' %}
+                                <span class="badge bg-info">Voicemail</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ call.outcome }}</span>
+                            {% endif %}
+                        </dd>
+                    </dl>
+                </div>
+                
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-4">Duration:</dt>
+                        <dd class="col-sm-8">{{ call.duration_seconds }} seconds</dd>
+                        
+                        <dt class="col-sm-4">Provider:</dt>
+                        <dd class="col-sm-8">{{ call.provider_type or 'N/A' }}</dd>
+                        
+                        <dt class="col-sm-4">Handled By:</dt>
+                        <dd class="col-sm-8">
+                            {% if call.handled_by_ai %}
+                                <i class="bi bi-robot text-success"></i> AI Assistant
+                            {% else %}
+                                <i class="bi bi-person text-primary"></i> Human Agent
+                            {% endif %}
+                        </dd>
+                        
+                        <dt class="col-sm-4">Created:</dt>
+                        <dd class="col-sm-8">{{ call.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</dd>
+                        
+                        {% if call.completed_at %}
+                        <dt class="col-sm-4">Completed:</dt>
+                        <dd class="col-sm-8">{{ call.completed_at.strftime('%Y-%m-%d %H:%M:%S') }}</dd>
+                        {% endif %}
+                    </dl>
+                </div>
+            </div>
+            
+            {% if call.transcript %}
+            <hr>
+            <h5>Transcript</h5>
+            <div class="alert alert-secondary">
+                {{ call.transcript }}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

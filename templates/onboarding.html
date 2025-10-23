@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block title %}Onboarding - Call Center Automation{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <h2 class="mb-4"><i class="bi bi-rocket"></i> Welcome, {{ company.name }}!</h2>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Setup Your Telephony Provider</h5>
+                    <p class="card-text">Connect your telephony provider to start receiving and handling calls.</p>
+                    
+                    {% if integrations %}
+                        <div class="alert alert-success">
+                            <i class="bi bi-check-circle"></i> You have {{ integrations|length }} integration(s) configured.
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Provider</th>
+                                        <th>Type</th>
+                                        <th>Status</th>
+                                        <th>Last Tested</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for integration in integrations %}
+                                    <tr>
+                                        <td>{{ integration.provider_name }}</td>
+                                        <td><span class="badge bg-primary">{{ integration.provider_type }}</span></td>
+                                        <td>
+                                            {% if integration.is_active %}
+                                                <span class="badge bg-success">Active</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">Inactive</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if integration.last_tested %}
+                                                {{ integration.last_tested.strftime('%Y-%m-%d %H:%M') }}
+                                            {% else %}
+                                                Not tested
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary test-integration" data-integration-id="{{ integration.id }}">
+                                                Test
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% endif %}
+                    
+                    <button class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#providerForm">
+                        <i class="bi bi-plus-circle"></i> Add New Provider
+                    </button>
+                </div>
+            </div>
+            
+            <div class="collapse" id="providerForm">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Configure Telephony Provider</h5>
+                        <form method="POST" action="{{ url_for('setup_provider') }}" id="providerSetupForm">
+                            <div class="mb-3">
+                                <label class="form-label">Select Provider Type</label>
+                                <select class="form-select" name="provider_type" id="providerType" required>
+                                    <option value="">Choose...</option>
+                                    <option value="twilio">Twilio</option>
+                                    <option value="cisco">Cisco Webex</option>
+                                    <option value="sip">SIP/VoIP</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Provider Name</label>
+                                <input type="text" class="form-control" name="provider_name" placeholder="e.g., My Twilio Account" required>
+                            </div>
+                            
+                            <div id="twilioFields" class="provider-fields d-none">
+                                <div class="mb-3">
+                                    <label class="form-label">Account SID</label>
+                                    <input type="text" class="form-control" name="account_sid" placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Auth Token</label>
+                                    <input type="password" class="form-control" name="auth_token">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Twilio Phone Number</label>
+                                    <input type="text" class="form-control" name="phone_number" placeholder="+1234567890">
+                                </div>
+                            </div>
+                            
+                            <div id="ciscoFields" class="provider-fields d-none">
+                                <div class="mb-3">
+                                    <label class="form-label">API URL</label>
+                                    <input type="url" class="form-control" name="api_url" placeholder="https://api.cisco.com">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">API Key</label>
+                                    <input type="password" class="form-control" name="api_key">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Phone Number</label>
+                                    <input type="text" class="form-control" name="phone_number" placeholder="+1234567890">
+                                </div>
+                            </div>
+                            
+                            <div id="sipFields" class="provider-fields d-none">
+                                <div class="mb-3">
+                                    <label class="form-label">SIP Server</label>
+                                    <input type="text" class="form-control" name="sip_server" placeholder="sip.example.com">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Username</label>
+                                    <input type="text" class="form-control" name="username">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Password</label>
+                                    <input type="password" class="form-control" name="password">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Phone Number</label>
+                                    <input type="text" class="form-control" name="phone_number" placeholder="+1234567890">
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">Save Integration</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Next Steps</h5>
+                    <ul>
+                        <li>Configure your telephony provider above</li>
+                        <li>Set up your call flow and menu options in <a href="{{ url_for('settings') }}">Settings</a></li>
+                        <li>Test your integration using the simulation endpoint</li>
+                        <li>Monitor calls in your <a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                    </ul>
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-success">
+                        <i class="bi bi-arrow-right"></i> Go to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('providerType').addEventListener('change', function() {
+    document.querySelectorAll('.provider-fields').forEach(el => el.classList.add('d-none'));
+    
+    const type = this.value;
+    if (type === 'twilio') {
+        document.getElementById('twilioFields').classList.remove('d-none');
+    } else if (type === 'cisco') {
+        document.getElementById('ciscoFields').classList.remove('d-none');
+    } else if (type === 'sip') {
+        document.getElementById('sipFields').classList.remove('d-none');
+    }
+});
+
+document.querySelectorAll('.test-integration').forEach(button => {
+    button.addEventListener('click', function() {
+        const integrationId = this.dataset.integrationId;
+        this.disabled = true;
+        this.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Testing...';
+        
+        fetch(`/test_integration/${integrationId}`, { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Integration test successful!');
+                    location.reload();
+                } else {
+                    alert('Integration test failed: ' + data.error);
+                    this.disabled = false;
+                    this.textContent = 'Test';
+                }
+            })
+            .catch(error => {
+                alert('Error testing integration');
+                this.disabled = false;
+                this.textContent = 'Test';
+            });
+    });
+});
+</script>
+{% endblock %}

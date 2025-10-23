@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Call Logs - {{ company.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="sidebar">
+                <div class="p-3">
+                    <h6 class="text-white-50">{{ company.name }}</h6>
+                    <hr class="bg-white">
+                </div>
+                <a href="{{ url_for('dashboard') }}">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+                <a href="{{ url_for('calls') }}" class="active">
+                    <i class="bi bi-telephone"></i> Call Logs
+                </a>
+                <a href="{{ url_for('voicemails') }}">
+                    <i class="bi bi-voicemail"></i> Voicemails
+                </a>
+                <a href="{{ url_for('settings') }}">
+                    <i class="bi bi-gear"></i> Settings
+                </a>
+                <a href="{{ url_for('onboarding') }}">
+                    <i class="bi bi-rocket"></i> Integrations
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">Call Logs</h2>
+                <a href="{{ url_for('simulate_call') }}?intent=OrderStatus" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Simulate Call
+                </a>
+            </div>
+            
+            <div class="card">
+                <div class="card-body">
+                    {% if calls %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Time</th>
+                                        <th>Caller</th>
+                                        <th>Intent</th>
+                                        <th>Outcome</th>
+                                        <th>Duration</th>
+                                        <th>Provider</th>
+                                        <th>Handled By</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for call in calls %}
+                                    <tr>
+                                        <td>{{ call.id }}</td>
+                                        <td>{{ call.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                        <td>{{ call.caller_phone }}</td>
+                                        <td><span class="badge bg-info">{{ call.intent or 'Unknown' }}</span></td>
+                                        <td>
+                                            {% if call.outcome == 'resolved' %}
+                                                <span class="badge bg-success">Resolved</span>
+                                            {% elif call.outcome == 'transferred' %}
+                                                <span class="badge bg-warning">Transferred</span>
+                                            {% elif call.outcome == 'voicemail' %}
+                                                <span class="badge bg-info">Voicemail</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{{ call.outcome }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ call.duration_seconds }}s</td>
+                                        <td>{{ call.provider_type or 'N/A' }}</td>
+                                        <td>
+                                            {% if call.handled_by_ai %}
+                                                <i class="bi bi-robot text-success"></i> AI
+                                            {% else %}
+                                                <i class="bi bi-person text-primary"></i> Agent
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <a href="{{ url_for('call_detail', call_id=call.id) }}" class="btn btn-sm btn-outline-primary">View</a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">No calls yet. <a href="{{ url_for('simulate_call') }}?intent=OrderStatus">Simulate a call</a> to get started.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

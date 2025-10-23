@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - {{ company.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="sidebar">
+                <div class="p-3">
+                    <h6 class="text-white-50">{{ company.name }}</h6>
+                    <hr class="bg-white">
+                </div>
+                <a href="{{ url_for('dashboard') }}">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+                <a href="{{ url_for('calls') }}">
+                    <i class="bi bi-telephone"></i> Call Logs
+                </a>
+                <a href="{{ url_for('voicemails') }}">
+                    <i class="bi bi-voicemail"></i> Voicemails
+                </a>
+                <a href="{{ url_for('settings') }}" class="active">
+                    <i class="bi bi-gear"></i> Settings
+                </a>
+                <a href="{{ url_for('onboarding') }}">
+                    <i class="bi bi-rocket"></i> Integrations
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <h2 class="mb-4">Company Settings</h2>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Call Flow Configuration</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="greeting_message" class="form-label">Greeting Message</label>
+                            <textarea class="form-control" id="greeting_message" name="greeting_message" rows="3">{{ company.greeting_message }}</textarea>
+                            <div class="form-text">This message will be played when a call is received</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Menu Options</label>
+                            {% for i in range(1, 6) %}
+                            <div class="input-group mb-2">
+                                <span class="input-group-text">Press {{ i }}</span>
+                                <input type="text" class="form-control" name="menu_option_{{ i }}" 
+                                       value="{{ company.get_menu_options().get(i|string, '') }}" 
+                                       placeholder="e.g., Order Status">
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Business Hours</label>
+                            <div class="row">
+                                <div class="col-md-6 mb-2">
+                                    <label for="hours_monday-friday" class="form-label small">Monday - Friday</label>
+                                    <input type="text" class="form-control" id="hours_monday-friday" name="hours_monday-friday" 
+                                           value="{{ company.get_business_hours().get('monday-friday', '9am-9pm') }}">
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <label for="hours_saturday-sunday" class="form-label small">Saturday - Sunday</label>
+                                    <input type="text" class="form-control" id="hours_saturday-sunday" name="hours_saturday-sunday" 
+                                           value="{{ company.get_business_hours().get('saturday-sunday', '10am-6pm') }}">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="escalation_number" class="form-label">Escalation Phone Number</label>
+                            <input type="tel" class="form-control" id="escalation_number" name="escalation_number" 
+                                   value="{{ company.escalation_number or '' }}" placeholder="+1234567890">
+                            <div class="form-text">Phone number to transfer calls when agent assistance is needed</div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Active Integrations</h5>
+                </div>
+                <div class="card-body">
+                    {% if integrations %}
+                        <div class="list-group">
+                            {% for integration in integrations %}
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">{{ integration.provider_name }}</h6>
+                                        <small class="text-muted">{{ integration.provider_type|upper }}</small>
+                                    </div>
+                                    <div>
+                                        {% if integration.is_active %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Inactive</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">No integrations configured. <a href="{{ url_for('onboarding') }}">Add one now</a></p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

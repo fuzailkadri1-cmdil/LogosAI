@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome - Call Center Automation{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="text-center mb-5">
+                <h1 class="display-4 fw-bold">Call Center Automation Platform</h1>
+                <p class="lead text-muted">Multi-tenant SaaS solution for automating call centers with AI-powered voice assistants</p>
+            </div>
+
+            <div class="row g-4 mb-5">
+                <div class="col-md-4">
+                    <div class="card h-100 text-center">
+                        <div class="card-body">
+                            <i class="bi bi-robot display-4 text-primary mb-3"></i>
+                            <h5 class="card-title">AI-Powered</h5>
+                            <p class="card-text">Intelligent call routing with intent detection supporting DTMF and speech input</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 text-center">
+                        <div class="card-body">
+                            <i class="bi bi-plugin display-4 text-success mb-3"></i>
+                            <h5 class="card-title">Pluggable Providers</h5>
+                            <p class="card-text">Support for Twilio, Cisco Webex, SIP/VoIP, and more telephony providers</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 text-center">
+                        <div class="card-body">
+                            <i class="bi bi-graph-up display-4 text-info mb-3"></i>
+                            <h5 class="card-title">Analytics Dashboard</h5>
+                            <p class="card-text">Real-time metrics and insights into call performance and automation rates</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title"><i class="bi bi-check-circle text-success"></i> Key Features</h5>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-check"></i> Multi-tenant company management</li>
+                                <li><i class="bi bi-check"></i> Onboarding wizard for provider setup</li>
+                                <li><i class="bi bi-check"></i> Dynamic webhook routing</li>
+                                <li><i class="bi bi-check"></i> Voicemail recording and transcription</li>
+                                <li><i class="bi bi-check"></i> Company-specific configurations</li>
+                                <li><i class="bi bi-check"></i> Call simulation for testing</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body">
+                            <h5 class="card-title">Get Started Today</h5>
+                            <p class="card-text">Create your account and start automating your call center in minutes</p>
+                            <div class="d-grid gap-2">
+                                <a href="{{ url_for('register') }}" class="btn btn-light btn-lg">
+                                    <i class="bi bi-person-plus"></i> Sign Up Free
+                                </a>
+                                <a href="{{ url_for('login') }}" class="btn btn-outline-light">
+                                    <i class="bi bi-box-arrow-in-right"></i> Login
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

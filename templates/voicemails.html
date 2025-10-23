@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Voicemails - {{ company.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="sidebar">
+                <div class="p-3">
+                    <h6 class="text-white-50">{{ company.name }}</h6>
+                    <hr class="bg-white">
+                </div>
+                <a href="{{ url_for('dashboard') }}">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+                <a href="{{ url_for('calls') }}">
+                    <i class="bi bi-telephone"></i> Call Logs
+                </a>
+                <a href="{{ url_for('voicemails') }}" class="active">
+                    <i class="bi bi-voicemail"></i> Voicemails
+                </a>
+                <a href="{{ url_for('settings') }}">
+                    <i class="bi bi-gear"></i> Settings
+                </a>
+                <a href="{{ url_for('onboarding') }}">
+                    <i class="bi bi-rocket"></i> Integrations
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <h2 class="mb-4">Voicemails</h2>
+            
+            <div class="card">
+                <div class="card-body">
+                    {% if voicemails %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Date</th>
+                                        <th>Caller</th>
+                                        <th>Duration</th>
+                                        <th>Status</th>
+                                        <th>Transcription</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for vm in voicemails %}
+                                    <tr class="{% if not vm.is_listened %}table-primary{% endif %}">
+                                        <td>{{ vm.id }}</td>
+                                        <td>{{ vm.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                        <td>{{ vm.caller_phone }}</td>
+                                        <td>{{ vm.duration_seconds }}s</td>
+                                        <td>
+                                            {% if vm.is_listened %}
+                                                <span class="badge bg-secondary">Listened</span>
+                                            {% else %}
+                                                <span class="badge bg-primary">New</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if vm.transcription %}
+                                                {{ vm.transcription[:50] }}{% if vm.transcription|length > 50 %}...{% endif %}
+                                            {% else %}
+                                                <span class="text-muted">Not available</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary mark-listened" data-vm-id="{{ vm.id }}"
+                                                    {% if vm.is_listened %}disabled{% endif %}>
+                                                Mark as Listened
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">No voicemails yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.querySelectorAll('.mark-listened').forEach(button => {
+    button.addEventListener('click', function() {
+        const vmId = this.dataset.vmId;
+        
+        fetch(`/voicemails/${vmId}/listen`, { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                }
+            });
+    });
+});
+</script>
+{% endblock %}

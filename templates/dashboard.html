@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - {{ company.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="sidebar">
+                <div class="p-3">
+                    <h6 class="text-white-50">{{ company.name }}</h6>
+                    <hr class="bg-white">
+                </div>
+                <a href="{{ url_for('dashboard') }}" class="active">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+                <a href="{{ url_for('calls') }}">
+                    <i class="bi bi-telephone"></i> Call Logs
+                </a>
+                <a href="{{ url_for('voicemails') }}">
+                    <i class="bi bi-voicemail"></i> Voicemails
+                    {% if voicemails > 0 %}
+                        <span class="badge bg-danger">{{ voicemails }}</span>
+                    {% endif %}
+                </a>
+                <a href="{{ url_for('settings') }}">
+                    <i class="bi bi-gear"></i> Settings
+                </a>
+                <a href="{{ url_for('onboarding') }}">
+                    <i class="bi bi-rocket"></i> Integrations
+                </a>
+                <hr class="bg-white">
+                <a href="{{ url_for('logout') }}">
+                    <i class="bi bi-box-arrow-right"></i> Logout
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <h2 class="mb-4">Dashboard</h2>
+            
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card stat-card">
+                        <div class="card-body">
+                            <h6 class="text-muted">Total Calls</h6>
+                            <h2 class="mb-0">{{ total_calls }}</h2>
+                            <small class="text-muted">All time</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card stat-card success">
+                        <div class="card-body">
+                            <h6 class="text-muted">AI Handled</h6>
+                            <h2 class="mb-0">{{ ai_handled }}</h2>
+                            <small class="text-muted">
+                                {% if total_calls > 0 %}
+                                    {{ (ai_handled / total_calls * 100)|round(1) }}% automation rate
+                                {% else %}
+                                    0% automation rate
+                                {% endif %}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card stat-card warning">
+                        <div class="card-body">
+                            <h6 class="text-muted">New Voicemails</h6>
+                            <h2 class="mb-0">{{ voicemails }}</h2>
+                            <small class="text-muted">Unlistened</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Automation Rate</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="automationChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Call Intents</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="intentChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Daily Call Volume (Last 7 Days)</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="dailyCallsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mt-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Recent Calls</h5>
+                    <a href="{{ url_for('calls') }}" class="btn btn-sm btn-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    {% if recent_calls %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Time</th>
+                                        <th>Caller</th>
+                                        <th>Intent</th>
+                                        <th>Outcome</th>
+                                        <th>Duration</th>
+                                        <th>Handled By</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for call in recent_calls %}
+                                    <tr>
+                                        <td>{{ call.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                        <td>{{ call.caller_phone }}</td>
+                                        <td>
+                                            <span class="badge bg-info">{{ call.intent or 'Unknown' }}</span>
+                                        </td>
+                                        <td>
+                                            {% if call.outcome == 'resolved' %}
+                                                <span class="badge bg-success">Resolved</span>
+                                            {% elif call.outcome == 'transferred' %}
+                                                <span class="badge bg-warning">Transferred</span>
+                                            {% elif call.outcome == 'voicemail' %}
+                                                <span class="badge bg-info">Voicemail</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{{ call.outcome }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ call.duration_seconds }}s</td>
+                                        <td>
+                                            {% if call.handled_by_ai %}
+                                                <i class="bi bi-robot text-success"></i> AI
+                                            {% else %}
+                                                <i class="bi bi-person text-primary"></i> Agent
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">No calls yet. <a href="{{ url_for('simulate_call') }}?intent=OrderStatus">Simulate a call</a> to get started.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+fetch('/api/stats')
+    .then(response => response.json())
+    .then(data => {
+        const automationCtx = document.getElementById('automationChart').getContext('2d');
+        new Chart(automationCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['AI Handled', 'Agent Handled'],
+                datasets: [{
+                    data: [data.automation_rate.ai_handled, data.automation_rate.agent_handled],
+                    backgroundColor: ['#28a745', '#007bff']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true
+            }
+        });
+        
+        const intentLabels = Object.keys(data.intents);
+        const intentData = Object.values(data.intents);
+        
+        const intentCtx = document.getElementById('intentChart').getContext('2d');
+        new Chart(intentCtx, {
+            type: 'pie',
+            data: {
+                labels: intentLabels,
+                datasets: [{
+                    data: intentData,
+                    backgroundColor: ['#007bff', '#28a745', '#ffc107', '#dc3545', '#17a2b8']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true
+            }
+        });
+        
+        const dailyCtx = document.getElementById('dailyCallsChart').getContext('2d');
+        new Chart(dailyCtx, {
+            type: 'bar',
+            data: {
+                labels: data.daily_calls.labels,
+                datasets: [{
+                    label: 'Calls',
+                    data: data.daily_calls.data,
+                    backgroundColor: '#007bff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
