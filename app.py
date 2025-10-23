@@ -6,6 +6,7 @@ from ai_voice_agent import AIVoiceAgent
 from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
+from twilio.twiml.voice_response import VoiceResponse
 import os
 import json
 
@@ -346,147 +347,178 @@ def api_stats():
         }
     })
 
-@app.route('/voice/webhook', methods=['POST'])
+@app.route('/voice/webhook', methods=['GET', 'POST'])
 def voice_webhook():
     """Initial webhook when call arrives - routes to AI conversation"""
-    from_number = request.values.get('From', request.values.get('from', 'Unknown'))
-    to_number = request.values.get('To', request.values.get('to', ''))
-    call_sid = request.values.get('CallSid', f'SIM_{datetime.utcnow().timestamp()}')
     
-    company = get_company_by_phone(to_number)
+    if request.method == 'GET':
+        return '''<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Say voice="alice">This is the Twilio webhook endpoint. It works! Configure this URL in your Twilio console to handle incoming calls.</Say>
+</Response>''', 200, {'Content-Type': 'text/xml'}
     
-    if not company:
-        company = Company.query.filter_by(is_active=True).first()
-    
-    if not company:
-        return "No active company found", 404
-    
-    integration = Integration.query.filter_by(company_id=company.id, is_active=True).first()
-    provider_type = integration.provider_type if integration else 'twilio'
-    provider_config = integration.get_config() if integration else None
-    
-    provider = get_provider(provider_type, provider_config)
-    engine = CallFlowEngine(company)
-    
-    call_log = engine.log_call(from_number, call_sid, None, 'in_progress')
-    
-    if not company.greeting_message or not company.greeting_message.strip():
-        default_message = "Thank you for calling. Please configure your company greeting message in the settings to enable full voice automation features. Goodbye."
-        response = provider.create_call_response(default_message)
+    try:
+        from_number = request.values.get('From', request.values.get('from', 'Unknown'))
+        to_number = request.values.get('To', request.values.get('to', ''))
+        call_sid = request.values.get('CallSid', f'SIM_{datetime.utcnow().timestamp()}')
+        
+        company = get_company_by_phone(to_number)
+        
+        if not company:
+            company = Company.query.filter_by(is_active=True).first()
+        
+        if not company:
+            error_response = VoiceResponse()
+            error_response.say("Sorry, no active company configuration found. Please contact support.", voice='alice')
+            error_response.hangup()
+            return str(error_response), 200, {'Content-Type': 'text/xml'}
+        
+        integration = Integration.query.filter_by(company_id=company.id, is_active=True).first()
+        provider_type = integration.provider_type if integration else 'twilio'
+        provider_config = integration.get_config() if integration else None
+        
+        provider = get_provider(provider_type, provider_config)
+        engine = CallFlowEngine(company)
+        
+        call_log = engine.log_call(from_number, call_sid, None, 'in_progress')
+        
+        if not company.greeting_message or not company.greeting_message.strip():
+            default_message = "Thank you for calling. Please configure your company greeting message in the settings to enable full voice automation features. Goodbye."
+            response = provider.create_call_response(default_message)
+            return response, 200, {'Content-Type': 'text/xml' if provider_type != 'sip' else 'application/json'}
+        
+        greeting = company.greeting_message
+        
+        response = provider.create_gather_response(
+            greeting,
+            url_for('voice_ai_conversation', _external=True),
+            input_type='speech',
+            speech_timeout=3,
+            speech_model='experimental_conversations'
+        )
+        
         return response, 200, {'Content-Type': 'text/xml' if provider_type != 'sip' else 'application/json'}
     
-    greeting = company.greeting_message
-    
-    response = provider.create_gather_response(
-        greeting,
-        url_for('voice_ai_conversation', _external=True),
-        input_type='speech',
-        speech_timeout=3,
-        speech_model='experimental_conversations'
-    )
-    
-    return response, 200, {'Content-Type': 'text/xml' if provider_type != 'sip' else 'application/json'}
+    except Exception as e:
+        print(f"Error in voice_webhook: {e}")
+        error_response = VoiceResponse()
+        error_response.say("Sorry, we encountered an error. Please try again later.", voice='alice')
+        error_response.hangup()
+        return str(error_response), 200, {'Content-Type': 'text/xml'}
 
 @app.route('/voice/ai_conversation', methods=['POST'])
 def voice_ai_conversation():
     """Handle AI-powered conversation loop"""
-    from_number = request.values.get('From', request.values.get('from', 'Unknown'))
-    to_number = request.values.get('To', request.values.get('to', ''))
-    call_sid = request.values.get('CallSid', f'SIM_{datetime.utcnow().timestamp()}')
-    speech_result = request.values.get('SpeechResult', '')
-    
-    company = get_company_by_phone(to_number)
-    if not company:
-        company = Company.query.filter_by(is_active=True).first()
-    
-    if not company:
-        return "No active company found", 404
-    
-    integration = Integration.query.filter_by(company_id=company.id, is_active=True).first()
-    provider_type = integration.provider_type if integration else 'twilio'
-    provider_config = integration.get_config() if integration else None
-    
-    provider = get_provider(provider_type, provider_config)
-    
-    call_log = CallLog.query.filter_by(call_sid=call_sid).first()
-    if not call_log:
-        engine = CallFlowEngine(company)
-        call_log = engine.log_call(from_number, call_sid, None, 'in_progress')
-    
-    session_key = f'ai_agent_{call_sid}'
-    if session_key not in session:
-        company_config = {
-            'name': company.name,
-            'business_hours': company.get_business_hours(),
-            'phone_number': company.phone_number
-        }
-        ai_agent = AIVoiceAgent(company_config)
-        session[session_key] = {
-            'conversation_history': [],
-            'turn_count': 0
-        }
-    else:
-        company_config = {
-            'name': company.name,
-            'business_hours': company.get_business_hours(),
-            'phone_number': company.phone_number
-        }
-        ai_agent = AIVoiceAgent(company_config)
-        ai_agent.conversation_history = session[session_key]['conversation_history']
-    
-    if not speech_result or speech_result.strip() == '':
-        response = provider.create_gather_response(
-            "I didn't catch that. Could you please repeat?",
-            url_for('voice_ai_conversation', _external=True),
-            input_type='speech',
-            speech_timeout=3,
-            speech_model='experimental_conversations'
-        )
+    try:
+        from_number = request.values.get('From', request.values.get('from', 'Unknown'))
+        to_number = request.values.get('To', request.values.get('to', ''))
+        call_sid = request.values.get('CallSid', f'SIM_{datetime.utcnow().timestamp()}')
+        speech_result = request.values.get('SpeechResult', '')
+        
+        company = get_company_by_phone(to_number)
+        if not company:
+            company = Company.query.filter_by(is_active=True).first()
+        
+        if not company:
+            error_response = VoiceResponse()
+            error_response.say("Sorry, no active company configuration found.", voice='alice')
+            error_response.hangup()
+            return str(error_response), 200, {'Content-Type': 'text/xml'}
+        
+        integration = Integration.query.filter_by(company_id=company.id, is_active=True).first()
+        provider_type = integration.provider_type if integration else 'twilio'
+        provider_config = integration.get_config() if integration else None
+        
+        provider = get_provider(provider_type, provider_config)
+        
+        call_log = CallLog.query.filter_by(call_sid=call_sid).first()
+        if not call_log:
+            engine = CallFlowEngine(company)
+            call_log = engine.log_call(from_number, call_sid, None, 'in_progress')
+        
+        session_key = f'ai_agent_{call_sid}'
+        if session_key not in session:
+            company_config = {
+                'name': company.name,
+                'business_hours': company.get_business_hours(),
+                'phone_number': company.phone_number
+            }
+            ai_agent = AIVoiceAgent(company_config)
+            session[session_key] = {
+                'conversation_history': [],
+                'turn_count': 0
+            }
+        else:
+            company_config = {
+                'name': company.name,
+                'business_hours': company.get_business_hours(),
+                'phone_number': company.phone_number
+            }
+            ai_agent = AIVoiceAgent(company_config)
+            ai_agent.conversation_history = session[session_key]['conversation_history']
+        
+        if not speech_result or speech_result.strip() == '':
+            response = provider.create_gather_response(
+                "I didn't catch that. Could you please repeat?",
+                url_for('voice_ai_conversation', _external=True),
+                input_type='speech',
+                speech_timeout=3,
+                speech_model='experimental_conversations'
+            )
+            return response, 200, {'Content-Type': 'text/xml' if provider_type != 'sip' else 'application/json'}
+        
+        ai_result = ai_agent.process_speech(speech_result)
+        
+        session[session_key]['conversation_history'] = ai_agent.conversation_history
+        session[session_key]['turn_count'] += 1
+        
+        call_log.intent = ai_result['intent']
+        call_log.ai_confidence = ai_result['confidence']
+        call_log.conversation_turns = session[session_key]['turn_count']
+        call_log.set_conversation(ai_agent.conversation_history)
+        
+        transcript_text = '\n'.join([
+            f"{msg['role']}: {msg['content']}" 
+            for msg in ai_agent.conversation_history
+        ])
+        call_log.transcript = transcript_text
+        
+        if ai_result['should_escalate']:
+            call_log.outcome = 'transferred'
+            call_log.escalation_reason = ai_result.get('escalation_reason', 'unknown')
+            call_log.handled_by_ai = False
+            call_log.completed_at = datetime.utcnow()
+            db.session.commit()
+            
+            session.pop(session_key, None)
+            
+            if company.escalation_number:
+                response = provider.transfer_call(company.escalation_number)
+            else:
+                response = provider.create_call_response(
+                    ai_result['response'] + " However, we don't have an agent available right now. Please try calling back during business hours. Goodbye!"
+                )
+        else:
+            db.session.commit()
+            
+            response = provider.create_gather_response(
+                ai_result['response'],
+                url_for('voice_ai_conversation', _external=True),
+                input_type='speech',
+                speech_timeout=3,
+                speech_model='experimental_conversations'
+            )
+        
         return response, 200, {'Content-Type': 'text/xml' if provider_type != 'sip' else 'application/json'}
     
-    ai_result = ai_agent.process_speech(speech_result)
-    
-    session[session_key]['conversation_history'] = ai_agent.conversation_history
-    session[session_key]['turn_count'] += 1
-    
-    call_log.intent = ai_result['intent']
-    call_log.ai_confidence = ai_result['confidence']
-    call_log.conversation_turns = session[session_key]['turn_count']
-    call_log.set_conversation(ai_agent.conversation_history)
-    
-    transcript_text = '\n'.join([
-        f"{msg['role']}: {msg['content']}" 
-        for msg in ai_agent.conversation_history
-    ])
-    call_log.transcript = transcript_text
-    
-    if ai_result['should_escalate']:
-        call_log.outcome = 'transferred'
-        call_log.escalation_reason = ai_result.get('escalation_reason', 'unknown')
-        call_log.handled_by_ai = False
-        call_log.completed_at = datetime.utcnow()
-        db.session.commit()
-        
-        session.pop(session_key, None)
-        
-        if company.escalation_number:
-            response = provider.transfer_call(company.escalation_number)
-        else:
-            response = provider.create_call_response(
-                ai_result['response'] + " However, we don't have an agent available right now. Please try calling back during business hours. Goodbye!"
-            )
-    else:
-        db.session.commit()
-        
-        response = provider.create_gather_response(
-            ai_result['response'],
-            url_for('voice_ai_conversation', _external=True),
-            input_type='speech',
-            speech_timeout=3,
-            speech_model='experimental_conversations'
-        )
-    
-    return response, 200, {'Content-Type': 'text/xml' if provider_type != 'sip' else 'application/json'}
+    except Exception as e:
+        print(f"Error in voice_ai_conversation: {e}")
+        import traceback
+        traceback.print_exc()
+        error_response = VoiceResponse()
+        error_response.say("Sorry, we encountered an error processing your request. Please try again later.", voice='alice')
+        error_response.hangup()
+        return str(error_response), 200, {'Content-Type': 'text/xml'}
 
 @app.route('/voice/handle_input', methods=['POST'])
 def voice_handle_input():

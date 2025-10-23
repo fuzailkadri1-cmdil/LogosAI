@@ -11,7 +11,7 @@ class TelephonyProvider(ABC):
         pass
     
     @abstractmethod
-    def create_gather_response(self, message, action_url, input_type='dtmf', timeout=5) -> Any:
+    def create_gather_response(self, message, action_url, input_type='dtmf', timeout=5, speech_timeout=None, speech_model=None) -> Any:
         pass
     
     @abstractmethod
@@ -51,17 +51,22 @@ class TwilioProvider(TelephonyProvider):
         
         return str(response)
     
-    def create_gather_response(self, message, action_url, input_type='dtmf', timeout=5):
+    def create_gather_response(self, message, action_url, input_type='dtmf', timeout=5, speech_timeout=None, speech_model=None):
         response = VoiceResponse()
         
         if input_type == 'speech' or input_type == 'both':
-            gather = Gather(
-                input='dtmf speech',
-                action=action_url,
-                method='POST',
-                timeout=timeout,
-                speech_timeout='auto'
-            )
+            gather_params = {
+                'input': 'dtmf speech',
+                'action': action_url,
+                'method': 'POST',
+                'timeout': timeout,
+                'speech_timeout': speech_timeout or 'auto'
+            }
+            
+            if speech_model:
+                gather_params['speech_model'] = speech_model
+            
+            gather = Gather(**gather_params)
         else:
             gather = Gather(
                 input='dtmf',
@@ -130,7 +135,7 @@ class CiscoProvider(TelephonyProvider):
 </Response>'''
         return xml
     
-    def create_gather_response(self, message, action_url, input_type='dtmf', timeout=5):
+    def create_gather_response(self, message, action_url, input_type='dtmf', timeout=5, speech_timeout=None, speech_model=None):
         xml = f'''<?xml version="1.0" encoding="UTF-8"?>
 <Response>
     <Gather action="{action_url}" method="POST" timeout="{timeout}" numDigits="1">
@@ -175,13 +180,15 @@ class SIPProvider(TelephonyProvider):
             "hangup": next_action is None
         }
     
-    def create_gather_response(self, message, action_url, input_type='dtmf', timeout=5):
+    def create_gather_response(self, message, action_url, input_type='dtmf', timeout=5, speech_timeout=None, speech_model=None):
         return {
             "type": "gather",
             "message": message,
             "action_url": action_url,
             "input_type": input_type,
-            "timeout": timeout
+            "timeout": timeout,
+            "speech_timeout": speech_timeout,
+            "speech_model": speech_model
         }
     
     def create_record_response(self, message, action_url, max_length=60):
