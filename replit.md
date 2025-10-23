@@ -24,6 +24,11 @@ Multi-tenant SaaS platform for automating call centers with AI-powered voice ass
   - Built interactive Conversation Preview/Tester for real-time AI testing
   - Added Industry Templates for quick setup (eCommerce, Healthcare, Transportation)
   - Enhanced navigation with quick access to all features
+- **Bug Fixes & Stability Improvements:**
+  - Added delete integration functionality with confirmation dialog and proper authorization
+  - Implemented fallback error handling for missing greetings to prevent call disconnections
+  - Set default company settings (greeting, menu options, business hours) during registration
+  - Fixed voice webhook crash by removing invalid provider_type parameter from log_call()
 
 ## Key Features
 1. **Multi-Tenant Architecture**: Complete company and user management system
