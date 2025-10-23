@@ -2,10 +2,12 @@ import os
 import json
 from openai import OpenAI
 
-client = OpenAI(
-    base_url=os.environ.get('AI_INTEGRATIONS_OPENAI_BASE_URL'),
-    api_key=os.environ.get('AI_INTEGRATIONS_OPENAI_API_KEY')
-)
+def get_openai_client():
+    """Initialize OpenAI client with Replit AI Integrations"""
+    return OpenAI(
+        base_url=os.environ.get('AI_INTEGRATIONS_OPENAI_BASE_URL'),
+        api_key=os.environ.get('AI_INTEGRATIONS_OPENAI_API_KEY')
+    )
 
 SYSTEM_PROMPT = """You are a helpful AI voice assistant for a call center. Your role is to:
 1. Understand customer queries and determine their intent
@@ -70,6 +72,7 @@ class AIVoiceAgent:
         
         # Call OpenAI for response
         try:
+            client = get_openai_client()
             response = client.chat.completions.create(
                 model='gpt-4o-mini',
                 messages=[

@@ -97,6 +97,22 @@ class CallLog(db.Model):
     completed_at = db.Column(db.DateTime, nullable=True)
     handled_by_ai = db.Column(db.Boolean, default=True)
     
+    ai_conversation = db.Column(db.Text, nullable=True)
+    ai_confidence = db.Column(db.Float, nullable=True)
+    conversation_turns = db.Column(db.Integer, default=0)
+    escalation_reason = db.Column(db.String(100), nullable=True)
+    
+    def get_conversation(self):
+        """Get AI conversation history as list of messages"""
+        try:
+            return json.loads(self.ai_conversation) if self.ai_conversation else []
+        except:
+            return []
+    
+    def set_conversation(self, messages):
+        """Store AI conversation history"""
+        self.ai_conversation = json.dumps(messages)
+    
     def __repr__(self):
         return f'<CallLog {self.id} - {self.intent}>'
 

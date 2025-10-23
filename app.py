@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, j
 from models import db, Company, User, Integration, CallLog, Voicemail
 from providers import get_provider
 from call_engine import CallFlowEngine, IntentRouter
+from ai_voice_agent import AIVoiceAgent
 from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
@@ -319,6 +320,7 @@ def api_stats():
 
 @app.route('/voice/webhook', methods=['POST'])
 def voice_webhook():
+    """Initial webhook when call arrives - routes to AI conversation"""
     from_number = request.values.get('From', request.values.get('from', 'Unknown'))
     to_number = request.values.get('To', request.values.get('to', ''))
     call_sid = request.values.get('CallSid', f'SIM_{datetime.utcnow().timestamp()}')
@@ -338,22 +340,123 @@ def voice_webhook():
     provider = get_provider(provider_type, provider_config)
     engine = CallFlowEngine(company)
     
-    session_key = f'call_state_{call_sid}'
-    if session_key not in session:
-        engine.log_call(from_number, call_sid, None, 'in_progress')
-        session[session_key] = {'step': 'greeting'}
+    call_log = engine.log_call(from_number, call_sid, None, 'in_progress')
     
     if not company.greeting_message or not company.greeting_message.strip():
         default_message = "Thank you for calling. Please configure your company greeting message in the settings to enable full voice automation features. Goodbye."
         response = provider.create_call_response(default_message)
         return response, 200, {'Content-Type': 'text/xml' if provider_type != 'sip' else 'application/json'}
     
-    greeting_with_menu = engine.get_greeting_with_menu()
+    greeting = company.greeting_message
+    
     response = provider.create_gather_response(
-        greeting_with_menu,
-        url_for('voice_handle_input', _external=True),
-        input_type='both'
+        greeting,
+        url_for('voice_ai_conversation', _external=True),
+        input_type='speech',
+        speech_timeout=3,
+        speech_model='experimental_conversations'
     )
+    
+    return response, 200, {'Content-Type': 'text/xml' if provider_type != 'sip' else 'application/json'}
+
+@app.route('/voice/ai_conversation', methods=['POST'])
+def voice_ai_conversation():
+    """Handle AI-powered conversation loop"""
+    from_number = request.values.get('From', request.values.get('from', 'Unknown'))
+    to_number = request.values.get('To', request.values.get('to', ''))
+    call_sid = request.values.get('CallSid', f'SIM_{datetime.utcnow().timestamp()}')
+    speech_result = request.values.get('SpeechResult', '')
+    
+    company = get_company_by_phone(to_number)
+    if not company:
+        company = Company.query.filter_by(is_active=True).first()
+    
+    if not company:
+        return "No active company found", 404
+    
+    integration = Integration.query.filter_by(company_id=company.id, is_active=True).first()
+    provider_type = integration.provider_type if integration else 'twilio'
+    provider_config = integration.get_config() if integration else None
+    
+    provider = get_provider(provider_type, provider_config)
+    
+    call_log = CallLog.query.filter_by(call_sid=call_sid).first()
+    if not call_log:
+        engine = CallFlowEngine(company)
+        call_log = engine.log_call(from_number, call_sid, None, 'in_progress')
+    
+    session_key = f'ai_agent_{call_sid}'
+    if session_key not in session:
+        company_config = {
+            'name': company.name,
+            'business_hours': company.get_business_hours(),
+            'phone_number': company.phone_number
+        }
+        ai_agent = AIVoiceAgent(company_config)
+        session[session_key] = {
+            'conversation_history': [],
+            'turn_count': 0
+        }
+    else:
+        company_config = {
+            'name': company.name,
+            'business_hours': company.get_business_hours(),
+            'phone_number': company.phone_number
+        }
+        ai_agent = AIVoiceAgent(company_config)
+        ai_agent.conversation_history = session[session_key]['conversation_history']
+    
+    if not speech_result or speech_result.strip() == '':
+        response = provider.create_gather_response(
+            "I didn't catch that. Could you please repeat?",
+            url_for('voice_ai_conversation', _external=True),
+            input_type='speech',
+            speech_timeout=3,
+            speech_model='experimental_conversations'
+        )
+        return response, 200, {'Content-Type': 'text/xml' if provider_type != 'sip' else 'application/json'}
+    
+    ai_result = ai_agent.process_speech(speech_result)
+    
+    session[session_key]['conversation_history'] = ai_agent.conversation_history
+    session[session_key]['turn_count'] += 1
+    
+    call_log.intent = ai_result['intent']
+    call_log.ai_confidence = ai_result['confidence']
+    call_log.conversation_turns = session[session_key]['turn_count']
+    call_log.set_conversation(ai_agent.conversation_history)
+    
+    transcript_text = '\n'.join([
+        f"{msg['role']}: {msg['content']}" 
+        for msg in ai_agent.conversation_history
+    ])
+    call_log.transcript = transcript_text
+    
+    if ai_result['should_escalate']:
+        call_log.outcome = 'transferred'
+        call_log.escalation_reason = ai_result.get('escalation_reason', 'unknown')
+        call_log.handled_by_ai = False
+        call_log.completed_at = datetime.utcnow()
+        db.session.commit()
+        
+        session.pop(session_key, None)
+        
+        if company.escalation_number:
+            response = provider.transfer_call(company.escalation_number)
+        else:
+            response = provider.create_call_response(
+                ai_result['response'] + " However, we don't have an agent available right now. Please try calling back during business hours. Goodbye!"
+            )
+    else:
+        db.session.commit()
+        
+        response = provider.create_gather_response(
+            ai_result['response'],
+            url_for('voice_ai_conversation', _external=True),
+            input_type='speech',
+            speech_timeout=3,
+            speech_model='experimental_conversations'
+        )
     
     return response, 200, {'Content-Type': 'text/xml' if provider_type != 'sip' else 'application/json'}
 
