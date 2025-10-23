@@ -104,6 +104,45 @@
             </div>
             
             <div class="row mt-4">
+                <div class="col-md-3">
+                    <div class="card stat-card info">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted">AI Confidence</h6>
+                            <h2 class="mb-0"><span id="ai-confidence">--</span>%</h2>
+                            <small class="text-muted">Average</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card primary">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted">Conversation Turns</h6>
+                            <h2 class="mb-0"><span id="avg-turns">--</span></h2>
+                            <small class="text-muted">Average</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card warning">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted">Escalated Calls</h6>
+                            <h2 class="mb-0"><span id="escalated-calls">--</span></h2>
+                            <small class="text-muted"><span id="escalation-rate">--</span>% of total</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card success">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted">AI Resolution</h6>
+                            <h2 class="mb-0"><span id="ai-resolution">--</span>%</h2>
+                            <small class="text-muted">Success Rate</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-4">
                 <div class="col-md-6">
                     <div class="card">
                         <div class="card-header">
@@ -205,6 +244,19 @@
 fetch('/api/stats')
     .then(response => response.json())
     .then(data => {
+        if (data.ai_metrics) {
+            document.getElementById('ai-confidence').textContent = data.ai_metrics.avg_confidence;
+            document.getElementById('avg-turns').textContent = data.ai_metrics.avg_conversation_turns;
+            document.getElementById('escalated-calls').textContent = data.ai_metrics.ai_escalated_calls;
+            document.getElementById('escalation-rate').textContent = data.ai_metrics.escalation_rate;
+            
+            const aiHandled = data.automation_rate.ai_handled;
+            const aiEscalated = data.ai_metrics.ai_escalated_calls;
+            const aiResolved = aiHandled - aiEscalated;
+            const aiResolutionRate = aiHandled > 0 ? Math.max(0, Math.round((aiResolved / aiHandled) * 100)) : 0;
+            document.getElementById('ai-resolution').textContent = aiResolutionRate;
+        }
+        
         const automationCtx = document.getElementById('automationChart').getContext('2d');
         new Chart(automationCtx, {
             type: 'doughnut',

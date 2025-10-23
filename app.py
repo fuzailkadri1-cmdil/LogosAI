@@ -288,6 +288,28 @@ def api_stats():
     ai_handled = CallLog.query.filter_by(company_id=company.id, handled_by_ai=True).count()
     agent_handled = total_calls - ai_handled
     
+    ai_escalated_calls = CallLog.query.filter(
+        CallLog.company_id == company.id,
+        CallLog.handled_by_ai == True,
+        CallLog.outcome == 'transferred'
+    ).count()
+    
+    avg_confidence_result = db.session.query(
+        db.func.avg(CallLog.ai_confidence)
+    ).filter(
+        CallLog.company_id == company.id,
+        CallLog.ai_confidence.isnot(None)
+    ).scalar()
+    avg_confidence = round(avg_confidence_result * 100 if avg_confidence_result else 0, 1)
+    
+    avg_turns_result = db.session.query(
+        db.func.avg(CallLog.conversation_turns)
+    ).filter(
+        CallLog.company_id == company.id,
+        CallLog.conversation_turns > 0
+    ).scalar()
+    avg_turns = round(avg_turns_result if avg_turns_result else 0, 1)
+    
     intent_counts = db.session.query(
         CallLog.intent, 
         db.func.count(CallLog.id)
@@ -310,6 +332,12 @@ def api_stats():
         'automation_rate': {
             'ai_handled': ai_handled,
             'agent_handled': agent_handled
+        },
+        'ai_metrics': {
+            'avg_confidence': avg_confidence,
+            'avg_conversation_turns': avg_turns,
+            'ai_escalated_calls': ai_escalated_calls,
+            'escalation_rate': round((ai_escalated_calls / ai_handled * 100) if ai_handled > 0 else 0, 1)
         },
         'intents': intent_data,
         'daily_calls': {

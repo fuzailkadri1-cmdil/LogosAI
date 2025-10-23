@@ -7,6 +7,16 @@ Multi-tenant SaaS platform for automating call centers with AI-powered voice ass
 **Current State:** MVP Complete - Fully functional multi-tenant call center automation platform
 
 ## Recent Changes (October 23, 2025)
+**AI Voice Agent Implementation (October 23, 2025):**
+  - **Live AI Conversations:** Customers can now call and speak naturally with AI instead of pressing buttons
+  - **Natural Language Understanding:** OpenAI GPT-4o-mini processes speech and generates human-like responses
+  - **Intelligent Escalation:** AI automatically escalates to human agents for sensitive topics (refunds, billing, complaints), low confidence (<0.5), or explicit requests
+  - **Conversation Tracking:** Full dialogue history stored in database with confidence scores and turn counts
+  - **Enhanced Dashboard Metrics:** New AI performance cards showing average confidence (%), conversation turns, escalation rate (%), and AI resolution rate (%)
+  - **Database Schema Updates:** Added 4 new fields to CallLog: ai_conversation, ai_confidence, conversation_turns, escalation_reason
+  - **Twilio Speech Integration:** Webhooks now use Twilio's speech recognition for natural voice input
+
+## Previous Updates (October 23, 2025)
 - Initial project setup with Flask and SQLAlchemy
 - Implemented multi-tenant architecture with Companies, Users, Integrations, CallLogs, and Voicemails tables
 - Created pluggable telephony provider abstraction layer supporting Twilio, Cisco, and SIP providers
