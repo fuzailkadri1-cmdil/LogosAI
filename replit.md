@@ -7,6 +7,17 @@ Multi-tenant SaaS platform for automating call centers with AI-powered voice ass
 **Current State:** MVP Complete - Fully functional multi-tenant call center automation platform
 
 ## Recent Changes (October 23, 2025)
+**Multi-Turn Order Lookup with Follow-Up Feature (October 23, 2025):**
+  - **Order Database Integration:** Created orders_db.py with mock order database containing 5 sample orders
+  - **Intelligent Order Lookup:** AI asks for order number if not provided, searches database, and provides detailed status
+  - **Multi-Turn Conversations:** AI maintains conversation state across multiple user inputs
+  - **Follow-Up Prompts:** After resolving requests, AI asks "Is there anything else I can help you with?"
+  - **Precise Goodbye Detection:** Word boundary matching prevents false positives (e.g., "I don't know" won't end call)
+  - **Continued Assistance:** Users can ask multiple questions in one call (order status → store hours → goodbye)
+  - **Conversation State Machine:** 4 states (initial, waiting_for_order_number, offering_more_help, goodbye)
+  - **Flexible Order Number Matching:** Handles various formats (ORDER-12345, 12345, "order 12345")
+  - **Production-Ready Error Handling:** All webhooks return valid TwiML even on failures, preventing call drops
+
 **AI Voice Agent Implementation (October 23, 2025):**
   - **Live AI Conversations:** Customers can now call and speak naturally with AI instead of pressing buttons
   - **Natural Language Understanding:** OpenAI GPT-4o-mini processes speech and generates human-like responses
@@ -82,6 +93,8 @@ Multi-tenant SaaS platform for automating call centers with AI-powered voice ass
 ├── models.py              # Database models (Company, User, Integration, CallLog, Voicemail)
 ├── providers.py           # Telephony provider abstraction layer
 ├── call_engine.py         # AI-powered call flow engine with intent detection
+├── ai_voice_agent.py      # AI conversation handler with state machine
+├── orders_db.py           # Mock order database for lookup testing
 ├── templates/             # HTML templates with Bootstrap 5
 │   ├── base.html         # Base template with navigation
 │   ├── index.html        # Landing page
