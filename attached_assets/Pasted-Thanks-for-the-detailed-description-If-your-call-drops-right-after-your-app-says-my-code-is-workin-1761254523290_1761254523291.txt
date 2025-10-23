@@ -1,0 +1,62 @@
+Thanks for the detailed description! If your call drops right after your app says “my code is working correctly,” it usually means your TwiML response is ending the call, or you’re not returning additional TwiML to keep the conversation going.
+
+Here’s what’s likely happening and how to fix it:
+
+---
+
+## Why the Call Drops
+
+- After your app responds, if you return a `<Say>` (or similar) without a `<Gather>` or `<Redirect>`, Twilio will play the message and then hang up.
+- If you want the conversation to continue (e.g., ask for the order number, wait for input, look up the order, reply), you must return a new `<Gather>` or `<Redirect>` in your TwiML response.
+
+---
+
+## How to Keep the Conversation Going
+
+### 1. **After Recognizing “Where is my order?”**
+Instead of just saying “my code is working correctly,” your endpoint should return a new `<Gather>` to collect the order number:
+
+```xml
+<Response>
+  <Gather input="speech" action="/lookup-order" method="POST">
+    <Say>Sure, can you please provide your order number?</Say>
+  </Gather>
+  <Say>We didn't receive any input. Please try again.</Say>
+  <Redirect>/voice/ai_conversation</Redirect>
+</Response>
+```
+
+### 2. **After Getting the Order Number**
+Your `/lookup-order` endpoint should:
+- Extract the order number from `SpeechResult`
+- Look up the order in your database
+- Respond with a `<Say>` containing the order status
+- (Optional) Offer to help with something else, or end the call
+
+Example:
+```xml
+<Response>
+  <Say>Your order 123456 is out for delivery and should arrive today.</Say>
+  <Say>Is there anything else I can help you with?</Say>
+  <Redirect>/voice/ai_conversation</Redirect>
+</Response>
+```
+
+---
+
+## Common Pitfalls
+
+- If you only return `<Say>` and nothing else, Twilio ends the call after playing the message.
+- If your endpoint returns an error or no TwiML, Twilio will also end the call.
+
+---
+
+## What to Do Next
+
+1. **Update your endpoint to return a new `<Gather>` after each step where you want user input.**
+2. **Use `<Redirect>` to loop back if you want to keep the conversation going.**
+3. **Check your server logs to ensure your endpoints are being hit in the right order.**
+
+---
+
+If you share your endpoint code (with secrets redacted), I can help you spot exactly where to add the next `<Gather>` or `<Redirect>`! Let me know if you want a sample Python/Flask code for this flow.
