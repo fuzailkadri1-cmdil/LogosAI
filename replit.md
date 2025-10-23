@@ -15,6 +15,11 @@ Multi-tenant SaaS platform for automating call centers with AI-powered voice ass
   - **Enhanced Dashboard Metrics:** New AI performance cards showing average confidence (%), conversation turns, escalation rate (%), and AI resolution rate (%)
   - **Database Schema Updates:** Added 4 new fields to CallLog: ai_conversation, ai_confidence, conversation_turns, escalation_reason
   - **Twilio Speech Integration:** Webhooks now use Twilio's speech recognition for natural voice input
+  - **Bug Fixes & Stability Improvements:**
+    - Fixed AI resolution metric calculation to use AI-handled calls only (not total calls)
+    - Fixed escalation count to filter for AI-only transfers (handled_by_ai=True)
+    - Added safety clamp (Math.max) to prevent negative resolution percentages
+    - All dashboard metrics now accurately reflect AI-only performance
 
 ## Previous Updates (October 23, 2025)
 - Initial project setup with Flask and SQLAlchemy
