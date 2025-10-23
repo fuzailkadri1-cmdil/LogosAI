@@ -1,80 +1,474 @@
 {% extends "base.html" %}
 
-{% block title %}Welcome - Call Center Automation{% endblock %}
+{% block title %}Automate Your Calls with Voice AI{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 100px 0;
+        margin-top: -20px;
+    }
+    .hero-title {
+        font-size: 3.5rem;
+        font-weight: 800;
+        margin-bottom: 20px;
+    }
+    .hero-subtitle {
+        font-size: 1.4rem;
+        opacity: 0.95;
+        margin-bottom: 40px;
+    }
+    .industry-tab {
+        cursor: pointer;
+        padding: 15px 30px;
+        border: 2px solid #dee2e6;
+        border-radius: 10px;
+        transition: all 0.3s;
+        background: white;
+    }
+    .industry-tab:hover, .industry-tab.active {
+        border-color: #667eea;
+        background: #f8f9fa;
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    .conversation-demo {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 40px;
+        margin: 30px 0;
+    }
+    .message {
+        display: flex;
+        margin-bottom: 20px;
+        align-items: flex-start;
+    }
+    .message.customer {
+        justify-content: flex-end;
+    }
+    .message-bubble {
+        max-width: 70%;
+        padding: 15px 20px;
+        border-radius: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .message.customer .message-bubble {
+        background: #667eea;
+        color: white;
+        border-bottom-right-radius: 5px;
+    }
+    .message.ai .message-bubble {
+        background: white;
+        border-bottom-left-radius: 5px;
+    }
+    .avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin: 0 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+    }
+    .customer-avatar {
+        background: #667eea;
+        color: white;
+    }
+    .ai-avatar {
+        background: #28a745;
+        color: white;
+    }
+    .feature-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+    }
+    .stats-banner {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+        padding: 60px 0;
+    }
+    .stat-number {
+        font-size: 3rem;
+        font-weight: 800;
+    }
+    .integration-logo {
+        height: 50px;
+        opacity: 0.6;
+        transition: opacity 0.3s;
+        filter: grayscale(100%);
+    }
+    .integration-logo:hover {
+        opacity: 1;
+        filter: grayscale(0%);
+    }
+    .cta-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 80px 0;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
+<div class="hero-section text-center">
+    <div class="container">
+        <h1 class="hero-title">Automate Your Support Calls<br>with Voice AI</h1>
+        <p class="hero-subtitle">For Retail eCommerce, Transportation, and Healthcare Brands</p>
+        <div class="d-grid gap-3 d-md-flex justify-content-md-center">
+            <a href="{{ url_for('register') }}" class="btn btn-light btn-lg px-5">
+                <i class="bi bi-rocket"></i> Get Started Free
+            </a>
+            <a href="{{ url_for('roi_calculator') }}" class="btn btn-outline-light btn-lg px-5">
+                <i class="bi bi-calculator"></i> Calculate ROI
+            </a>
+        </div>
+    </div>
+</div>
+
 <div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-10">
-            <div class="text-center mb-5">
-                <h1 class="display-4 fw-bold">Call Center Automation Platform</h1>
-                <p class="lead text-muted">Multi-tenant SaaS solution for automating call centers with AI-powered voice assistants</p>
+    <div class="text-center mb-5">
+        <h2 class="display-5 fw-bold">Automate Support Calls. Improve Experience. Drive Growth.</h2>
+        <p class="lead text-muted">Replace your IVR with a modern Voice AI experience that actually understands your callers</p>
+    </div>
+    
+    <div class="row g-3 mb-5 justify-content-center">
+        <div class="col-md-3">
+            <div class="industry-tab active text-center" data-industry="ecommerce">
+                <i class="bi bi-cart3 display-6 text-primary"></i>
+                <h5 class="mt-2">eCommerce</h5>
             </div>
-
-            <div class="row g-4 mb-5">
-                <div class="col-md-4">
-                    <div class="card h-100 text-center">
-                        <div class="card-body">
-                            <i class="bi bi-robot display-4 text-primary mb-3"></i>
-                            <h5 class="card-title">AI-Powered</h5>
-                            <p class="card-text">Intelligent call routing with intent detection supporting DTMF and speech input</p>
-                        </div>
-                    </div>
+        </div>
+        <div class="col-md-3">
+            <div class="industry-tab text-center" data-industry="transportation">
+                <i class="bi bi-truck display-6 text-success"></i>
+                <h5 class="mt-2">Transportation</h5>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="industry-tab text-center" data-industry="healthcare">
+                <i class="bi bi-hospital display-6 text-info"></i>
+                <h5 class="mt-2">Healthcare</h5>
+            </div>
+        </div>
+    </div>
+    
+    <div id="ecommerce-demo" class="industry-content">
+        <div class="conversation-demo" id="demo">
+            <div class="message customer">
+                <div class="message-bubble">
+                    <strong>Customer</strong><br>
+                    Hi! Where's my order?
                 </div>
-                <div class="col-md-4">
-                    <div class="card h-100 text-center">
-                        <div class="card-body">
-                            <i class="bi bi-plugin display-4 text-success mb-3"></i>
-                            <h5 class="card-title">Pluggable Providers</h5>
-                            <p class="card-text">Support for Twilio, Cisco Webex, SIP/VoIP, and more telephony providers</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card h-100 text-center">
-                        <div class="card-body">
-                            <i class="bi bi-graph-up display-4 text-info mb-3"></i>
-                            <h5 class="card-title">Analytics Dashboard</h5>
-                            <p class="card-text">Real-time metrics and insights into call performance and automation rates</p>
-                        </div>
-                    </div>
+                <div class="avatar customer-avatar">
+                    <i class="bi bi-person-fill"></i>
                 </div>
             </div>
-
-            <div class="row">
-                <div class="col-md-6">
+            
+            <div class="message ai">
+                <div class="avatar ai-avatar">
+                    <i class="bi bi-robot"></i>
+                </div>
+                <div class="message-bubble">
+                    <strong>Voice AI</strong><br>
+                    Hi Katie! Your order will be delivered Tuesday. Would you like tracking details?
+                </div>
+            </div>
+            
+            <div class="message customer">
+                <div class="message-bubble">
+                    <strong>Customer</strong><br>
+                    Yes please! Also, can I modify my delivery address?
+                </div>
+                <div class="avatar customer-avatar">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+            </div>
+            
+            <div class="message ai">
+                <div class="avatar ai-avatar">
+                    <i class="bi bi-robot"></i>
+                </div>
+                <div class="message-bubble">
+                    <strong>Voice AI</strong><br>
+                    I can help with that! Let me transfer you to an agent who can update your delivery address.
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center">
+            <h4 class="mb-3">200+ Native Automations</h4>
+            <p class="lead">Including subscriptions, order issues, returns, and store inquiries</p>
+            <div class="row g-3 mt-4">
+                <div class="col-md-3">
                     <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title"><i class="bi bi-check-circle text-success"></i> Key Features</h5>
-                            <ul class="list-unstyled">
-                                <li><i class="bi bi-check"></i> Multi-tenant company management</li>
-                                <li><i class="bi bi-check"></i> Onboarding wizard for provider setup</li>
-                                <li><i class="bi bi-check"></i> Dynamic webhook routing</li>
-                                <li><i class="bi bi-check"></i> Voicemail recording and transcription</li>
-                                <li><i class="bi bi-check"></i> Company-specific configurations</li>
-                                <li><i class="bi bi-check"></i> Call simulation for testing</li>
-                            </ul>
+                        <div class="card-body text-center">
+                            <i class="bi bi-box-seam display-4 text-primary"></i>
+                            <h6 class="mt-2">Order Status</h6>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-6">
-                    <div class="card bg-primary text-white">
-                        <div class="card-body">
-                            <h5 class="card-title">Get Started Today</h5>
-                            <p class="card-text">Create your account and start automating your call center in minutes</p>
-                            <div class="d-grid gap-2">
-                                <a href="{{ url_for('register') }}" class="btn btn-light btn-lg">
-                                    <i class="bi bi-person-plus"></i> Sign Up Free
-                                </a>
-                                <a href="{{ url_for('login') }}" class="btn btn-outline-light">
-                                    <i class="bi bi-box-arrow-in-right"></i> Login
-                                </a>
-                            </div>
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <i class="bi bi-arrow-repeat display-4 text-success"></i>
+                            <h6 class="mt-2">Returns & Exchanges</h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <i class="bi bi-credit-card display-4 text-warning"></i>
+                            <h6 class="mt-2">Subscriptions</h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <i class="bi bi-clock display-4 text-info"></i>
+                            <h6 class="mt-2">Store Hours</h6>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    
+    <div id="transportation-demo" class="industry-content" style="display:none;">
+        <div class="conversation-demo">
+            <div class="message customer">
+                <div class="message-bubble">
+                    <strong>Customer</strong><br>
+                    Hi! I need to book a ride to the airport.
+                </div>
+                <div class="avatar customer-avatar">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+            </div>
+            
+            <div class="message ai">
+                <div class="avatar ai-avatar">
+                    <i class="bi bi-robot"></i>
+                </div>
+                <div class="message-bubble">
+                    <strong>Voice AI</strong><br>
+                    No problem! What's your pickup location and what time do you need to be picked up?
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center">
+            <h4 class="mb-3">Automate 80%+ of Calls</h4>
+            <p class="lead">Including new rides, active rides, accounts, and billing</p>
+        </div>
+    </div>
+    
+    <div id="healthcare-demo" class="industry-content" style="display:none;">
+        <div class="conversation-demo">
+            <div class="message customer">
+                <div class="message-bubble">
+                    <strong>Patient</strong><br>
+                    Hi! I'd like to schedule an appointment.
+                </div>
+                <div class="avatar customer-avatar">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+            </div>
+            
+            <div class="message ai">
+                <div class="avatar ai-avatar">
+                    <i class="bi bi-robot"></i>
+                </div>
+                <div class="message-bubble">
+                    <strong>Voice AI</strong><br>
+                    I'd be happy to help! What type of appointment do you need - a general checkup or specialist visit?
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center">
+            <h4 class="mb-3">Replace That Old Phone Bot</h4>
+            <p class="lead">With a modern Voice AI that handles appointments, lab results, and more</p>
+        </div>
+    </div>
 </div>
+
+<div class="stats-banner">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-3">
+                <div class="stat-number">80%</div>
+                <p class="lead">Calls Automated</p>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-number">24/7</div>
+                <p class="lead">Availability</p>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-number">50%</div>
+                <p class="lead">Cost Reduction</p>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-number">2 Weeks</div>
+                <p class="lead">Implementation</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h2 class="display-5 fw-bold">So Simple to Implement</h2>
+        <p class="lead text-muted">No bot building - point, click, and launch today</p>
+    </div>
+    
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon">
+                        <i class="bi bi-ear display-4 text-white"></i>
+                    </div>
+                    <h4>1. Listen Mode</h4>
+                    <p>We analyze your calls to find why customers are calling and recommend which intents to automate first.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon">
+                        <i class="bi bi-lightning-charge display-4 text-white"></i>
+                    </div>
+                    <h4>2. Automation</h4>
+                    <p>Turn on intents based on your preferences and see instant ROI with reduced hold times.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon">
+                        <i class="bi bi-graph-up-arrow display-4 text-white"></i>
+                    </div>
+                    <h4>3. Impact</h4>
+                    <p>Continue expanding automations for high-volume intents with deeper integrations and personalization.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h2 class="display-6 fw-bold">Native Integrations</h2>
+        <p class="lead text-muted">With the systems your brand is already using</p>
+    </div>
+    
+    <div class="row text-center g-4">
+        <div class="col-6 col-md-3">
+            <div class="card h-100">
+                <div class="card-body d-flex align-items-center justify-content-center">
+                    <h5 class="mb-0">Shopify</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card h-100">
+                <div class="card-body d-flex align-items-center justify-content-center">
+                    <h5 class="mb-0">Salesforce</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card h-100">
+                <div class="card-body d-flex align-items-center justify-content-center">
+                    <h5 class="mb-0">Zendesk</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card h-100">
+                <div class="card-body d-flex align-items-center justify-content-center">
+                    <h5 class="mb-0">Twilio</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card h-100">
+                <div class="card-body d-flex align-items-center justify-content-center">
+                    <h5 class="mb-0">Stripe</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card h-100">
+                <div class="card-body d-flex align-items-center justify-content-center">
+                    <h5 class="mb-0">Recharge</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card h-100">
+                <div class="card-body d-flex align-items-center justify-content-center">
+                    <h5 class="mb-0">Kustomer</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card h-100">
+                <div class="card-body d-flex align-items-center justify-content-center">
+                    <h5 class="mb-0">+80 More</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="cta-section text-center">
+    <div class="container">
+        <h2 class="display-4 fw-bold mb-4">Ready to Automate Your Calls?</h2>
+        <p class="lead mb-5">Join hundreds of brands using Voice AI to improve customer experience</p>
+        <div class="d-grid gap-3 d-md-flex justify-content-md-center">
+            <a href="{{ url_for('register') }}" class="btn btn-light btn-lg px-5">
+                <i class="bi bi-rocket"></i> Start Free Trial
+            </a>
+            <a href="{{ url_for('roi_calculator') }}" class="btn btn-outline-light btn-lg px-5">
+                <i class="bi bi-calculator"></i> Calculate ROI
+            </a>
+        </div>
+        <p class="mt-4 opacity-75">
+            <small>Zero upfront cost • 14-day free trial • No credit card required</small>
+        </p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.querySelectorAll('.industry-tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+        document.querySelectorAll('.industry-tab').forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        
+        const industry = this.dataset.industry;
+        
+        document.querySelectorAll('.industry-content').forEach(content => {
+            content.style.display = 'none';
+        });
+        
+        document.getElementById(industry + '-demo').style.display = 'block';
+    });
+});
+</script>
 {% endblock %}

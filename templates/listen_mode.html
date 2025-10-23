@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}Listen Mode - {{ company.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="sidebar">
+                <div class="p-3">
+                    <h6 class="text-white-50">{{ company.name }}</h6>
+                    <hr class="bg-white">
+                </div>
+                <a href="{{ url_for('dashboard') }}">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+                <a href="{{ url_for('listen_mode') }}" class="active">
+                    <i class="bi bi-ear"></i> Listen Mode
+                </a>
+                <a href="{{ url_for('calls') }}">
+                    <i class="bi bi-telephone"></i> Call Logs
+                </a>
+                <a href="{{ url_for('industry_templates') }}">
+                    <i class="bi bi-lightning"></i> Templates
+                </a>
+                <a href="{{ url_for('settings') }}">
+                    <i class="bi bi-gear"></i> Settings
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <h2 class="mb-4"><i class="bi bi-ear"></i> Listen Mode Analytics</h2>
+            <p class="lead">AI-powered analysis of your call patterns with automation recommendations</p>
+            
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i>
+                <strong>How it works:</strong> We analyze your historical calls to identify patterns and recommend which intents to automate first for maximum impact.
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-graph-up-arrow"></i> Intent Automation Recommendations</h5>
+                </div>
+                <div class="card-body">
+                    {% if recommendations %}
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Intent</th>
+                                        <th>Call Volume</th>
+                                        <th>Automation Potential</th>
+                                        <th>Recommendation</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for rec in recommendations %}
+                                    <tr>
+                                        <td><strong>{{ rec.intent }}</strong></td>
+                                        <td>{{ rec.call_count }} calls</td>
+                                        <td>
+                                            <div class="progress" style="height: 25px;">
+                                                <div class="progress-bar bg-success" role="progressbar" 
+                                                     style="width: {{ rec.automation_potential }}%;" 
+                                                     aria-valuenow="{{ rec.automation_potential }}" 
+                                                     aria-valuemin="0" aria-valuemax="100">
+                                                    {{ rec.automation_potential }}%
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            {% if rec.recommended %}
+                                                <span class="badge bg-success">✓ Highly Recommended</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">Monitor</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <a href="{{ url_for('settings') }}" class="btn btn-sm btn-primary">Configure</a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="bi bi-inbox display-1 text-muted"></i>
+                            <p class="lead mt-3">Not enough call data yet</p>
+                            <p class="text-muted">Simulate or receive more calls to get automation recommendations</p>
+                            <a href="{{ url_for('simulate_call') }}?intent=OrderStatus" class="btn btn-primary">
+                                Simulate Calls
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-chat-quote"></i> Recent Call Transcripts</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_transcripts %}
+                        <div class="list-group">
+                            {% for call in recent_transcripts[:10] %}
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">
+                                        <span class="badge bg-info">{{ call.intent or 'Unknown' }}</span>
+                                        {{ call.caller_phone }}
+                                    </h6>
+                                    <small>{{ call.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                                </div>
+                                <p class="mb-1"><em>"{{ call.transcript[:150] }}{% if call.transcript|length > 150 %}...{% endif %}"</em></p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No transcripts available yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

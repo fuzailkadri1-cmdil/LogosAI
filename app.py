@@ -488,6 +488,217 @@ def test_integration(integration_id):
             'error': str(e)
         }), 500
 
+@app.route('/listen-mode')
+@login_required
+def listen_mode():
+    company = Company.query.get(session['company_id'])
+    
+    intent_data = db.session.query(
+        CallLog.intent,
+        db.func.count(CallLog.id).label('count')
+    ).filter_by(company_id=company.id).group_by(CallLog.intent).all()
+    
+    intent_recommendations = []
+    for intent, count in intent_data:
+        if intent and count >= 3:
+            automation_potential = min(95, 60 + (count * 2))
+            intent_recommendations.append({
+                'intent': intent,
+                'call_count': count,
+                'automation_potential': automation_potential,
+                'recommended': count >= 5
+            })
+    
+    intent_recommendations.sort(key=lambda x: x['call_count'], reverse=True)
+    
+    recent_transcripts = CallLog.query.filter(
+        CallLog.company_id == company.id,
+        CallLog.transcript.isnot(None)
+    ).order_by(CallLog.created_at.desc()).limit(20).all()
+    
+    return render_template('listen_mode.html', 
+                         company=company,
+                         recommendations=intent_recommendations,
+                         recent_transcripts=recent_transcripts)
+
+@app.route('/roi-calculator')
+def roi_calculator():
+    return render_template('roi_calculator.html')
+
+@app.route('/calculate-roi', methods=['POST'])
+def calculate_roi():
+    data = request.get_json()
+    
+    monthly_calls = int(data.get('monthly_calls', 1000))
+    avg_call_duration = int(data.get('avg_call_duration', 5))
+    agent_hourly_rate = float(data.get('agent_hourly_rate', 15))
+    automation_rate = float(data.get('automation_rate', 70)) / 100
+    
+    total_monthly_minutes = monthly_calls * avg_call_duration
+    automated_minutes = total_monthly_minutes * automation_rate
+    automated_hours = automated_minutes / 60
+    monthly_savings = automated_hours * agent_hourly_rate
+    annual_savings = monthly_savings * 12
+    
+    agent_calls_saved = monthly_calls * automation_rate
+    
+    return jsonify({
+        'monthly_savings': round(monthly_savings, 2),
+        'annual_savings': round(annual_savings, 2),
+        'calls_automated': round(agent_calls_saved),
+        'hours_saved': round(automated_hours, 1),
+        'automation_rate': round(automation_rate * 100, 1)
+    })
+
+@app.route('/conversation-preview')
+@login_required
+def conversation_preview():
+    company = Company.query.get(session['company_id'])
+    return render_template('conversation_preview.html', company=company)
+
+@app.route('/api/test-conversation', methods=['POST'])
+@login_required
+def test_conversation():
+    data = request.get_json()
+    user_input = data.get('input', '')
+    
+    company = Company.query.get(session['company_id'])
+    engine = CallFlowEngine(company)
+    
+    intent = engine.determine_intent(user_input, None)
+    
+    context = {}
+    if intent == 'OrderStatus':
+        order_number = engine.extract_order_number(user_input)
+        context['order_number'] = order_number
+    
+    response_message = IntentRouter.route_intent(engine, intent, context)
+    
+    return jsonify({
+        'intent': intent,
+        'response': response_message,
+        'confidence': 85 if intent != 'Unknown' else 20
+    })
+
+@app.route('/industry-templates')
+@login_required
+def industry_templates():
+    company = Company.query.get(session['company_id'])
+    
+    templates = {
+        'ecommerce': {
+            'name': 'eCommerce',
+            'icon': 'cart3',
+            'greeting': 'Thank you for calling. How can I help you today with your order?',
+            'menu_options': {
+                '1': 'Order Status',
+                '2': 'Returns & Exchanges',
+                '3': 'Subscription Management',
+                '4': 'Store Hours & Locations',
+                '5': 'Speak to Agent'
+            },
+            'business_hours': {
+                'monday-friday': '9am-9pm EST',
+                'saturday-sunday': '10am-6pm EST'
+            }
+        },
+        'transportation': {
+            'name': 'Transportation',
+            'icon': 'truck',
+            'greeting': 'Welcome to our transportation service. How may I assist you?',
+            'menu_options': {
+                '1': 'Book a Ride',
+                '2': 'Track Active Ride',
+                '3': 'Account Management',
+                '4': 'Billing Questions',
+                '5': 'Speak to Dispatcher'
+            },
+            'business_hours': {
+                'monday-friday': '24/7',
+                'saturday-sunday': '24/7'
+            }
+        },
+        'healthcare': {
+            'name': 'Healthcare',
+            'icon': 'hospital',
+            'greeting': 'Thank you for calling. How can I help you today?',
+            'menu_options': {
+                '1': 'Schedule Appointment',
+                '2': 'Lab Results',
+                '3': 'Prescription Refills',
+                '4': 'Insurance Questions',
+                '5': 'Speak to Nurse'
+            },
+            'business_hours': {
+                'monday-friday': '8am-6pm',
+                'saturday-sunday': 'Closed'
+            }
+        }
+    }
+    
+    return render_template('industry_templates.html', company=company, templates=templates)
+
+@app.route('/apply-template/<template_id>', methods=['POST'])
+@login_required
+def apply_template(template_id):
+    company = Company.query.get(session['company_id'])
+    
+    templates = {
+        'ecommerce': {
+            'greeting': 'Thank you for calling. How can I help you today with your order?',
+            'menu_options': json.dumps({
+                '1': 'Order Status',
+                '2': 'Returns & Exchanges',
+                '3': 'Subscription Management',
+                '4': 'Store Hours & Locations',
+                '5': 'Speak to Agent'
+            }),
+            'business_hours': json.dumps({
+                'monday-friday': '9am-9pm EST',
+                'saturday-sunday': '10am-6pm EST'
+            })
+        },
+        'transportation': {
+            'greeting': 'Welcome to our transportation service. How may I assist you?',
+            'menu_options': json.dumps({
+                '1': 'Book a Ride',
+                '2': 'Track Active Ride',
+                '3': 'Account Management',
+                '4': 'Billing Questions',
+                '5': 'Speak to Dispatcher'
+            }),
+            'business_hours': json.dumps({
+                'monday-friday': '24/7',
+                'saturday-sunday': '24/7'
+            })
+        },
+        'healthcare': {
+            'greeting': 'Thank you for calling. How can I help you today?',
+            'menu_options': json.dumps({
+                '1': 'Schedule Appointment',
+                '2': 'Lab Results',
+                '3': 'Prescription Refills',
+                '4': 'Insurance Questions',
+                '5': 'Speak to Nurse'
+            }),
+            'business_hours': json.dumps({
+                'monday-friday': '8am-6pm',
+                'saturday-sunday': 'Closed'
+            })
+        }
+    }
+    
+    if template_id in templates:
+        template = templates[template_id]
+        company.greeting_message = template['greeting']
+        company.menu_options = template['menu_options']
+        company.business_hours = template['business_hours']
+        db.session.commit()
+        
+        flash(f'{template_id.title()} template applied successfully!', 'success')
+    
+    return redirect(url_for('settings'))
+
 def init_db():
     with app.app_context():
         db.create_all()

@@ -16,6 +16,14 @@ Multi-tenant SaaS platform for automating call centers with AI-powered voice ass
 - Built admin dashboard with real-time analytics using Chart.js
 - Added voicemail recording and company configuration features
 - Implemented call simulation endpoint for testing without real calls
+- **Enhanced UI/UX inspired by FlipCX:**
+  - Redesigned landing page with industry-specific sections (eCommerce, Transportation, Healthcare)
+  - Added conversational UI demos showing AI interactions
+  - Implemented Listen Mode analytics for call pattern analysis and intent recommendations
+  - Created ROI Calculator tool for cost savings projections
+  - Built interactive Conversation Preview/Tester for real-time AI testing
+  - Added Industry Templates for quick setup (eCommerce, Healthcare, Transportation)
+  - Enhanced navigation with quick access to all features
 
 ## Key Features
 1. **Multi-Tenant Architecture**: Complete company and user management system

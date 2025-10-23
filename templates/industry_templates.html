@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Industry Templates - {{ company.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="sidebar">
+                <div class="p-3">
+                    <h6 class="text-white-50">{{ company.name }}</h6>
+                    <hr class="bg-white">
+                </div>
+                <a href="{{ url_for('dashboard') }}">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+                <a href="{{ url_for('industry_templates') }}" class="active">
+                    <i class="bi bi-lightning"></i> Templates
+                </a>
+                <a href="{{ url_for('settings') }}">
+                    <i class="bi bi-gear"></i> Settings
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <h2 class="mb-4"><i class="bi bi-lightning-charge"></i> Industry Templates</h2>
+            <p class="lead">Pre-configured call flows optimized for your industry - launch in minutes</p>
+            
+            <div class="alert alert-primary">
+                <i class="bi bi-info-circle"></i>
+                <strong>Quick Setup:</strong> Choose a template below to automatically configure greetings, menu options, and business hours optimized for your industry.
+            </div>
+            
+            <div class="row g-4">
+                {% for template_id, template in templates.items() %}
+                <div class="col-md-6">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <div class="text-center mb-3">
+                                <i class="bi bi-{{ template.icon }} display-1 text-primary"></i>
+                            </div>
+                            <h3 class="card-title text-center">{{ template.name }}</h3>
+                            
+                            <div class="mt-4">
+                                <h6>Greeting Message:</h6>
+                                <p class="text-muted"><em>"{{ template.greeting }}"</em></p>
+                                
+                                <h6>Menu Options:</h6>
+                                <ul class="list-unstyled">
+                                    {% for key, value in template.menu_options.items() %}
+                                    <li><span class="badge bg-secondary">{{ key }}</span> {{ value }}</li>
+                                    {% endfor %}
+                                </ul>
+                                
+                                <h6>Business Hours:</h6>
+                                <ul class="list-unstyled">
+                                    {% for period, hours in template.business_hours.items() %}
+                                    <li><strong>{{ period|replace('-', ' - ')|title }}:</strong> {{ hours }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            
+                            <form method="POST" action="{{ url_for('apply_template', template_id=template_id) }}">
+                                <button type="submit" class="btn btn-primary w-100 mt-3">
+                                    <i class="bi bi-check-circle"></i> Apply This Template
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h5><i class="bi bi-gear"></i> Need Custom Configuration?</h5>
+                    <p>These templates provide a great starting point, but you can fully customize your call flow, menu options, and business hours in the Settings page.</p>
+                    <a href="{{ url_for('settings') }}" class="btn btn-outline-primary">
+                        Go to Settings
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

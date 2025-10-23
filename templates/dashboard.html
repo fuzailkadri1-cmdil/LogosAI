@@ -14,6 +14,12 @@
                 <a href="{{ url_for('dashboard') }}" class="active">
                     <i class="bi bi-speedometer2"></i> Dashboard
                 </a>
+                <a href="{{ url_for('listen_mode') }}">
+                    <i class="bi bi-ear"></i> Listen Mode
+                </a>
+                <a href="{{ url_for('conversation_preview') }}">
+                    <i class="bi bi-chat-dots"></i> Test AI
+                </a>
                 <a href="{{ url_for('calls') }}">
                     <i class="bi bi-telephone"></i> Call Logs
                 </a>
@@ -22,6 +28,9 @@
                     {% if voicemails > 0 %}
                         <span class="badge bg-danger">{{ voicemails }}</span>
                     {% endif %}
+                </a>
+                <a href="{{ url_for('industry_templates') }}">
+                    <i class="bi bi-lightning"></i> Templates
                 </a>
                 <a href="{{ url_for('settings') }}">
                     <i class="bi bi-gear"></i> Settings

@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+
+{% block title %}Conversation Preview - {{ company.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .chat-container {
+        max-width: 600px;
+        margin: 0 auto;
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 20px;
+        height: 500px;
+        overflow-y: auto;
+    }
+    .message {
+        display: flex;
+        margin-bottom: 15px;
+        align-items: flex-start;
+    }
+    .message.user {
+        justify-content: flex-end;
+    }
+    .message-bubble {
+        max-width: 70%;
+        padding: 12px 18px;
+        border-radius: 18px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .message.user .message-bubble {
+        background: #667eea;
+        color: white;
+    }
+    .message.ai .message-bubble {
+        background: white;
+    }
+    .intent-badge {
+        display: inline-block;
+        font-size: 0.75rem;
+        padding: 2px 8px;
+        border-radius: 10px;
+        background: #28a745;
+        color: white;
+        margin-top: 5px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="sidebar">
+                <div class="p-3">
+                    <h6 class="text-white-50">{{ company.name }}</h6>
+                    <hr class="bg-white">
+                </div>
+                <a href="{{ url_for('dashboard') }}">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+                <a href="{{ url_for('conversation_preview') }}" class="active">
+                    <i class="bi bi-chat-dots"></i> Preview AI
+                </a>
+                <a href="{{ url_for('calls') }}">
+                    <i class="bi bi-telephone"></i> Call Logs
+                </a>
+                <a href="{{ url_for('settings') }}">
+                    <i class="bi bi-gear"></i> Settings
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <h2 class="mb-4"><i class="bi bi-chat-dots"></i> Test Your Voice AI</h2>
+            <p class="lead">See how your AI will respond to customer inquiries in real-time</p>
+            
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Live Conversation Preview</h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="chat-container" id="chatContainer">
+                                <div class="text-center text-muted py-5">
+                                    <i class="bi bi-chat-quote display-3"></i>
+                                    <p class="mt-3">Type a message below to test your AI assistant</p>
+                                </div>
+                            </div>
+                            <div class="p-3 border-top">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="userInput" placeholder="Type a message...">
+                                    <button class="btn btn-primary" id="sendBtn">
+                                        <i class="bi bi-send"></i> Send
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h6 class="mb-0">Quick Test Scenarios</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-outline-primary test-scenario" data-message="Where is my order?">
+                                    Order Status
+                                </button>
+                                <button class="btn btn-outline-success test-scenario" data-message="What are your store hours?">
+                                    Store Hours
+                                </button>
+                                <button class="btn btn-outline-info test-scenario" data-message="I need to speak to someone">
+                                    Agent Transfer
+                                </button>
+                                <button class="btn btn-outline-warning test-scenario" data-message="I want to return my order">
+                                    Returns
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0">Current Configuration</h6>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Greeting:</strong><br>{{ company.greeting_message[:100] }}...</p>
+                            <a href="{{ url_for('settings') }}" class="btn btn-sm btn-primary">
+                                <i class="bi bi-gear"></i> Edit Settings
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let conversationStarted = false;
+
+function addMessage(text, isUser, intent = null) {
+    const chatContainer = document.getElementById('chatContainer');
+    
+    if (!conversationStarted) {
+        chatContainer.innerHTML = '';
+        conversationStarted = true;
+    }
+    
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${isUser ? 'user' : 'ai'}`;
+    
+    const bubbleDiv = document.createElement('div');
+    bubbleDiv.className = 'message-bubble';
+    bubbleDiv.textContent = text;
+    
+    if (!isUser && intent) {
+        const badge = document.createElement('div');
+        badge.className = 'intent-badge';
+        badge.textContent = `Intent: ${intent}`;
+        bubbleDiv.appendChild(badge);
+    }
+    
+    messageDiv.appendChild(bubbleDiv);
+    chatContainer.appendChild(messageDiv);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+}
+
+function sendMessage(message) {
+    addMessage(message, true);
+    
+    fetch('/api/test-conversation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ input: message })
+    })
+    .then(response => response.json())
+    .then(data => {
+        setTimeout(() => {
+            addMessage(data.response, false, data.intent);
+        }, 500);
+    });
+}
+
+document.getElementById('sendBtn').addEventListener('click', function() {
+    const input = document.getElementById('userInput');
+    const message = input.value.trim();
+    
+    if (message) {
+        sendMessage(message);
+        input.value = '';
+    }
+});
+
+document.getElementById('userInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        document.getElementById('sendBtn').click();
+    }
+});
+
+document.querySelectorAll('.test-scenario').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const message = this.dataset.message;
+        document.getElementById('userInput').value = message;
+        document.getElementById('sendBtn').click();
+    });
+});
+</script>
+{% endblock %}

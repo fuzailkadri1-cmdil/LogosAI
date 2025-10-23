@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}ROI Calculator - Call Center Automation{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold">Calculate Your Savings</h1>
+        <p class="lead text-muted">See how much you can save with Voice AI automation</p>
+    </div>
+    
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-lg">
+                <div class="card-body p-5">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h4 class="mb-4">Your Call Center Metrics</h4>
+                            
+                            <div class="mb-4">
+                                <label class="form-label">Monthly Call Volume</label>
+                                <input type="number" class="form-control form-control-lg" id="monthly_calls" value="1000" min="100">
+                                <small class="text-muted">Average number of calls per month</small>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="form-label">Average Call Duration (minutes)</label>
+                                <input type="number" class="form-control form-control-lg" id="avg_call_duration" value="5" min="1" max="60">
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="form-label">Agent Hourly Rate ($)</label>
+                                <input type="number" class="form-control form-control-lg" id="agent_hourly_rate" value="15" min="5" max="100">
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="form-label">Expected Automation Rate (%)</label>
+                                <input type="range" class="form-range" id="automation_rate" min="30" max="95" value="70">
+                                <div class="text-center">
+                                    <span class="badge bg-primary fs-5" id="automation_rate_display">70%</span>
+                                </div>
+                            </div>
+                            
+                            <button class="btn btn-primary btn-lg w-100" id="calculate">
+                                <i class="bi bi-calculator"></i> Calculate Savings
+                            </button>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h4 class="mb-4">Your Estimated Savings</h4>
+                            
+                            <div id="results" style="display:none;">
+                                <div class="card bg-success text-white mb-3">
+                                    <div class="card-body text-center">
+                                        <h6 class="card-title">Annual Savings</h6>
+                                        <h1 class="display-3 fw-bold">$<span id="annual_savings">0</span></h1>
+                                    </div>
+                                </div>
+                                
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span>Monthly Savings</span>
+                                            <strong class="fs-4 text-success">$<span id="monthly_savings">0</span></strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span>Calls Automated</span>
+                                            <strong class="fs-4 text-primary"><span id="calls_automated">0</span>/mo</strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span>Agent Hours Saved</span>
+                                            <strong class="fs-4 text-info"><span id="hours_saved">0</span> hrs/mo</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="alert alert-info">
+                                    <strong>ROI Timeline:</strong> Most customers see positive ROI within the first month with our zero upfront cost model.
+                                </div>
+                                
+                                <div class="d-grid gap-2">
+                                    <a href="{{ url_for('register') }}" class="btn btn-lg btn-success">
+                                        <i class="bi bi-rocket"></i> Start Free Trial
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <div id="placeholder" class="text-center py-5">
+                                <i class="bi bi-calculator display-1 text-muted"></i>
+                                <p class="lead mt-3 text-muted">Enter your metrics and click calculate</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('automation_rate').addEventListener('input', function() {
+    document.getElementById('automation_rate_display').textContent = this.value + '%';
+});
+
+document.getElementById('calculate').addEventListener('click', function() {
+    const data = {
+        monthly_calls: parseInt(document.getElementById('monthly_calls').value),
+        avg_call_duration: parseInt(document.getElementById('avg_call_duration').value),
+        agent_hourly_rate: parseFloat(document.getElementById('agent_hourly_rate').value),
+        automation_rate: parseInt(document.getElementById('automation_rate').value)
+    };
+    
+    fetch('/calculate-roi', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        document.getElementById('annual_savings').textContent = result.annual_savings.toLocaleString();
+        document.getElementById('monthly_savings').textContent = result.monthly_savings.toLocaleString();
+        document.getElementById('calls_automated').textContent = result.calls_automated.toLocaleString();
+        document.getElementById('hours_saved').textContent = result.hours_saved;
+        
+        document.getElementById('placeholder').style.display = 'none';
+        document.getElementById('results').style.display = 'block';
+    });
+});
+</script>
+{% endblock %}
