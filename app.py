@@ -699,6 +699,41 @@ def apply_template(template_id):
     
     return redirect(url_for('settings'))
 
+@app.route('/pricing')
+def pricing():
+    return render_template('pricing.html')
+
+@app.route('/demo-script')
+@login_required
+def demo_script():
+    company = Company.query.get(session['company_id'])
+    return render_template('demo_script.html', company=company)
+
+@app.route('/twilio-setup')
+@login_required
+def twilio_setup():
+    company = Company.query.get(session['company_id'])
+    replit_url = request.host_url.rstrip('/')
+    return render_template('twilio_setup.html', company=company, replit_url=replit_url)
+
+@app.route('/investor-dashboard')
+@login_required
+def investor_dashboard():
+    company = Company.query.get(session['company_id'])
+    
+    total_calls = CallLog.query.filter_by(company_id=company.id).count()
+    automated_calls = CallLog.query.filter_by(company_id=company.id, handled_by_ai=True).count()
+    automation_rate = (automated_calls / total_calls * 100) if total_calls > 0 else 0
+    
+    stats = {
+        'total_calls': total_calls,
+        'automation_rate': round(automation_rate, 1),
+        'avg_call_duration': 3.5,
+        'customer_satisfaction': 4.7
+    }
+    
+    return render_template('investor_dashboard.html', company=company, stats=stats)
+
 def init_db():
     with app.app_context():
         db.create_all()

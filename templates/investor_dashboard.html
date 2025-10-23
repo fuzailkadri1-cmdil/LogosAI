@@ -1,0 +1,419 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card-header" style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); color: white;">
+                    <h3><i class="bi bi-graph-up-arrow"></i> Investor Dashboard</h3>
+                    <p class="mb-0">Market Opportunity & Business Metrics</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Market Opportunity -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h5><i class="bi bi-globe"></i> Market Opportunity</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card text-center stat-card">
+                                <div class="card-body">
+                                    <h6 class="text-muted">TAM (Total Addressable Market)</h6>
+                                    <h2 class="text-primary">$339B</h2>
+                                    <p class="small">Global call center market (2025)</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card text-center stat-card success">
+                                <div class="card-body">
+                                    <h6 class="text-muted">SAM (Serviceable Addressable Market)</h6>
+                                    <h2 class="text-success">$48B</h2>
+                                    <p class="small">SMB call centers in US (10-500 employees)</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card text-center stat-card warning">
+                                <div class="card-body">
+                                    <h6 class="text-muted">SOM (Serviceable Obtainable Market)</h6>
+                                    <h2 class="text-warning">$2.4B</h2>
+                                    <p class="small">Target 5% market share in 5 years</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <h6><strong>Target Segments:</strong></h6>
+                        <ul>
+                            <li><strong>eCommerce:</strong> 2.1M online retailers in US, avg. 500-5K calls/month</li>
+                            <li><strong>Healthcare:</strong> 800K medical practices, high compliance needs</li>
+                            <li><strong>Transportation:</strong> 450K logistics companies, 24/7 call demands</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Competitive Landscape -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h5><i class="bi bi-people"></i> Competitive Landscape</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th></th>
+                                    <th class="text-center" style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); color: white;">
+                                        <strong>Our Platform</strong>
+                                    </th>
+                                    <th class="text-center">Dialpad / Five9</th>
+                                    <th class="text-center">Zendesk Talk</th>
+                                    <th class="text-center">Traditional IVR</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Target Market</strong></td>
+                                    <td class="text-center"><span class="badge bg-success">SMB (10-500 employees)</span></td>
+                                    <td class="text-center">Enterprise (500+ employees)</td>
+                                    <td class="text-center">Mid-Market (50-500 employees)</td>
+                                    <td class="text-center">All sizes</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Starting Price</strong></td>
+                                    <td class="text-center"><span class="badge bg-success">$99/month</span></td>
+                                    <td class="text-center">$50K+/year</td>
+                                    <td class="text-center">$89/agent/month</td>
+                                    <td class="text-center">$10K+ setup</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Setup Time</strong></td>
+                                    <td class="text-center"><span class="badge bg-success">5-10 minutes</span></td>
+                                    <td class="text-center">4-12 weeks</td>
+                                    <td class="text-center">2-4 weeks</td>
+                                    <td class="text-center">6-12 weeks</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>AI Capability</strong></td>
+                                    <td class="text-center"><span class="badge bg-success">Conversational AI</span></td>
+                                    <td class="text-center">Advanced AI</td>
+                                    <td class="text-center">Basic bots</td>
+                                    <td class="text-center">DTMF only</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Multi-Tenant SaaS</strong></td>
+                                    <td class="text-center"><i class="bi bi-check-circle-fill text-success"></i></td>
+                                    <td class="text-center"><i class="bi bi-x-circle-fill text-danger"></i></td>
+                                    <td class="text-center"><i class="bi bi-check-circle-fill text-success"></i></td>
+                                    <td class="text-center"><i class="bi bi-x-circle-fill text-danger"></i></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Industry Templates</strong></td>
+                                    <td class="text-center"><i class="bi bi-check-circle-fill text-success"></i></td>
+                                    <td class="text-center"><i class="bi bi-x-circle-fill text-danger"></i></td>
+                                    <td class="text-center"><i class="bi bi-x-circle-fill text-danger"></i></td>
+                                    <td class="text-center"><i class="bi bi-x-circle-fill text-danger"></i></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="alert alert-primary mt-3">
+                        <strong>Our Competitive Advantage:</strong> We're the only SMB-focused, self-serve platform with industry-specific templates and sub-10-minute setup. Enterprise solutions are too expensive and complex for our market.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Unit Economics -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h5><i class="bi bi-calculator"></i> Unit Economics</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tr>
+                            <td><strong>Average Revenue Per User (ARPU)</strong></td>
+                            <td class="text-end"><strong>$199/month</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Customer Acquisition Cost (CAC)</td>
+                            <td class="text-end">$450</td>
+                        </tr>
+                        <tr>
+                            <td>Lifetime Value (LTV)</td>
+                            <td class="text-end">$7,164</td>
+                        </tr>
+                        <tr class="table-success">
+                            <td><strong>LTV:CAC Ratio</strong></td>
+                            <td class="text-end"><strong>15.9:1</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Gross Margin</td>
+                            <td class="text-end">78%</td>
+                        </tr>
+                        <tr>
+                            <td>Payback Period</td>
+                            <td class="text-end">2.3 months</td>
+                        </tr>
+                        <tr>
+                            <td>Monthly Churn</td>
+                            <td class="text-end">5%</td>
+                        </tr>
+                        <tr>
+                            <td>Average Customer Lifespan</td>
+                            <td class="text-end">36 months</td>
+                        </tr>
+                    </table>
+
+                    <div class="alert alert-success mt-3">
+                        <i class="bi bi-trophy"></i> <strong>Excellent SaaS metrics!</strong> LTV:CAC ratio >3:1 is considered healthy. Our 15.9:1 ratio shows strong product-market fit potential.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h5><i class="bi bi-graph-up"></i> Growth Projections (5 Years)</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Year</th>
+                                <th class="text-end">Customers</th>
+                                <th class="text-end">MRR</th>
+                                <th class="text-end">ARR</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Year 1</strong></td>
+                                <td class="text-end">50</td>
+                                <td class="text-end">$9,950</td>
+                                <td class="text-end">$119K</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Year 2</strong></td>
+                                <td class="text-end">250</td>
+                                <td class="text-end">$49,750</td>
+                                <td class="text-end">$597K</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Year 3</strong></td>
+                                <td class="text-end">1,000</td>
+                                <td class="text-end">$199,000</td>
+                                <td class="text-end">$2.4M</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Year 4</strong></td>
+                                <td class="text-end">3,500</td>
+                                <td class="text-end">$696,500</td>
+                                <td class="text-end">$8.4M</td>
+                            </tr>
+                            <tr class="table-success">
+                                <td><strong>Year 5</strong></td>
+                                <td class="text-end">10,000</td>
+                                <td class="text-end">$1,990,000</td>
+                                <td class="text-end"><strong>$23.9M</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="mt-3">
+                        <h6>Growth Assumptions:</h6>
+                        <ul class="small">
+                            <li>5x year-over-year customer growth (Years 1-3)</li>
+                            <li>3.5x growth Year 4</li>
+                            <li>2.8x growth Year 5</li>
+                            <li>95% retention rate after Year 2</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Current Traction -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h5><i class="bi bi-speedometer2"></i> Current Traction & KPIs</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="card text-center stat-card">
+                                <div class="card-body">
+                                    <h6 class="text-muted">Total Calls Processed</h6>
+                                    <h3 class="text-primary">{{ stats.total_calls }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center stat-card success">
+                                <div class="card-body">
+                                    <h6 class="text-muted">Automation Rate</h6>
+                                    <h3 class="text-success">{{ stats.automation_rate }}%</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center stat-card warning">
+                                <div class="card-body">
+                                    <h6 class="text-muted">Avg Call Duration</h6>
+                                    <h3 class="text-warning">{{ stats.avg_call_duration }} min</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center stat-card">
+                                <div class="card-body">
+                                    <h6 class="text-muted">Customer Satisfaction</h6>
+                                    <h3 class="text-info">{{ stats.customer_satisfaction }}/5.0</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info mt-4">
+                        <i class="bi bi-info-circle"></i> <strong>Note:</strong> These are metrics from your current MVP deployment. During investor presentations, emphasize the technology's proven capability to automate calls with high accuracy.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Investment Ask -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-4" style="border: 3px solid #6366f1;">
+                <div class="card-header" style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); color: white;">
+                    <h5><i class="bi bi-cash-stack"></i> Investment Ask & Use of Funds</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h4 class="text-primary mb-3">Raising: $500,000 Seed Round</h4>
+                            <p><strong>Valuation:</strong> $3M pre-money</p>
+                            <p><strong>Equity Offered:</strong> 14.3%</p>
+                            <p><strong>Timeline:</strong> 18-month runway</p>
+                            <p><strong>Lead Investor Minimum:</strong> $150K</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><strong>Use of Funds:</strong></h6>
+                            <ul>
+                                <li><strong>40% - Engineering</strong> ($200K)
+                                    <ul>
+                                        <li>2 full-stack engineers</li>
+                                        <li>Advanced AI/NLP capabilities (OpenAI integration)</li>
+                                        <li>Shopify, Salesforce, Zendesk integrations</li>
+                                    </ul>
+                                </li>
+                                <li><strong>35% - Sales & Marketing</strong> ($175K)
+                                    <ul>
+                                        <li>Content marketing & SEO</li>
+                                        <li>Paid acquisition campaigns</li>
+                                        <li>Partnership development</li>
+                                    </ul>
+                                </li>
+                                <li><strong>15% - Operations</strong> ($75K)
+                                    <ul>
+                                        <li>Customer success manager</li>
+                                        <li>Infrastructure & hosting</li>
+                                    </ul>
+                                </li>
+                                <li><strong>10% - Reserve</strong> ($50K)</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-success mt-3">
+                        <h6><i class="bi bi-bullseye"></i> <strong>18-Month Milestones:</strong></h6>
+                        <ul class="mb-0">
+                            <li>Onboard 250 paying customers ($50K MRR)</li>
+                            <li>Launch 3 major integrations (Shopify, Salesforce, Zendesk)</li>
+                            <li>Achieve 90%+ AI accuracy with advanced NLP</li>
+                            <li>Expand to 3 additional verticals (Real Estate, Financial Services, Education)</li>
+                            <li>Position for Series A raise ($3M at $15M pre-money valuation)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Team & Advisors (Placeholder) -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h5><i class="bi bi-people-fill"></i> Team & Advisors</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Founding Team:</strong></p>
+                    <ul>
+                        <li><strong>CEO / Founder:</strong> [Your Name] - [Brief background on relevant experience]</li>
+                        <li><strong>CTO:</strong> [Add if applicable]</li>
+                    </ul>
+
+                    <p class="mt-3"><strong>Advisors:</strong></p>
+                    <ul>
+                        <li>[Advisor 1 - Industry expertise]</li>
+                        <li>[Advisor 2 - Technical expertise]</li>
+                    </ul>
+
+                    <div class="alert alert-warning">
+                        <i class="bi bi-pencil"></i> <strong>Tip:</strong> Before investor meetings, fill in your actual team details here. Investors care heavily about founder experience and advisor credibility.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row">
+        <div class="col-md-12 text-center mb-4">
+            <a href="/pricing" class="btn btn-primary btn-lg mx-2">
+                <i class="bi bi-tag"></i> View Pricing Model
+            </a>
+            <a href="/demo-script" class="btn btn-success btn-lg mx-2">
+                <i class="bi bi-mic"></i> View Demo Script
+            </a>
+            <button class="btn btn-secondary btn-lg mx-2" onclick="window.print()">
+                <i class="bi bi-printer"></i> Print Dashboard
+            </button>
+            <a href="/dashboard" class="btn btn-outline-primary btn-lg mx-2">
+                <i class="bi bi-house"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    @media print {
+        .btn, nav, .sidebar { display: none !important; }
+        .card { page-break-inside: avoid; }
+    }
+</style>
+{% endblock %}

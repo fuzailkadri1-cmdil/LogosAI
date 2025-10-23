@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h4><i class="bi bi-telephone-fill"></i> Twilio Setup Guide - Get a Live Demo Number</h4>
+                </div>
+                <div class="card-body">
+                    <p class="lead">Follow these steps to get a real phone number that showcases your AI call automation to investors.</p>
+                    
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle-fill"></i> <strong>Why Twilio?</strong> Twilio offers a free trial with $15 credit—enough for ~100 demo calls. You can have a working phone number in under 10 minutes.
+                    </div>
+
+                    <!-- Step 1 -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-dark text-white">
+                            <h5>Step 1: Create Your Twilio Account</h5>
+                        </div>
+                        <div class="card-body">
+                            <ol>
+                                <li>Go to <a href="https://www.twilio.com/try-twilio" target="_blank" class="fw-bold">https://www.twilio.com/try-twilio</a></li>
+                                <li>Sign up with your email (no credit card required for trial)</li>
+                                <li>Verify your email and phone number</li>
+                                <li>You'll receive <strong>$15 in free trial credit</strong></li>
+                            </ol>
+                            <div class="alert alert-success">
+                                <i class="bi bi-check-circle"></i> This takes about 2 minutes
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-dark text-white">
+                            <h5>Step 2: Get Your Twilio Credentials</h5>
+                        </div>
+                        <div class="card-body">
+                            <ol>
+                                <li>Log in to your <a href="https://console.twilio.com" target="_blank" class="fw-bold">Twilio Console</a></li>
+                                <li>On the dashboard, find these two values:
+                                    <ul>
+                                        <li><strong>Account SID</strong> - Starts with "AC..."</li>
+                                        <li><strong>Auth Token</strong> - Click "Show" to reveal it</li>
+                                    </ul>
+                                </li>
+                                <li>Copy both values—you'll need them in Step 4</li>
+                            </ol>
+                            <div class="alert alert-warning">
+                                <i class="bi bi-exclamation-triangle"></i> <strong>Security:</strong> Never share your Auth Token publicly. It's like a password for your Twilio account.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-dark text-white">
+                            <h5>Step 3: Buy a Phone Number</h5>
+                        </div>
+                        <div class="card-body">
+                            <ol>
+                                <li>In the Twilio Console, go to <strong>Phone Numbers → Manage → Buy a number</strong></li>
+                                <li>Select your country (e.g., United States)</li>
+                                <li>Check "Voice" capability</li>
+                                <li>Click <strong>Search</strong></li>
+                                <li>Choose any available number and click <strong>Buy</strong></li>
+                                <li>Cost: <strong>$1/month</strong> (deducted from your free credit)</li>
+                            </ol>
+                            <div class="alert alert-success">
+                                <i class="bi bi-check-circle"></i> Your phone number is now active!
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 4 -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-dark text-white">
+                            <h5>Step 4: Configure Your Number in This Platform</h5>
+                        </div>
+                        <div class="card-body">
+                            <ol>
+                                <li>Go to <a href="/onboarding" class="fw-bold">Onboarding</a> in your dashboard</li>
+                                <li>Select <strong>Twilio</strong> as your provider</li>
+                                <li>Enter the credentials from Step 2:
+                                    <ul>
+                                        <li>Account SID</li>
+                                        <li>Auth Token</li>
+                                        <li>Phone Number (from Step 3)</li>
+                                    </ul>
+                                </li>
+                                <li>Click <strong>Save Integration</strong></li>
+                            </ol>
+                            <div class="alert alert-info">
+                                <i class="bi bi-lightbulb"></i> The platform will automatically validate your credentials.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 5 -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-dark text-white">
+                            <h5>Step 5: Point Twilio to Your Webhook</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>This is the most important step—it tells Twilio to send incoming calls to your AI platform.</p>
+                            <ol>
+                                <li>In Twilio Console, go to <strong>Phone Numbers → Manage → Active numbers</strong></li>
+                                <li>Click on your phone number</li>
+                                <li>Scroll down to <strong>Voice Configuration</strong></li>
+                                <li>Under "A CALL COMES IN", configure:
+                                    <ul>
+                                        <li><strong>Webhook:</strong> (select this option)</li>
+                                        <li><strong>URL:</strong> Copy the URL below 👇</li>
+                                    </ul>
+                                </li>
+                            </ol>
+
+                            <div class="alert alert-primary">
+                                <h6><i class="bi bi-link-45deg"></i> Your Webhook URL:</h6>
+                                <div class="input-group mb-3">
+                                    <input type="text" class="form-control" id="webhookUrl" value="{{ replit_url }}/voice/webhook" readonly>
+                                    <button class="btn btn-outline-secondary" type="button" onclick="copyWebhook()">
+                                        <i class="bi bi-clipboard"></i> Copy
+                                    </button>
+                                </div>
+                                <small><strong>Method:</strong> HTTP POST</small>
+                            </div>
+
+                            <ol start="5">
+                                <li>Click <strong>Save Configuration</strong></li>
+                            </ol>
+
+                            <div class="alert alert-success">
+                                <i class="bi bi-check-circle"></i> Your Twilio number is now connected to your AI platform!
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 6 -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-dark text-white">
+                            <h5>Step 6: Test Your Setup</h5>
+                        </div>
+                        <div class="card-body">
+                            <h6>Option A: Call Your Number</h6>
+                            <ol>
+                                <li>Use your personal phone to call the Twilio number from Step 3</li>
+                                <li>You should hear your company greeting</li>
+                                <li>Try saying "What's my order status?" or press menu options</li>
+                                <li>The AI should respond with appropriate information</li>
+                            </ol>
+
+                            <h6 class="mt-4">Option B: Use the Dashboard Test</h6>
+                            <ol>
+                                <li>Go to <a href="/dashboard">Dashboard</a></li>
+                                <li>Find your Twilio integration</li>
+                                <li>Click <strong>Test Integration</strong></li>
+                                <li>Check for "Success" message</li>
+                            </ol>
+
+                            <div class="alert alert-info mt-3">
+                                <i class="bi bi-bar-chart"></i> <strong>Pro Tip:</strong> After making test calls, check <a href="/calls">Call Logs</a> to see the full transcript and intent detection.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Troubleshooting -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-warning">
+                            <h5><i class="bi bi-tools"></i> Troubleshooting Common Issues</h5>
+                        </div>
+                        <div class="card-body">
+                            <h6><strong>Issue: Call goes to voicemail immediately</strong></h6>
+                            <p><strong>Solution:</strong> Check that your webhook URL is correct in Twilio. Make sure it ends with <code>/voice/webhook</code> and uses <strong>HTTP POST</strong>.</p>
+
+                            <h6 class="mt-3"><strong>Issue: "Cannot read your Twilio credentials"</strong></h6>
+                            <p><strong>Solution:</strong> Double-check your Account SID and Auth Token. Make sure there are no extra spaces when copying.</p>
+
+                            <h6 class="mt-3"><strong>Issue: Call connects but AI doesn't respond</strong></h6>
+                            <p><strong>Solution:</strong> Verify your company greeting is set in <a href="/settings">Settings</a>. If blank, the AI won't know what to say.</p>
+
+                            <h6 class="mt-3"><strong>Issue: "This number cannot accept incoming calls"</strong></h6>
+                            <p><strong>Solution:</strong> Verify your phone number in Twilio trial. Trial accounts can only call verified numbers unless you upgrade.</p>
+
+                            <h6 class="mt-3"><strong>Issue: Webhook URL returns 404 error</strong></h6>
+                            <p><strong>Solution:</strong> Make sure your Replit app is running. Check that the URL includes your full Replit domain.</p>
+                        </div>
+                    </div>
+
+                    <!-- Cost Info -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-info text-white">
+                            <h5><i class="bi bi-currency-dollar"></i> Twilio Pricing for Demos</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul>
+                                <li><strong>Trial Credit:</strong> $15 free (no credit card required)</li>
+                                <li><strong>Phone Number:</strong> $1/month</li>
+                                <li><strong>Incoming Calls:</strong> $0.0085/minute (~1 cent per minute)</li>
+                                <li><strong>Outgoing Calls:</strong> $0.013/minute (if you add transfer-to-agent features)</li>
+                            </ul>
+                            <div class="alert alert-success mt-3">
+                                <strong>For investor demos:</strong> Your $15 credit covers 100+ demo calls. That's plenty for initial pitches!
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Next Steps -->
+                    <div class="text-center mt-4">
+                        <a href="/onboarding" class="btn btn-success btn-lg">
+                            <i class="bi bi-arrow-right-circle"></i> Configure Twilio Integration
+                        </a>
+                        <a href="/demo-script" class="btn btn-primary btn-lg">
+                            <i class="bi bi-file-text"></i> View Demo Script
+                        </a>
+                        <a href="/dashboard" class="btn btn-secondary btn-lg">
+                            <i class="bi bi-house"></i> Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyWebhook() {
+    const webhookInput = document.getElementById('webhookUrl');
+    webhookInput.select();
+    document.execCommand('copy');
+    alert('Webhook URL copied to clipboard!');
+}
+</script>
+{% endblock %}
