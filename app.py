@@ -410,18 +410,15 @@ def voice_webhook():
 def voice_ai_conversation():
     """Handle AI-powered conversation loop"""
     
-    if request.method == 'GET':
-        return '''<?xml version="1.0" encoding="UTF-8"?>
-<Response>
-    <Say voice="alice">This is the AI conversation endpoint. It is working correctly.</Say>
-    <Hangup/>
-</Response>''', 200, {'Content-Type': 'text/xml'}
-    
     try:
+        # Use request.values to get parameters from both GET query string and POST form data
         from_number = request.values.get('From', request.values.get('from', 'Unknown'))
         to_number = request.values.get('To', request.values.get('to', ''))
         call_sid = request.values.get('CallSid', f'SIM_{datetime.utcnow().timestamp()}')
         speech_result = request.values.get('SpeechResult', '')
+        
+        # Log for debugging
+        print(f"Method: {request.method}, SpeechResult: '{speech_result}', CallSid: {call_sid}")
         
         company = get_company_by_phone(to_number)
         if not company:
