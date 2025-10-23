@@ -34,6 +34,11 @@ Multi-tenant SaaS platform for automating call centers with AI-powered voice ass
 6. **Analytics Dashboard**: Real-time metrics with Chart.js visualizations
 7. **Voicemail System**: Recording, storage, and transcription support per company
 8. **Call Simulation**: Testing endpoint for integration validation
+9. **Investor-Ready Tools**: 
+   - Professional pricing page with 3-tier SaaS model
+   - Complete demo script for 5-10 minute investor pitches
+   - Step-by-step Twilio setup guide for live phone demos
+   - Investor dashboard with market metrics, competitive analysis, and unit economics
 
 ## Project Structure
 ```
@@ -86,6 +91,7 @@ Multi-tenant SaaS platform for automating call centers with AI-powered voice ass
 - `POST /login` - Process login
 - `GET /register` - Registration page
 - `POST /register` - Create new account
+- `GET /pricing` - SaaS pricing page (Starter/Professional/Enterprise)
 
 ### Protected Routes (require login)
 - `GET /dashboard` - Main dashboard with analytics
@@ -99,6 +105,9 @@ Multi-tenant SaaS platform for automating call centers with AI-powered voice ass
 - `POST /voicemails/<id>/listen` - Mark voicemail as listened
 - `GET /api/stats` - Analytics data (JSON)
 - `POST /test_integration/<id>` - Test provider integration
+- `GET /demo-script` - Investor pitch guide with talking points
+- `GET /twilio-setup` - Complete Twilio configuration guide
+- `GET /investor-dashboard` - Market metrics and business analytics
 
 ### Webhook Routes (for telephony providers)
 - `POST /voice/webhook` - Initial call handler
@@ -153,13 +162,30 @@ Multi-tenant SaaS platform for automating call centers with AI-powered voice ass
 ```
 # Simulate a call
 http://localhost:5000/simulate_call?intent=OrderStatus&caller=+15551234567
+
+# Or use the Conversation Preview tester in the dashboard
 ```
 
 ### With Twilio Integration
-1. Set up Twilio account
-2. Configure integration in Onboarding wizard
-3. Point Twilio webhook to: `https://your-repl-url.repl.co/voice/webhook`
-4. Call your Twilio number
+1. Follow the step-by-step guide at `/twilio-setup`
+2. Set up Twilio account (free $15 trial credit)
+3. Configure integration in Onboarding wizard
+4. Point Twilio webhook to: `https://your-repl-url.repl.co/voice/webhook`
+5. Call your Twilio number to test live
+
+## Investor Demo Preparation
+
+### Quick Start (5 minutes)
+1. Visit `/pricing` to show your business model
+2. Review `/demo-script` for pitch talking points
+3. Open `/investor-dashboard` to display market metrics
+4. Use `/roi-calculator` to demonstrate customer savings
+5. Test AI with `/conversation-preview` during presentations
+
+### Live Phone Demo (Optional)
+- Follow `/twilio-setup` guide to get a real demo number
+- $15 free Twilio credit = ~100 demo calls
+- Investors can call and interact with your AI live
 
 ## Future Enhancements
 - Real-time call monitoring dashboard with WebSocket updates
