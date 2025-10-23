@@ -406,9 +406,16 @@ def voice_webhook():
         error_response.hangup()
         return str(error_response), 200, {'Content-Type': 'text/xml'}
 
-@app.route('/voice/ai_conversation', methods=['POST'])
+@app.route('/voice/ai_conversation', methods=['GET', 'POST'])
 def voice_ai_conversation():
     """Handle AI-powered conversation loop"""
+    
+    if request.method == 'GET':
+        return '''<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Say voice="alice">This is the AI conversation endpoint. It is working correctly.</Say>
+</Response>''', 200, {'Content-Type': 'text/xml'}
+    
     try:
         from_number = request.values.get('From', request.values.get('from', 'Unknown'))
         to_number = request.values.get('To', request.values.get('to', ''))
@@ -483,10 +490,21 @@ def voice_ai_conversation():
         ])
         call_log.transcript = transcript_text
         
-        if ai_result['should_escalate']:
+        if ai_result.get('should_end_call', False):
+            # User said goodbye - end call gracefully
+            call_log.outcome = 'completed'
+            call_log.handled_by_ai = True
+            call_log.completed_at = datetime.utcnow()
+            db.session.commit()
+            
+            session.pop(session_key, None)
+            
+            response = provider.create_call_response(ai_result['response'])
+        
+        elif ai_result['should_escalate']:
             call_log.outcome = 'transferred'
             call_log.escalation_reason = ai_result.get('escalation_reason', 'unknown')
-            call_log.handled_by_ai = False
+            call_log.handled_by_ai = True
             call_log.completed_at = datetime.utcnow()
             db.session.commit()
             
