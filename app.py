@@ -414,6 +414,7 @@ def voice_ai_conversation():
         return '''<?xml version="1.0" encoding="UTF-8"?>
 <Response>
     <Say voice="alice">This is the AI conversation endpoint. It is working correctly.</Say>
+    <Hangup/>
 </Response>''', 200, {'Content-Type': 'text/xml'}
     
     try:
@@ -465,11 +466,13 @@ def voice_ai_conversation():
             ai_agent.conversation_history = session[session_key]['conversation_history']
         
         if not speech_result or speech_result.strip() == '':
+            # First time or no speech detected - provide welcome and gather
+            welcome_message = "Hello! How can I help you today? You can ask about order status, store hours, or speak with an agent."
             response = provider.create_gather_response(
-                "I didn't catch that. Could you please repeat?",
+                welcome_message,
                 url_for('voice_ai_conversation', _external=True),
                 input_type='speech',
-                speech_timeout=3,
+                speech_timeout=5,
                 speech_model='experimental_conversations'
             )
             return response, 200, {'Content-Type': 'text/xml' if provider_type != 'sip' else 'application/json'}
