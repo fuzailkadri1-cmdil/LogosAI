@@ -265,12 +265,19 @@ def extract_order_number_from_speech(speech_text):
     # First normalize spoken numbers to digits
     text = normalize_spoken_numbers(speech_text)
     
-    # Support 3-6 digit order numbers for flexibility
+    # Support 3-6 digit order numbers
+    # Very strict patterns to avoid false positives like "order 20 minutes ago"
     patterns = [
-        r'ORDER[- ]?(\d{3,6})',
-        r'NUMBER[- ]?(\d{3,6})',
-        r'#(\d{3,6})',
-        r'\b(\d{3,6})\b'  # Any 3-6 digit number as standalone word
+        # 2+ digit patterns - require very explicit order number phrasing
+        r'ORDER\s+NUMBER\s+(?:IS\s+)?(\d{2,6})',  # "order number is 11"
+        r'ORDER\s+#\s*(\d{2,6})',                 # "order # 11"
+        r'NUMBER\s+(?:IS\s+)?(\d{2,6})',          # "number is 456"
+        r'#(\d{2,6})',                            # "#123"
+        
+        # 3+ digit patterns - allow more flexible matching
+        r'ORDER[- ]?(\d{3,6})',                   # "order 111" or "order-111"
+        r'ORDER\s+(?:IS\s+)?(\d{3,6})',           # "order is 111"
+        r'\b(\d{3,6})\b'                          # Standalone 3-6 digit numbers
     ]
     
     for pattern in patterns:
