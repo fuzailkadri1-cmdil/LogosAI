@@ -3,31 +3,31 @@ Mock Orders Database for Testing Order Lookup Flow
 """
 
 MOCK_ORDERS = {
-    # Easy-to-say order numbers for investor demos
-    "111": {
-        "order_number": "111",
+    # Single-digit order numbers - MUCH easier for Twilio speech recognition!
+    "1": {
+        "order_number": "1",
         "status": "out_for_delivery",
         "status_text": "out for delivery",
         "delivery_date": "today",
         "delivery_time": "by 5pm",
         "delivery_address": "123 Main Street, Boston, MA 02101",
-        "tracking_number": "1Z999AA10123456111",
+        "tracking_number": "1Z999AA10123456001",
         "items": ["Wireless Headphones", "Phone Case"],
         "total": 79.99
     },
-    "123": {
-        "order_number": "123",
+    "2": {
+        "order_number": "2",
         "status": "shipped",
         "status_text": "shipped and on the way",
         "delivery_date": "tomorrow",
         "delivery_time": "by end of day",
         "delivery_address": "456 Oak Avenue, San Francisco, CA 94102",
-        "tracking_number": "1Z999AA10123456123",
+        "tracking_number": "1Z999AA10123456002",
         "items": ["Coffee Maker"],
         "total": 149.99
     },
-    "456": {
-        "order_number": "456",
+    "3": {
+        "order_number": "3",
         "status": "processing",
         "status_text": "being prepared for shipment",
         "delivery_date": "in 2-3 business days",
@@ -37,84 +37,71 @@ MOCK_ORDERS = {
         "items": ["Running Shoes", "Sports Watch"],
         "total": 229.99
     },
-    "789": {
-        "order_number": "789",
+    "4": {
+        "order_number": "4",
         "status": "delivered",
         "status_text": "delivered",
         "delivery_date": "yesterday",
         "delivery_time": "at 3:45pm",
         "delivery_address": "321 Elm Drive, Seattle, WA 98101",
-        "tracking_number": "1Z999AA10123456789",
+        "tracking_number": "1Z999AA10123456004",
         "items": ["Laptop Stand"],
         "total": 59.99
     },
-    "999": {
-        "order_number": "999",
+    "5": {
+        "order_number": "5",
         "status": "out_for_delivery",
         "status_text": "out for delivery",
         "delivery_date": "today",
         "delivery_time": "by 8pm",
         "delivery_address": "555 Broadway, New York, NY 10012",
-        "tracking_number": "1Z999AA10123456999",
+        "tracking_number": "1Z999AA10123456005",
         "items": ["Designer Sunglasses", "Leather Wallet"],
         "total": 349.99
     },
-    
-    # Original orders with added addresses
-    "ORDER-12345": {
-        "order_number": "ORDER-12345",
+    "6": {
+        "order_number": "6",
+        "status": "shipped",
+        "status_text": "shipped and on the way",
+        "delivery_date": "in 2 days",
+        "delivery_time": "by 6pm",
+        "delivery_address": "100 Market Street, Chicago, IL 60602",
+        "tracking_number": "1Z999AA10123456006",
+        "items": ["Yoga Mat", "Water Bottle"],
+        "total": 65.99
+    },
+    "7": {
+        "order_number": "7",
+        "status": "processing",
+        "status_text": "being prepared for shipment",
+        "delivery_date": "in 3-5 business days",
+        "delivery_time": "",
+        "delivery_address": "200 Park Avenue, Miami, FL 33101",
+        "tracking_number": None,
+        "items": ["Bluetooth Speaker"],
+        "total": 89.99
+    },
+    "8": {
+        "order_number": "8",
+        "status": "delivered",
+        "status_text": "delivered",
+        "delivery_date": "2 days ago",
+        "delivery_time": "at 11:15am",
+        "delivery_address": "500 Peachtree Street, Atlanta, GA 30308",
+        "tracking_number": "1Z999AA10123456008",
+        "items": ["Office Chair"],
+        "total": 299.99
+    },
+    "9": {
+        "order_number": "9",
         "status": "out_for_delivery",
         "status_text": "out for delivery",
         "delivery_date": "today",
-        "delivery_time": "by 5pm",
-        "delivery_address": "1600 Pennsylvania Avenue, Washington, DC 20500",
-        "tracking_number": "1Z999AA10123456784",
-        "items": ["Blue T-Shirt", "Black Jeans"],
-        "total": 89.99
-    },
-    "ORDER-67890": {
-        "order_number": "ORDER-67890",
-        "status": "processing",
-        "status_text": "being prepared for shipment",
-        "delivery_date": "in 2-3 business days",
-        "delivery_time": "",
-        "delivery_address": "350 Fifth Avenue, New York, NY 10118",
-        "tracking_number": None,
-        "items": ["Running Shoes"],
-        "total": 129.99
-    },
-    "ORDER-54321": {
-        "order_number": "ORDER-54321",
-        "status": "delivered",
-        "status_text": "delivered",
-        "delivery_date": "yesterday",
-        "delivery_time": "at 2:30pm",
-        "delivery_address": "1 Apple Park Way, Cupertino, CA 95014",
-        "tracking_number": "1Z999AA10987654321",
-        "items": ["Laptop Backpack", "USB Cable"],
-        "total": 65.50
-    },
-    "12345": {
-        "order_number": "12345",
-        "status": "shipped",
-        "status_text": "shipped and on the way",
-        "delivery_date": "tomorrow",
-        "delivery_time": "by end of day",
-        "delivery_address": "1 Infinite Loop, Cupertino, CA 95014",
-        "tracking_number": "1Z999AA10111222333",
-        "items": ["Wireless Mouse"],
-        "total": 29.99
-    },
-    "67890": {
-        "order_number": "67890",
-        "status": "cancelled",
-        "status_text": "cancelled at your request",
-        "delivery_date": None,
-        "delivery_time": "",
-        "delivery_address": "100 Universal City Plaza, Universal City, CA 91608",
-        "tracking_number": None,
-        "items": ["Gaming Keyboard"],
-        "total": 149.99
+        "delivery_time": "by 7pm",
+        "delivery_address": "700 Washington Avenue, Denver, CO 80203",
+        "tracking_number": "1Z999AA10123456009",
+        "items": ["Desk Lamp", "Notebooks"],
+        "total": 45.99
     }
 }
 
@@ -265,10 +252,16 @@ def extract_order_number_from_speech(speech_text):
     # First normalize spoken numbers to digits
     text = normalize_spoken_numbers(speech_text)
     
-    # Support 3-6 digit order numbers
-    # Very strict patterns to avoid false positives like "order 20 minutes ago"
+    # Support single-digit and multi-digit order numbers
+    # Very strict patterns to avoid false positives like "I have 2 questions"
     patterns = [
-        # 2+ digit patterns - require very explicit order number phrasing
+        # Single digit - require VERY explicit order number phrasing
+        r'ORDER\s+NUMBER\s+(?:IS\s+)?(\d{1})\b',  # "order number is 1"
+        r'NUMBER\s+(?:IS\s+)?(\d{1})\b',          # "number is 1"
+        r'ORDER\s+(?:IS\s+)?(\d{1})\b',           # "order is 1" or "order 1"
+        r'#(\d{1})\b',                            # "#1"
+        
+        # 2+ digit patterns - require explicit order number phrasing
         r'ORDER\s+NUMBER\s+(?:IS\s+)?(\d{2,6})',  # "order number is 11"
         r'ORDER\s+#\s*(\d{2,6})',                 # "order # 11"
         r'NUMBER\s+(?:IS\s+)?(\d{2,6})',          # "number is 456"
