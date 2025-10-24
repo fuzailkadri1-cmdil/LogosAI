@@ -157,22 +157,38 @@ def format_order_status(order_data):
     
     order_num = order_data['order_number']
     status_text = order_data['status_text']
+    delivery_address = order_data.get('delivery_address', '')
     
     response = f"Your order {order_num} is currently {status_text}."
     
     if order_data['status'] == 'out_for_delivery':
         delivery_time = f" {order_data['delivery_time']}" if order_data['delivery_time'] else ""
-        response += f" It should arrive {order_data['delivery_date']}{delivery_time}."
+        response += f" It should arrive {order_data['delivery_date']}{delivery_time}"
+        if delivery_address:
+            response += f" at {delivery_address}."
+        else:
+            response += "."
     
     elif order_data['status'] == 'shipped':
         delivery_time = f" {order_data['delivery_time']}" if order_data['delivery_time'] else ""
-        response += f" Expected delivery is {order_data['delivery_date']}{delivery_time}."
+        response += f" Expected delivery is {order_data['delivery_date']}{delivery_time}"
+        if delivery_address:
+            response += f" to {delivery_address}."
+        else:
+            response += "."
     
     elif order_data['status'] == 'processing':
-        response += f" We'll ship it soon, and you should receive it {order_data['delivery_date']}."
+        response += f" We'll ship it soon"
+        if delivery_address:
+            response += f" to {delivery_address}"
+        response += f", and you should receive it {order_data['delivery_date']}."
     
     elif order_data['status'] == 'delivered':
-        response += f" It was delivered {order_data['delivery_date']} {order_data['delivery_time']}."
+        response += f" It was delivered {order_data['delivery_date']} {order_data['delivery_time']}"
+        if delivery_address:
+            response += f" to {delivery_address}."
+        else:
+            response += "."
     
     elif order_data['status'] == 'cancelled':
         response += " If you have any questions about this, I can connect you with our support team."
@@ -194,11 +210,12 @@ def extract_order_number_from_speech(speech_text):
     
     text = speech_text.upper()
     
+    # Support 3-6 digit order numbers for flexibility
     patterns = [
-        r'ORDER[- ]?(\d{5})',
-        r'(\d{5})',
-        r'NUMBER[- ]?(\d{5})',
-        r'#(\d{5})'
+        r'ORDER[- ]?(\d{3,6})',
+        r'NUMBER[- ]?(\d{3,6})',
+        r'#(\d{3,6})',
+        r'\b(\d{3,6})\b'  # Any 3-6 digit number as standalone word
     ]
     
     for pattern in patterns:
