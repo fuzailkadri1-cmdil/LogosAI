@@ -108,10 +108,10 @@ MOCK_ORDERS = {
 
 def lookup_order(order_number_input):
     """
-    Look up an order by number (flexible matching)
+    Look up an order by number (exact matching for single digits, flexible for multi-digit)
     
     Args:
-        order_number_input: User's input (e.g., "12345", "ORDER-12345", "order 12345")
+        order_number_input: User's input (e.g., "1", "2", "3", "12345", "ORDER-12345")
     
     Returns:
         dict with order info or None if not found
@@ -121,10 +121,19 @@ def lookup_order(order_number_input):
     
     clean_input = order_number_input.strip().upper().replace(" ", "").replace("ORDER", "").replace("-", "")
     
+    # First try exact match (important for single digits)
     for order_key, order_data in MOCK_ORDERS.items():
         clean_key = order_key.upper().replace("ORDER", "").replace("-", "")
-        if clean_input in clean_key or clean_key in clean_input:
+        if clean_input == clean_key:
             return order_data
+    
+    # No exact match found - for multi-digit orders, try flexible substring matching
+    # (but only if the lengths are similar to avoid "1" matching "111")
+    if len(clean_input) >= 3:
+        for order_key, order_data in MOCK_ORDERS.items():
+            clean_key = order_key.upper().replace("ORDER", "").replace("-", "")
+            if len(clean_key) >= 3 and (clean_input in clean_key or clean_key in clean_input):
+                return order_data
     
     return None
 
@@ -259,6 +268,7 @@ def extract_order_number_from_speech(speech_text):
         r'ORDER\s+NUMBER\s+(?:IS\s+)?(\d{1})\b',  # "order number is 1"
         r'NUMBER\s+(?:IS\s+)?(\d{1})\b',          # "number is 1"
         r'ORDER\s+(?:IS\s+)?(\d{1})\b',           # "order is 1" or "order 1"
+        r"IT'?S\s+(\d{1})\b",                     # "it's 1" or "its 1"
         r'#(\d{1})\b',                            # "#1"
         
         # 2+ digit patterns - require explicit order number phrasing
