@@ -3,12 +3,71 @@ Mock Orders Database for Testing Order Lookup Flow
 """
 
 MOCK_ORDERS = {
+    # Easy-to-say order numbers for investor demos
+    "111": {
+        "order_number": "111",
+        "status": "out_for_delivery",
+        "status_text": "out for delivery",
+        "delivery_date": "today",
+        "delivery_time": "by 5pm",
+        "delivery_address": "123 Main Street, Boston, MA 02101",
+        "tracking_number": "1Z999AA10123456111",
+        "items": ["Wireless Headphones", "Phone Case"],
+        "total": 79.99
+    },
+    "123": {
+        "order_number": "123",
+        "status": "shipped",
+        "status_text": "shipped and on the way",
+        "delivery_date": "tomorrow",
+        "delivery_time": "by end of day",
+        "delivery_address": "456 Oak Avenue, San Francisco, CA 94102",
+        "tracking_number": "1Z999AA10123456123",
+        "items": ["Coffee Maker"],
+        "total": 149.99
+    },
+    "456": {
+        "order_number": "456",
+        "status": "processing",
+        "status_text": "being prepared for shipment",
+        "delivery_date": "in 2-3 business days",
+        "delivery_time": "",
+        "delivery_address": "789 Pine Street, Austin, TX 78701",
+        "tracking_number": None,
+        "items": ["Running Shoes", "Sports Watch"],
+        "total": 229.99
+    },
+    "789": {
+        "order_number": "789",
+        "status": "delivered",
+        "status_text": "delivered",
+        "delivery_date": "yesterday",
+        "delivery_time": "at 3:45pm",
+        "delivery_address": "321 Elm Drive, Seattle, WA 98101",
+        "tracking_number": "1Z999AA10123456789",
+        "items": ["Laptop Stand"],
+        "total": 59.99
+    },
+    "999": {
+        "order_number": "999",
+        "status": "out_for_delivery",
+        "status_text": "out for delivery",
+        "delivery_date": "today",
+        "delivery_time": "by 8pm",
+        "delivery_address": "555 Broadway, New York, NY 10012",
+        "tracking_number": "1Z999AA10123456999",
+        "items": ["Designer Sunglasses", "Leather Wallet"],
+        "total": 349.99
+    },
+    
+    # Original orders with added addresses
     "ORDER-12345": {
         "order_number": "ORDER-12345",
         "status": "out_for_delivery",
         "status_text": "out for delivery",
         "delivery_date": "today",
         "delivery_time": "by 5pm",
+        "delivery_address": "1600 Pennsylvania Avenue, Washington, DC 20500",
         "tracking_number": "1Z999AA10123456784",
         "items": ["Blue T-Shirt", "Black Jeans"],
         "total": 89.99
@@ -19,6 +78,7 @@ MOCK_ORDERS = {
         "status_text": "being prepared for shipment",
         "delivery_date": "in 2-3 business days",
         "delivery_time": "",
+        "delivery_address": "350 Fifth Avenue, New York, NY 10118",
         "tracking_number": None,
         "items": ["Running Shoes"],
         "total": 129.99
@@ -29,6 +89,7 @@ MOCK_ORDERS = {
         "status_text": "delivered",
         "delivery_date": "yesterday",
         "delivery_time": "at 2:30pm",
+        "delivery_address": "1 Apple Park Way, Cupertino, CA 95014",
         "tracking_number": "1Z999AA10987654321",
         "items": ["Laptop Backpack", "USB Cable"],
         "total": 65.50
@@ -39,6 +100,7 @@ MOCK_ORDERS = {
         "status_text": "shipped and on the way",
         "delivery_date": "tomorrow",
         "delivery_time": "by end of day",
+        "delivery_address": "1 Infinite Loop, Cupertino, CA 95014",
         "tracking_number": "1Z999AA10111222333",
         "items": ["Wireless Mouse"],
         "total": 29.99
@@ -49,6 +111,7 @@ MOCK_ORDERS = {
         "status_text": "cancelled at your request",
         "delivery_date": None,
         "delivery_time": "",
+        "delivery_address": "100 Universal City Plaza, Universal City, CA 91608",
         "tracking_number": None,
         "items": ["Gaming Keyboard"],
         "total": 149.99
