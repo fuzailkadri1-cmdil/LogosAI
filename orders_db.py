@@ -196,6 +196,60 @@ def format_order_status(order_data):
     return response
 
 
+def normalize_spoken_numbers(text):
+    """
+    Convert spoken numbers and comma-separated digits to continuous digit strings
+    
+    Handles cases like:
+    - "one one one" -> "111"
+    - "four five six" -> "456"
+    - "1, 1, 1" -> "111"
+    - "Yes. The order number is 1, 1." -> "Yes. The order number is 11."
+    
+    Args:
+        text: User's spoken input
+    
+    Returns:
+        str: Text with normalized numbers
+    """
+    import re
+    
+    # Map of spoken numbers to digits
+    number_words = {
+        'ZERO': '0', 'OH': '0', 'O': '0',
+        'ONE': '1', 'TWO': '2', 'THREE': '3', 'FOUR': '4', 'FIVE': '5',
+        'SIX': '6', 'SEVEN': '7', 'EIGHT': '8', 'NINE': '9'
+    }
+    
+    text_upper = text.upper()
+    
+    # First, convert sequences of spoken numbers to digits
+    # Match patterns like "ONE ONE ONE" or "FOUR FIVE SIX"
+    def replace_spoken_sequence(match):
+        words = match.group(0).split()
+        digits = ''.join(number_words.get(w, w) for w in words if w in number_words)
+        return digits if digits else match.group(0)
+    
+    # Pattern to match sequences of number words
+    spoken_pattern = r'\b(?:ZERO|OH|O|ONE|TWO|THREE|FOUR|FIVE|SIX|SEVEN|EIGHT|NINE)(?:\s+(?:ZERO|OH|O|ONE|TWO|THREE|FOUR|FIVE|SIX|SEVEN|EIGHT|NINE))+\b'
+    text_upper = re.sub(spoken_pattern, replace_spoken_sequence, text_upper)
+    
+    # Also convert single spoken numbers
+    for word, digit in number_words.items():
+        text_upper = re.sub(r'\b' + word + r'\b', digit, text_upper)
+    
+    # Remove commas and spaces between digits
+    # Match patterns like "1, 1, 1" or "1 1 1" and convert to "111"
+    def remove_separators(match):
+        return re.sub(r'[,\s]+', '', match.group(0))
+    
+    # Pattern to match digit sequences with commas/spaces
+    digit_separator_pattern = r'\d(?:[,\s]+\d)+'
+    text_upper = re.sub(digit_separator_pattern, remove_separators, text_upper)
+    
+    return text_upper
+
+
 def extract_order_number_from_speech(speech_text):
     """
     Extract order number from user speech using pattern matching
@@ -208,7 +262,8 @@ def extract_order_number_from_speech(speech_text):
     """
     import re
     
-    text = speech_text.upper()
+    # First normalize spoken numbers to digits
+    text = normalize_spoken_numbers(speech_text)
     
     # Support 3-6 digit order numbers for flexibility
     patterns = [
