@@ -21,7 +21,8 @@ The platform is built on Python 3.11 using Flask and Flask-SQLAlchemy, with SQLi
 - **AI-powered Call Flow Engine:** Employs intent detection (OrderStatus, StoreHours, ConnectAgent, Voicemail) for both DTMF and speech input.
 - **AI Voice Agent:** Utilizes OpenAI GPT-4o-mini for natural language understanding and human-like responses. It supports multi-turn conversations, maintains conversation state (initial, waiting_for_order_number, offering_more_help, goodbye), and handles flexible order number matching.
 - **Intelligent Escalation:** AI automatically escalates to human agents for sensitive topics, low confidence scores (<0.5), or explicit requests.
-- **Order Database Integration:** Includes a mock order database (`orders_db.py`) for order lookup, providing detailed status and delivery information.
+- **Order Database Integration:** Includes a mock order database (`orders_db.py`) with 10 demo-ready orders (easy-to-say numbers: 111, 123, 456, 789, 999) featuring full delivery addresses for realistic investor demos.
+- **Speech Recognition Number Normalization:** Advanced `normalize_spoken_numbers()` function converts Twilio speech transcriptions ("one one one", "1, 1, 1") to digits ("111"). Features two-tier pattern matching to prevent false positives (e.g., "order 20 minutes ago" won't extract "20"). Handles sequential spoken numbers, comma-separated digits, and requires explicit "order number" phrasing for 2-digit extractions.
 - **Analytics Dashboard:** Real-time metrics and Chart.js visualizations display AI performance (average confidence, conversation turns, escalation rate, AI resolution rate) and overall call center performance.
 - **Voicemail System:** Supports recording, storage, and transcription per company.
 - **Onboarding Wizard:** A Bootstrap-styled interface guides setup of telephony providers.
