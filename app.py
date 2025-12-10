@@ -4,32 +4,45 @@ from providers import get_provider
 from call_engine import CallFlowEngine, IntentRouter
 from ai_voice_agent import AIVoiceAgent
 from datetime import datetime, timedelta
-from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from twilio.twiml.voice_response import VoiceResponse
+from werkzeug.middleware.proxy_fix import ProxyFix
+from flask_login import current_user
 import os
 import json
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.environ.get('SESSION_SECRET', 'dev-secret-key-change-in-production')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///callcenter.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.secret_key = os.environ.get("SESSION_SECRET")
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
+
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+    'pool_pre_ping': True,
+    "pool_recycle": 300,
+}
 
 db.init_app(app)
 
-def login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if 'user_id' not in session:
-            flash('Please log in to access this page.', 'warning')
-            return redirect(url_for('login'))
-        return f(*args, **kwargs)
-    return decorated_function
+with app.app_context():
+    db.create_all()
+    logging.info("Database tables created")
+
+from replit_auth import init_auth, require_login, require_admin
+init_auth(app)
+
+@app.before_request
+def make_session_permanent():
+    session.permanent = True
 
 def get_current_user():
-    if 'user_id' in session:
-        return User.query.get(session['user_id'])
-    return None
+    return current_user if current_user.is_authenticated else None
+
+def login_required(f):
+    return require_login(f)
 
 def get_company_by_phone(phone_number):
     clean_phone = phone_number.replace('+', '').replace('-', '').replace(' ', '')
@@ -45,89 +58,31 @@ def get_company_by_phone(phone_number):
 
 @app.route('/')
 def index():
-    if 'user_id' in session:
+    if current_user.is_authenticated:
         return redirect(url_for('dashboard'))
     return render_template('index.html')
 
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/login')
 def login():
-    if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password')
-        
-        user = User.query.filter_by(email=email, is_active=True).first()
-        
-        if user and check_password_hash(user.password_hash, password):
-            session['user_id'] = user.id
-            session['company_id'] = user.company_id
-            flash(f'Welcome back, {user.full_name}!', 'success')
-            return redirect(url_for('dashboard'))
-        else:
-            flash('Invalid email or password.', 'danger')
-    
-    return render_template('login.html')
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+    return redirect(url_for('replit_auth.login'))
 
 @app.route('/logout')
 def logout():
-    session.clear()
-    flash('You have been logged out successfully.', 'info')
-    return redirect(url_for('index'))
+    return redirect(url_for('replit_auth.logout'))
 
-@app.route('/register', methods=['GET', 'POST'])
+@app.route('/register')
 def register():
-    if request.method == 'POST':
-        company_name = request.form.get('company_name')
-        full_name = request.form.get('full_name')
-        email = request.form.get('email')
-        password = request.form.get('password')
-        
-        if User.query.filter_by(email=email).first():
-            flash('Email already registered.', 'danger')
-            return render_template('register.html')
-        
-        default_greeting = "Thank you for calling. How can I help you today?"
-        default_menu = json.dumps({
-            '1': 'Order Status',
-            '2': 'Business Hours',
-            '3': 'Speak to Agent',
-            '4': 'Leave Voicemail'
-        })
-        default_hours = json.dumps({
-            'monday-friday': '9am-5pm',
-            'saturday-sunday': 'Closed'
-        })
-        
-        company = Company(
-            name=company_name,
-            greeting_message=default_greeting,
-            menu_options=default_menu,
-            business_hours=default_hours
-        )
-        db.session.add(company)
-        db.session.flush()
-        
-        user = User(
-            email=email,
-            password_hash=generate_password_hash(password),
-            full_name=full_name,
-            company_id=company.id,
-            role='admin'
-        )
-        db.session.add(user)
-        db.session.commit()
-        
-        session['user_id'] = user.id
-        session['company_id'] = company.id
-        flash('Registration successful! Welcome to Call Center Automation.', 'success')
-        return redirect(url_for('onboarding'))
-    
-    return render_template('register.html')
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+    return redirect(url_for('replit_auth.login'))
 
 @app.route('/onboarding')
 @login_required
 def onboarding():
-    user = get_current_user()
-    company = Company.query.get(session['company_id'])
+    user = current_user
+    company = db.session.get(Company, current_user.company_id)
     integrations = Integration.query.filter_by(company_id=company.id).all()
     
     return render_template('onboarding.html', company=company, integrations=integrations)
@@ -161,7 +116,7 @@ def setup_provider():
         }
     
     integration = Integration(
-        company_id=session['company_id'],
+        company_id=current_user.company_id,
         provider_type=provider_type,
         provider_name=provider_name,
         config=json.dumps(config),
@@ -170,7 +125,7 @@ def setup_provider():
     
     db.session.add(integration)
     
-    company = Company.query.get(session['company_id'])
+    company = db.session.get(Company, current_user.company_id)
     if 'phone_number' in config and config['phone_number']:
         company.phone_number = config['phone_number']
     
@@ -183,7 +138,7 @@ def setup_provider():
 @login_required
 def dashboard():
     user = get_current_user()
-    company = Company.query.get(session['company_id'])
+    company = db.session.get(Company, current_user.company_id)
     
     total_calls = CallLog.query.filter_by(company_id=company.id).count()
     ai_handled = CallLog.query.filter_by(company_id=company.id, handled_by_ai=True).count()
@@ -206,7 +161,7 @@ def dashboard():
 @app.route('/settings', methods=['GET', 'POST'])
 @login_required
 def settings():
-    company = Company.query.get(session['company_id'])
+    company = db.session.get(Company, current_user.company_id)
     
     if request.method == 'POST':
         company.greeting_message = request.form.get('greeting_message')
@@ -239,7 +194,7 @@ def settings():
 @app.route('/calls')
 @login_required
 def calls():
-    company = Company.query.get(session['company_id'])
+    company = db.session.get(Company, current_user.company_id)
     all_calls = CallLog.query.filter_by(company_id=company.id)\
         .order_by(CallLog.created_at.desc())\
         .all()
@@ -251,7 +206,7 @@ def calls():
 def call_detail(call_id):
     call = CallLog.query.get_or_404(call_id)
     
-    if call.company_id != session['company_id']:
+    if call.company_id != current_user.company_id:
         flash('Unauthorized access.', 'danger')
         return redirect(url_for('calls'))
     
@@ -260,7 +215,7 @@ def call_detail(call_id):
 @app.route('/voicemails')
 @login_required
 def voicemails():
-    company = Company.query.get(session['company_id'])
+    company = db.session.get(Company, current_user.company_id)
     all_voicemails = Voicemail.query.filter_by(company_id=company.id)\
         .order_by(Voicemail.created_at.desc())\
         .all()
@@ -272,7 +227,7 @@ def voicemails():
 def mark_voicemail_listened(voicemail_id):
     voicemail = Voicemail.query.get_or_404(voicemail_id)
     
-    if voicemail.company_id != session['company_id']:
+    if voicemail.company_id != current_user.company_id:
         return jsonify({'error': 'Unauthorized'}), 403
     
     voicemail.is_listened = True
@@ -283,7 +238,7 @@ def mark_voicemail_listened(voicemail_id):
 @app.route('/api/stats')
 @login_required
 def api_stats():
-    company = Company.query.get(session['company_id'])
+    company = db.session.get(Company, current_user.company_id)
     
     total_calls = CallLog.query.filter_by(company_id=company.id).count()
     ai_handled = CallLog.query.filter_by(company_id=company.id, handled_by_ai=True).count()
@@ -495,6 +450,8 @@ def voice_ai_conversation():
             call_log.outcome = 'completed'
             call_log.handled_by_ai = True
             call_log.completed_at = datetime.utcnow()
+            if call_log.created_at:
+                call_log.duration_seconds = int((call_log.completed_at - call_log.created_at).total_seconds())
             db.session.commit()
             
             session.pop(session_key, None)
@@ -506,6 +463,8 @@ def voice_ai_conversation():
             call_log.escalation_reason = ai_result.get('escalation_reason', 'unknown')
             call_log.handled_by_ai = True
             call_log.completed_at = datetime.utcnow()
+            if call_log.created_at:
+                call_log.duration_seconds = int((call_log.completed_at - call_log.created_at).total_seconds())
             db.session.commit()
             
             session.pop(session_key, None)
@@ -667,7 +626,7 @@ def simulate_call():
 def test_integration(integration_id):
     integration = Integration.query.get_or_404(integration_id)
     
-    if integration.company_id != session['company_id']:
+    if integration.company_id != current_user.company_id:
         return jsonify({'error': 'Unauthorized'}), 403
     
     try:
@@ -696,7 +655,7 @@ def test_integration(integration_id):
 def delete_integration(integration_id):
     integration = Integration.query.get_or_404(integration_id)
     
-    if integration.company_id != session['company_id']:
+    if integration.company_id != current_user.company_id:
         return jsonify({'error': 'Unauthorized'}), 403
     
     try:
@@ -719,7 +678,7 @@ def delete_integration(integration_id):
 @app.route('/listen-mode')
 @login_required
 def listen_mode():
-    company = Company.query.get(session['company_id'])
+    company = db.session.get(Company, current_user.company_id)
     
     intent_data = db.session.query(
         CallLog.intent,
@@ -781,7 +740,7 @@ def calculate_roi():
 @app.route('/conversation-preview')
 @login_required
 def conversation_preview():
-    company = Company.query.get(session['company_id'])
+    company = db.session.get(Company, current_user.company_id)
     return render_template('conversation_preview.html', company=company)
 
 @app.route('/api/test-conversation', methods=['POST'])
@@ -791,7 +750,7 @@ def test_conversation():
     user_input = data.get('input', '')
     reset = data.get('reset', False)
     
-    company = Company.query.get(session['company_id'])
+    company = db.session.get(Company, current_user.company_id)
     
     company_config = {
         'name': company.name,
@@ -839,7 +798,7 @@ def reset_conversation():
 @app.route('/industry-templates')
 @login_required
 def industry_templates():
-    company = Company.query.get(session['company_id'])
+    company = db.session.get(Company, current_user.company_id)
     
     templates = {
         'ecommerce': {
@@ -897,7 +856,7 @@ def industry_templates():
 @app.route('/apply-template/<template_id>', methods=['POST'])
 @login_required
 def apply_template(template_id):
-    company = Company.query.get(session['company_id'])
+    company = db.session.get(Company, current_user.company_id)
     
     templates = {
         'ecommerce': {
@@ -968,22 +927,22 @@ def privacy():
     return render_template('privacy.html')
 
 @app.route('/demo-script')
-@login_required
+@require_admin
 def demo_script():
-    company = Company.query.get(session['company_id'])
+    company = db.session.get(Company, current_user.company_id)
     return render_template('demo_script.html', company=company)
 
 @app.route('/twilio-setup')
-@login_required
+@require_admin
 def twilio_setup():
-    company = Company.query.get(session['company_id'])
+    company = db.session.get(Company, current_user.company_id)
     replit_url = request.host_url.rstrip('/')
     return render_template('twilio_setup.html', company=company, replit_url=replit_url)
 
 @app.route('/investor-dashboard')
-@login_required
+@require_admin
 def investor_dashboard():
-    company = Company.query.get(session['company_id'])
+    company = db.session.get(Company, current_user.company_id)
     
     total_calls = CallLog.query.filter_by(company_id=company.id).count()
     automated_calls = CallLog.query.filter_by(company_id=company.id, handled_by_ai=True).count()
@@ -998,44 +957,5 @@ def investor_dashboard():
     
     return render_template('investor_dashboard.html', company=company, stats=stats)
 
-def init_db():
-    with app.app_context():
-        db.create_all()
-        
-        demo_company = Company.query.filter_by(name='Demo Company').first()
-        if not demo_company:
-            demo_company = Company(
-                name='Demo Company',
-                phone_number='+15555550100',
-                greeting_message='Thank you for calling Demo Company. Your call is important to us.'
-            )
-            db.session.add(demo_company)
-            db.session.flush()
-            
-            demo_user = User(
-                email='demo@example.com',
-                password_hash=generate_password_hash('demo123'),
-                full_name='Demo User',
-                company_id=demo_company.id,
-                role='admin'
-            )
-            db.session.add(demo_user)
-            
-            demo_integration = Integration(
-                company_id=demo_company.id,
-                provider_type='twilio',
-                provider_name='Twilio Demo',
-                config=json.dumps({
-                    'account_sid': 'DEMO_SID',
-                    'auth_token': 'DEMO_TOKEN',
-                    'phone_number': '+15555550100'
-                })
-            )
-            db.session.add(demo_integration)
-            
-            db.session.commit()
-            print("Demo company created: email=demo@example.com, password=demo123")
-
 if __name__ == '__main__':
-    init_db()
     app.run(host='0.0.0.0', port=5000, debug=True)

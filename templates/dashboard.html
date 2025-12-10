@@ -38,6 +38,7 @@
                 <a href="{{ url_for('onboarding') }}">
                     <i class="bi bi-rocket"></i> Integrations
                 </a>
+                {% if current_user.is_admin %}
                 <hr class="bg-white">
                 <div class="p-3">
                     <h6 class="text-white-50">Investor Tools</h6>
@@ -57,6 +58,7 @@
                 <a href="{{ url_for('roi_calculator') }}">
                     <i class="bi bi-calculator"></i> ROI Calculator
                 </a>
+                {% endif %}
                 <hr class="bg-white">
                 <a href="{{ url_for('logout') }}">
                     <i class="bi bi-box-arrow-right"></i> Logout

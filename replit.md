@@ -7,7 +7,7 @@ This is a multi-tenant SaaS platform designed to automate call centers using AI-
 None specified yet.
 
 ## System Architecture
-The platform is built on Python 3.11 using Flask and Flask-SQLAlchemy, with SQLite as the database (migratable to PostgreSQL). It features a multi-tenant architecture managing companies, users, integrations, call logs, and voicemails.
+The platform is built on Python 3.11 using Flask and Flask-SQLAlchemy, with PostgreSQL database (Neon-backed via Replit). It features a multi-tenant architecture managing companies, users, integrations, call logs, and voicemails.
 
 **UI/UX Decisions:**
 - The frontend utilizes Bootstrap 5, Chart.js, and Vanilla JavaScript.
@@ -35,7 +35,9 @@ The platform is built on Python 3.11 using Flask and Flask-SQLAlchemy, with SQLi
 - **Robust Error Handling:** All webhooks return valid TwiML even on failures to prevent call drops.
 - **Conversation Tracking:** Full dialogue history, confidence scores, and turn counts are stored in the database.
 - **Dynamic Configuration:** Company-specific settings (greeting message, menu options, business hours, escalation numbers) are configurable per tenant.
-- **Authentication:** Uses Werkzeug password hashing and Flask sessions for secure user access.
+- **Authentication:** Uses Replit Auth (OpenID Connect) for secure enterprise login via Google, GitHub, Apple, or email. Flask-Login and Flask-Dance handle session management.
+- **Admin Access Control:** First user to register automatically becomes admin with access to investor tools (demo script, investor dashboard, ROI calculator, Twilio setup). Regular customers only see the standard dashboard.
+- **Call Duration Tracking:** Duration is automatically calculated from call start to completion timestamps.
 
 ## External Dependencies
 - **Telephony Services:** Twilio (SDK integrated), Cisco Webex, generic SIP/VoIP providers.

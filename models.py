@@ -1,8 +1,14 @@
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import DeclarativeBase
 from datetime import datetime
 import json
+from flask_login import UserMixin
 
-db = SQLAlchemy()
+class Base(DeclarativeBase):
+    pass
+
+db = SQLAlchemy(model_class=Base)
+
 
 class Company(db.Model):
     __tablename__ = 'companies'
@@ -18,7 +24,7 @@ class Company(db.Model):
     business_hours = db.Column(db.Text, default='{"monday-friday": "9am-9pm", "saturday-sunday": "10am-6pm"}')
     escalation_number = db.Column(db.String(20), nullable=True)
     
-    users = db.relationship('User', backref='company', lazy=True, cascade='all, delete-orphan')
+    users = db.relationship('User', backref='company', lazy=True)
     integrations = db.relationship('Integration', backref='company', lazy=True, cascade='all, delete-orphan')
     call_logs = db.relationship('CallLog', backref='company', lazy=True, cascade='all, delete-orphan')
     voicemails = db.relationship('Voicemail', backref='company', lazy=True, cascade='all, delete-orphan')
@@ -39,20 +45,52 @@ class Company(db.Model):
         return f'<Company {self.name}>'
 
 
-class User(db.Model):
+class User(UserMixin, db.Model):
     __tablename__ = 'users'
     
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(200), nullable=False)
-    full_name = db.Column(db.String(100), nullable=False)
-    role = db.Column(db.String(20), default='admin')
-    company_id = db.Column(db.Integer, db.ForeignKey('companies.id'), nullable=False)
+    id = db.Column(db.String, primary_key=True)
+    email = db.Column(db.String(120), unique=True, nullable=True)
+    first_name = db.Column(db.String(100), nullable=True)
+    last_name = db.Column(db.String(100), nullable=True)
+    profile_image_url = db.Column(db.String(500), nullable=True)
+    
+    company_id = db.Column(db.Integer, db.ForeignKey('companies.id'), nullable=True)
+    is_admin = db.Column(db.Boolean, default=False)
+    role = db.Column(db.String(20), default='user')
+    
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     is_active = db.Column(db.Boolean, default=True)
+    
+    @property
+    def full_name(self):
+        if self.first_name and self.last_name:
+            return f"{self.first_name} {self.last_name}"
+        elif self.first_name:
+            return self.first_name
+        elif self.email:
+            return self.email.split('@')[0]
+        return "User"
     
     def __repr__(self):
         return f'<User {self.email}>'
+
+
+class OAuth(db.Model):
+    __tablename__ = 'oauth'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.String, db.ForeignKey('users.id'))
+    browser_session_key = db.Column(db.String, nullable=False)
+    provider = db.Column(db.String(50), nullable=False)
+    token = db.Column(db.JSON, nullable=True)
+    
+    user = db.relationship('User')
+    
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'browser_session_key', 'provider', 
+                           name='uq_user_browser_session_provider'),
+    )
 
 
 class Integration(db.Model):
@@ -103,14 +141,12 @@ class CallLog(db.Model):
     escalation_reason = db.Column(db.String(100), nullable=True)
     
     def get_conversation(self):
-        """Get AI conversation history as list of messages"""
         try:
             return json.loads(self.ai_conversation) if self.ai_conversation else []
         except:
             return []
     
     def set_conversation(self, messages):
-        """Store AI conversation history"""
         self.ai_conversation = json.dumps(messages)
     
     def __repr__(self):
