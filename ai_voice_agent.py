@@ -10,26 +10,18 @@ def get_openai_client():
         api_key=os.environ.get('AI_INTEGRATIONS_OPENAI_API_KEY')
     )
 
-SYSTEM_PROMPT = """You are a helpful AI voice assistant for a call center. Your role is to:
-1. Understand customer queries and determine their intent
-2. Provide helpful responses to common questions
-3. Be conversational and friendly
-4. Recognize when you should escalate to a human agent
+SYSTEM_PROMPT = """You are a friendly call center AI. Be brief (1-2 sentences max). Help with orders, hours, and general questions. Escalate refunds, returns, billing issues, or complaints to humans."""
 
-You can help with:
-- Order status inquiries (ask for order number if needed)
-- Store hours and location information
-- General product questions
-- Appointment scheduling
-
-You should escalate to a human when:
-- Customer explicitly asks to speak with someone
-- Refund or return requests
-- Billing disputes or account changes
-- Complaints or sensitive issues
-- You're uncertain how to help (low confidence)
-
-Always be brief and natural in your responses. This is a phone conversation, so keep responses under 2-3 sentences."""
+CACHED_RESPONSES = {
+    'store_hours': "Our store is open Monday through Friday, 9 AM to 5 PM. Is there anything else I can help you with?",
+    'greeting': "Hello! How can I help you today?",
+    'ask_order_number': "I'd be happy to help you track your order! What's your order number?",
+    'order_not_found': "I couldn't find that order in our system. Let me connect you with a team member who can help.",
+    'goodbye': "Thank you for calling! Have a great day. Goodbye!",
+    'escalate': "Of course, let me connect you with a team member who can help you right away.",
+    'anything_else': "Is there anything else I can help you with?",
+    'didnt_catch': "I didn't catch that. Could you please repeat your order number?"
+}
 
 ESCALATION_KEYWORDS = [
     'speak to someone', 'human', 'agent', 'representative', 'manager',
@@ -139,7 +131,7 @@ class AIVoiceAgent:
         self.conversation_state = 'waiting_for_order_number'
         self.current_intent = 'order_status'
         
-        response_text = "I'd be happy to help you track your order! Can you please provide your order number?"
+        response_text = CACHED_RESPONSES['ask_order_number']
         
         self.conversation_history.append({
             'role': 'assistant',
@@ -161,7 +153,7 @@ class AIVoiceAgent:
         
         if not order_num:
             # Couldn't extract order number, ask again
-            response_text = "I didn't catch that order number. Could you please repeat it? It should be a 5-digit number."
+            response_text = CACHED_RESPONSES['didnt_catch']
             
             self.conversation_history.append({
                 'role': 'assistant',
@@ -206,7 +198,7 @@ class AIVoiceAgent:
     
     def _handle_order_not_found(self, order_num):
         """Handle when order number is not found in database"""
-        response_text = f"I couldn't find order {order_num} in our system. Let me connect you with a team member who can help you look into this."
+        response_text = f"I couldn't find order {order_num}. " + CACHED_RESPONSES['order_not_found'].split('. ')[1]
         
         self.conversation_history.append({
             'role': 'assistant',
@@ -232,7 +224,7 @@ class AIVoiceAgent:
         for phrase in GOODBYE_PHRASES:
             if phrase in user_lower:
                 self.conversation_state = 'goodbye'
-                response_text = "Thank you for calling! Have a great day. Goodbye!"
+                response_text = CACHED_RESPONSES['goodbye']
                 
                 self.conversation_history.append({
                     'role': 'assistant',
@@ -252,7 +244,7 @@ class AIVoiceAgent:
         for word in GOODBYE_WORDS:
             if re.search(r'\b' + re.escape(word) + r'\b', user_lower):
                 self.conversation_state = 'goodbye'
-                response_text = "Thank you for calling! Have a great day. Goodbye!"
+                response_text = CACHED_RESPONSES['goodbye']
                 
                 self.conversation_history.append({
                     'role': 'assistant',
@@ -271,7 +263,7 @@ class AIVoiceAgent:
         # Special case: bare "no" ONLY when it's the complete response
         if user_lower in ['no', 'no.', 'no!']:
             self.conversation_state = 'goodbye'
-            response_text = "Thank you for calling! Have a great day. Goodbye!"
+            response_text = CACHED_RESPONSES['goodbye']
             
             self.conversation_history.append({
                 'role': 'assistant',
@@ -301,20 +293,32 @@ class AIVoiceAgent:
     
     def _generate_ai_response(self, user_speech, intent_analysis):
         """Generate AI response using GPT for general queries"""
-        # Build system prompt with company info
+        if intent_analysis['intent'] == 'store_hours':
+            hours = self.company_config.get('business_hours', 'Monday through Friday, 9 AM to 5 PM')
+            response_text = f"Our business hours are {hours}. {CACHED_RESPONSES['anything_else']}"
+            self.conversation_state = 'offering_more_help'
+            self.conversation_history.append({'role': 'assistant', 'content': response_text})
+            return {
+                'response': response_text,
+                'should_escalate': False,
+                'should_end_call': False,
+                'intent': 'store_hours',
+                'confidence': 0.95,
+                'escalation_reason': None
+            }
+        
         system_msg = self._build_system_prompt()
         
-        # Call OpenAI for response
         try:
             client = get_openai_client()
             response = client.chat.completions.create(
                 model='gpt-4o-mini',
                 messages=[
                     {'role': 'system', 'content': system_msg},
-                    *self.conversation_history
+                    *self.conversation_history[-4:]
                 ],
-                temperature=0.7,
-                max_tokens=150
+                temperature=0.5,
+                max_tokens=80
             )
             
             ai_response = response.choices[0].message.content
@@ -379,7 +383,7 @@ Phone: {self.company_config.get('phone_number', '')}
         for keyword in ESCALATION_KEYWORDS:
             if keyword in user_lower:
                 return {
-                    'response': "Of course, let me connect you with a team member who can help you right away.",
+                    'response': CACHED_RESPONSES['escalate'],
                     'should_escalate': True,
                     'should_end_call': False,
                     'intent': 'escalate_requested',
