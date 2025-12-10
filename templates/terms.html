@@ -1,0 +1,297 @@
+{% extends "base.html" %}
+
+{% block title %}Terms of Service - Call Center Automation{% endblock %}
+
+{% block extra_css %}
+<style>
+    .legal-content {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    .legal-content h1 {
+        color: var(--primary-blue);
+        border-bottom: 3px solid var(--primary-blue);
+        padding-bottom: 1rem;
+        margin-bottom: 2rem;
+    }
+    .legal-content h2 {
+        color: var(--primary-dark);
+        margin-top: 2.5rem;
+        margin-bottom: 1rem;
+        font-size: 1.5rem;
+    }
+    .legal-content h3 {
+        color: var(--text-dark);
+        margin-top: 1.5rem;
+        margin-bottom: 0.75rem;
+        font-size: 1.2rem;
+    }
+    .legal-content p, .legal-content li {
+        color: var(--text-muted);
+        line-height: 1.8;
+    }
+    .legal-content ul {
+        margin-bottom: 1rem;
+    }
+    .legal-content .highlight-box {
+        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+        border-left: 4px solid var(--primary-blue);
+        padding: 1.5rem;
+        border-radius: 0 8px 8px 0;
+        margin: 1.5rem 0;
+    }
+    .legal-content .warning-box {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border-left: 4px solid var(--accent-orange);
+        padding: 1.5rem;
+        border-radius: 0 8px 8px 0;
+        margin: 1.5rem 0;
+    }
+    .toc {
+        background: var(--bg-white);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .toc h4 {
+        color: var(--primary-blue);
+        margin-bottom: 1rem;
+    }
+    .toc ul {
+        list-style: none;
+        padding-left: 0;
+    }
+    .toc li {
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    .toc li:last-child {
+        border-bottom: none;
+    }
+    .toc a {
+        color: var(--text-dark);
+        text-decoration: none;
+    }
+    .toc a:hover {
+        color: var(--primary-blue);
+    }
+    .last-updated {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        margin-bottom: 2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="legal-content">
+        <h1><i class="bi bi-file-earmark-text"></i> Terms of Service</h1>
+        <p class="last-updated"><strong>Last Updated:</strong> October 24, 2025 | <strong>Effective Date:</strong> October 24, 2025</p>
+        
+        <div class="toc">
+            <h4><i class="bi bi-list-ul"></i> Table of Contents</h4>
+            <ul>
+                <li><a href="#acceptance">1. Acceptance of Terms</a></li>
+                <li><a href="#services">2. Description of Services</a></li>
+                <li><a href="#account">3. Account Registration</a></li>
+                <li><a href="#ai-disclaimer">4. AI Technology Disclaimer</a></li>
+                <li><a href="#recording-consent">5. Call Recording & Consent</a></li>
+                <li><a href="#acceptable-use">6. Acceptable Use Policy</a></li>
+                <li><a href="#sla">7. Service Level Agreement</a></li>
+                <li><a href="#payment">8. Payment Terms</a></li>
+                <li><a href="#intellectual-property">9. Intellectual Property</a></li>
+                <li><a href="#limitation">10. Limitation of Liability</a></li>
+                <li><a href="#termination">11. Termination</a></li>
+                <li><a href="#changes">12. Changes to Terms</a></li>
+                <li><a href="#contact">13. Contact Information</a></li>
+            </ul>
+        </div>
+
+        <section id="acceptance">
+            <h2>1. Acceptance of Terms</h2>
+            <p>By accessing or using the Call Center Automation Platform ("Service"), you agree to be bound by these Terms of Service ("Terms"). If you are using the Service on behalf of an organization, you represent that you have the authority to bind that organization to these Terms.</p>
+            <p>If you do not agree to these Terms, you may not access or use the Service.</p>
+        </section>
+
+        <section id="services">
+            <h2>2. Description of Services</h2>
+            <p>Call Center Automation Platform provides AI-powered voice automation services for call centers, including:</p>
+            <ul>
+                <li>AI voice agents for automated customer interactions</li>
+                <li>Integration with telephony providers (Twilio, Cisco Webex, SIP/VoIP)</li>
+                <li>Call routing, intent detection, and intelligent escalation</li>
+                <li>Analytics dashboard and performance metrics</li>
+                <li>Voicemail recording and transcription</li>
+                <li>Listen Mode for call pattern analysis</li>
+            </ul>
+            <p>The Service is provided as a multi-tenant SaaS platform with data isolation between customer accounts.</p>
+        </section>
+
+        <section id="account">
+            <h2>3. Account Registration</h2>
+            <h3>3.1 Account Creation</h3>
+            <p>To use the Service, you must create an account providing accurate and complete information. You are responsible for maintaining the confidentiality of your account credentials.</p>
+            
+            <h3>3.2 Account Security</h3>
+            <p>You are responsible for all activities that occur under your account. You must notify us immediately of any unauthorized use of your account.</p>
+            
+            <h3>3.3 Multi-Tenant Architecture</h3>
+            <p>Your data is logically separated from other customers' data. You may only access data associated with your company account.</p>
+        </section>
+
+        <section id="ai-disclaimer">
+            <h2>4. AI Technology Disclaimer</h2>
+            <div class="warning-box">
+                <h3><i class="bi bi-exclamation-triangle"></i> Important AI Limitations</h3>
+                <p><strong>The AI voice agents provided by this Service are decision-support tools and do not guarantee specific outcomes.</strong></p>
+            </div>
+            
+            <h3>4.1 AI Accuracy</h3>
+            <p>While our AI systems are designed to provide accurate and helpful responses, they may occasionally:</p>
+            <ul>
+                <li>Misinterpret customer intent or speech</li>
+                <li>Provide incomplete or inaccurate information</li>
+                <li>Fail to recognize when escalation to a human agent is necessary</li>
+            </ul>
+            
+            <h3>4.2 Human Oversight</h3>
+            <p>You are responsible for configuring appropriate escalation rules and maintaining human oversight of AI-handled interactions. The Service includes intelligent escalation features that automatically transfer calls to human agents for sensitive topics.</p>
+            
+            <h3>4.3 No Guarantee of Results</h3>
+            <p>We do not guarantee specific automation rates, cost savings, or customer satisfaction scores. Results vary based on your configuration, use case, and customer demographics.</p>
+        </section>
+
+        <section id="recording-consent">
+            <h2>5. Call Recording & Consent</h2>
+            <div class="highlight-box">
+                <h3><i class="bi bi-mic"></i> Your Responsibility for Consent</h3>
+                <p><strong>You are solely responsible for obtaining proper consent from callers before recording calls or using AI to process their voice data.</strong></p>
+            </div>
+            
+            <h3>5.1 Legal Compliance</h3>
+            <p>You must comply with all applicable laws regarding call recording, including but not limited to:</p>
+            <ul>
+                <li>Federal and state wiretapping laws</li>
+                <li>One-party or two-party consent requirements</li>
+                <li>Industry-specific regulations (HIPAA, PCI-DSS, etc.)</li>
+            </ul>
+            
+            <h3>5.2 Disclosure Requirements</h3>
+            <p>You must clearly disclose to callers that:</p>
+            <ul>
+                <li>They are interacting with an AI-powered system</li>
+                <li>The call may be recorded for quality and training purposes</li>
+                <li>Their voice data may be processed by AI systems</li>
+            </ul>
+            
+            <h3>5.3 Indemnification</h3>
+            <p>You agree to indemnify and hold us harmless from any claims arising from your failure to obtain proper consent for call recording or AI processing.</p>
+        </section>
+
+        <section id="acceptable-use">
+            <h2>6. Acceptable Use Policy</h2>
+            <h3>6.1 Prohibited Uses</h3>
+            <p>You may not use the Service for:</p>
+            <ul>
+                <li>Spam, robocalling, or unsolicited telemarketing</li>
+                <li>Fraudulent, deceptive, or illegal activities</li>
+                <li>Harassment, abuse, or threatening communications</li>
+                <li>Violating any applicable telecommunications regulations</li>
+                <li>Attempting to bypass security measures or access other customers' data</li>
+                <li>Reverse engineering or extracting source code from the Service</li>
+            </ul>
+            
+            <h3>6.2 Compliance with Regulations</h3>
+            <p>You must comply with all applicable laws, including:</p>
+            <ul>
+                <li>Telephone Consumer Protection Act (TCPA)</li>
+                <li>Telemarketing Sales Rule (TSR)</li>
+                <li>Do Not Call Registry requirements</li>
+                <li>CAN-SPAM Act (for any SMS/email integrations)</li>
+            </ul>
+        </section>
+
+        <section id="sla">
+            <h2>7. Service Level Agreement</h2>
+            <h3>7.1 Uptime Commitment</h3>
+            <p>We strive to maintain 99.9% uptime for the Service, excluding scheduled maintenance windows. Scheduled maintenance will be announced at least 48 hours in advance.</p>
+            
+            <h3>7.2 Support</h3>
+            <p>Technical support is available during business hours (9 AM - 6 PM EST, Monday - Friday). Enterprise customers may have access to extended support options.</p>
+            
+            <h3>7.3 Service Credits</h3>
+            <p>If we fail to meet our uptime commitment, you may be eligible for service credits as specified in your subscription agreement.</p>
+        </section>
+
+        <section id="payment">
+            <h2>8. Payment Terms</h2>
+            <h3>8.1 Subscription Fees</h3>
+            <p>Subscription fees are billed in advance on a monthly or annual basis. Usage-based charges (such as per-minute AI processing) are billed in arrears.</p>
+            
+            <h3>8.2 Late Payment</h3>
+            <p>Failure to pay invoices within 30 days may result in suspension of your account. We may charge interest on overdue amounts at 1.5% per month.</p>
+            
+            <h3>8.3 Refunds</h3>
+            <p>Subscription fees are non-refundable except as required by law. You may cancel your subscription at any time, but no prorated refunds will be provided.</p>
+        </section>
+
+        <section id="intellectual-property">
+            <h2>9. Intellectual Property</h2>
+            <h3>9.1 Our IP</h3>
+            <p>The Service, including all software, AI models, algorithms, and documentation, is our proprietary intellectual property. You receive a limited, non-exclusive license to use the Service during your subscription term.</p>
+            
+            <h3>9.2 Your Data</h3>
+            <p>You retain ownership of all data you upload to or generate through the Service, including call recordings, transcripts, and customer information.</p>
+            
+            <h3>9.3 AI Training</h3>
+            <p>We may use anonymized and aggregated data to improve our AI models. Your identifiable call data will never be used to train models without your explicit consent.</p>
+        </section>
+
+        <section id="limitation">
+            <h2>10. Limitation of Liability</h2>
+            <div class="warning-box">
+                <p>TO THE MAXIMUM EXTENT PERMITTED BY LAW, OUR LIABILITY FOR ANY CLAIMS ARISING FROM YOUR USE OF THE SERVICE IS LIMITED TO THE FEES YOU PAID IN THE 12 MONTHS PRECEDING THE CLAIM.</p>
+            </div>
+            <p>We are not liable for any indirect, incidental, special, consequential, or punitive damages, including lost profits, lost revenue, or loss of business opportunities.</p>
+        </section>
+
+        <section id="termination">
+            <h2>11. Termination</h2>
+            <h3>11.1 Termination by You</h3>
+            <p>You may terminate your account at any time through the dashboard or by contacting support.</p>
+            
+            <h3>11.2 Termination by Us</h3>
+            <p>We may terminate or suspend your account immediately if you violate these Terms or engage in prohibited activities.</p>
+            
+            <h3>11.3 Data Export</h3>
+            <p>Upon termination, you will have 30 days to export your data. After this period, your data will be deleted in accordance with our data retention policy.</p>
+        </section>
+
+        <section id="changes">
+            <h2>12. Changes to Terms</h2>
+            <p>We may update these Terms from time to time. We will notify you of material changes via email or through the Service. Your continued use of the Service after such notice constitutes acceptance of the updated Terms.</p>
+        </section>
+
+        <section id="contact">
+            <h2>13. Contact Information</h2>
+            <p>For questions about these Terms of Service, please contact us:</p>
+            <ul>
+                <li><strong>Email:</strong> legal@callcenterai.com</li>
+                <li><strong>Address:</strong> Call Center Automation Platform, Inc.</li>
+            </ul>
+        </section>
+
+        <div class="text-center mt-5 pt-4 border-top">
+            <p class="text-muted">By using our Service, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service.</p>
+            <a href="{{ url_for('privacy') }}" class="btn btn-outline-primary me-2">
+                <i class="bi bi-shield-lock"></i> Privacy Policy
+            </a>
+            <a href="{{ url_for('index') }}" class="btn btn-primary">
+                <i class="bi bi-house"></i> Back to Home
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

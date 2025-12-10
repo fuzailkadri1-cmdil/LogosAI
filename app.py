@@ -931,6 +931,14 @@ def apply_template(template_id):
 def pricing():
     return render_template('pricing.html')
 
+@app.route('/terms')
+def terms():
+    return render_template('terms.html')
+
+@app.route('/privacy')
+def privacy():
+    return render_template('privacy.html')
+
 @app.route('/demo-script')
 @login_required
 def demo_script():
