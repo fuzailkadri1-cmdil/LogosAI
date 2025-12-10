@@ -10,17 +10,17 @@ def get_openai_client():
         api_key=os.environ.get('AI_INTEGRATIONS_OPENAI_API_KEY')
     )
 
-SYSTEM_PROMPT = """You are a friendly call center AI. Be brief (1-2 sentences max). Help with orders, hours, and general questions. Escalate refunds, returns, billing issues, or complaints to humans."""
+SYSTEM_PROMPT = """You're a warm, helpful customer service assistant. Speak naturally like a real person - use contractions (I'm, you're, we'll), vary your sentence length, and sound genuinely friendly. Keep responses brief (1-2 sentences). You can help with orders, store hours, and general questions. For refunds, returns, billing, or complaints, warmly offer to connect the caller with a team member."""
 
 CACHED_RESPONSES = {
-    'store_hours': "Our store is open Monday through Friday, 9 AM to 5 PM. Is there anything else I can help you with?",
-    'greeting': "Hello! How can I help you today?",
-    'ask_order_number': "I'd be happy to help you track your order! What's your order number?",
-    'order_not_found': "I couldn't find that order in our system. Let me connect you with a team member who can help.",
-    'goodbye': "Thank you for calling! Have a great day. Goodbye!",
-    'escalate': "Of course, let me connect you with a team member who can help you right away.",
-    'anything_else': "Is there anything else I can help you with?",
-    'didnt_catch': "I didn't catch that. Could you please repeat your order number?"
+    'store_hours': "We're open Monday through Friday, 9 to 5! Anything else I can help with?",
+    'greeting': "Hi there! What can I help you with today?",
+    'ask_order_number': "Sure thing! What's your order number?",
+    'order_not_found': "Hmm, I'm not finding that one. Let me get you to someone who can dig a bit deeper.",
+    'goodbye': "Thanks so much for calling! Take care!",
+    'escalate': "Absolutely, let me get you to someone who can help with that right away.",
+    'anything_else': "Anything else I can help with?",
+    'didnt_catch': "Sorry, I didn't quite catch that. What was your order number again?"
 }
 
 ESCALATION_KEYWORDS = [
@@ -108,7 +108,7 @@ class AIVoiceAgent:
                 self.conversation_state = 'offering_more_help'
                 self.order_data = order_data
                 
-                response_text = f"{status_response} Is there anything else I can help you with?"
+                response_text = f"{status_response} Anything else I can help with?"
                 
                 self.conversation_history.append({
                     'role': 'assistant',
@@ -192,7 +192,7 @@ class AIVoiceAgent:
         self.conversation_state = 'offering_more_help'
         self.order_data = order_data
         
-        response_text = f"{status_response} Is there anything else I can help you with?"
+        response_text = f"{status_response} Anything else I can help with?"
         
         self.conversation_history.append({
             'role': 'assistant',
@@ -340,7 +340,7 @@ class AIVoiceAgent:
             
             if should_offer_help:
                 self.conversation_state = 'offering_more_help'
-                ai_response += " Is there anything else I can help you with?"
+                ai_response += " " + CACHED_RESPONSES['anything_else']
             
             # Add AI response to history
             self.conversation_history.append({
