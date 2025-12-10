@@ -1,7 +1,7 @@
 import os
 import json
 from openai import OpenAI
-from orders_db import lookup_order, format_order_status, extract_order_number_from_speech
+from orders_db import lookup_order, format_order_status, extract_order_number_from_speech, normalize_spoken_numbers
 
 def get_openai_client():
     """Initialize OpenAI client with Replit AI Integrations"""
@@ -149,7 +149,19 @@ class AIVoiceAgent:
     
     def _handle_order_number_response(self, user_speech):
         """Handle user providing their order number"""
+        import re
+        
+        # First try standard extraction
         order_num = extract_order_number_from_speech(user_speech)
+        
+        # If that fails, accept bare digits since we're already waiting for an order number
+        if not order_num:
+            # Normalize spoken numbers first
+            normalized = normalize_spoken_numbers(user_speech)
+            # Accept standalone digits (1-9) or multi-digit numbers
+            bare_match = re.match(r'^\s*(\d+)\s*$', normalized)
+            if bare_match:
+                order_num = bare_match.group(1)
         
         if not order_num:
             # Couldn't extract order number, ask again
