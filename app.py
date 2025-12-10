@@ -789,24 +789,52 @@ def conversation_preview():
 def test_conversation():
     data = request.get_json()
     user_input = data.get('input', '')
+    reset = data.get('reset', False)
     
     company = Company.query.get(session['company_id'])
-    engine = CallFlowEngine(company)
     
-    intent = engine.determine_intent(user_input, None)
+    company_config = {
+        'name': company.name,
+        'business_hours': company.business_hours or 'Monday-Friday 9am-5pm',
+        'phone_number': company.phone_number or ''
+    }
     
-    context = {}
-    if intent == 'OrderStatus':
-        order_number = engine.extract_order_number(user_input)
-        context['order_number'] = order_number
+    agent = AIVoiceAgent(company_config)
     
-    response_message = IntentRouter.route_intent(engine, intent, context)
+    if not reset and 'conv_state' in session:
+        agent.conversation_state = session['conv_state']
+        agent.conversation_history = session.get('conv_history', [])
+        agent.current_intent = session.get('conv_intent')
+    
+    result = agent.process_speech(user_input)
+    
+    if result.get('should_end_call'):
+        session.pop('conv_state', None)
+        session.pop('conv_history', None)
+        session.pop('conv_intent', None)
+        conv_state = 'ended'
+    else:
+        session['conv_state'] = agent.conversation_state
+        session['conv_history'] = agent.conversation_history[-10:]
+        session['conv_intent'] = agent.current_intent
+        conv_state = agent.conversation_state
     
     return jsonify({
-        'intent': intent,
-        'response': response_message,
-        'confidence': 85 if intent != 'Unknown' else 20
+        'intent': result.get('intent', 'Unknown'),
+        'response': result.get('response', ''),
+        'confidence': int(result.get('confidence', 0.5) * 100),
+        'should_escalate': result.get('should_escalate', False),
+        'should_end_call': result.get('should_end_call', False),
+        'conversation_state': conv_state
     })
+
+@app.route('/api/reset-conversation', methods=['POST'])
+@login_required
+def reset_conversation():
+    session.pop('conv_state', None)
+    session.pop('conv_history', None)
+    session.pop('conv_intent', None)
+    return jsonify({'status': 'reset', 'message': 'Conversation reset. Start a new conversation.'})
 
 @app.route('/industry-templates')
 @login_required
