@@ -29,6 +29,7 @@ The platform is built on Python 3.11 using Flask and Flask-SQLAlchemy, with SQLi
 - **Onboarding Wizard:** A Bootstrap-styled interface guides setup of telephony providers.
 - **Call Simulation Endpoint:** Allows testing without requiring live phone calls.
 - **Investor-Ready Tools:** Includes a professional pricing page, a comprehensive demo script, a Twilio setup guide, and an investor dashboard with market metrics and competitive analysis.
+- **Legal Documentation:** Professional Terms of Service (`/terms`) and Privacy Policy (`/privacy`) pages covering AI disclaimers, call recording consent, GDPR/CCPA compliance, data retention policies, and security measures. Footer links on all pages.
 
 **System Design Choices:**
 - **Robust Error Handling:** All webhooks return valid TwiML even on failures to prevent call drops.
