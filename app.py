@@ -1,5 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify, flash
-from models import db, Company, User, Integration, CallLog, Voicemail
+from models import db, Company, User, Integration, CallLog, Voicemail, PilotCustomer, PilotOrder
+import csv
+import io
 from providers import get_provider
 from call_engine import CallFlowEngine, IntentRouter
 from ai_voice_agent import AIVoiceAgent
@@ -385,6 +387,18 @@ def voice_ai_conversation():
             error_response.hangup()
             return str(error_response), 200, {'Content-Type': 'text/xml'}
         
+        pilot = PilotCustomer.query.filter_by(twilio_number=to_number, status='active').first()
+        if not pilot:
+            clean_to = to_number.replace('+', '').replace('-', '').replace(' ', '')
+            for p in PilotCustomer.query.filter_by(company_id=company.id, status='active').all():
+                if p.twilio_number:
+                    clean_pilot = p.twilio_number.replace('+', '').replace('-', '').replace(' ', '')
+                    if clean_pilot in clean_to or clean_to in clean_pilot:
+                        pilot = p
+                        break
+        
+        pilot_id = pilot.id if pilot else None
+        
         integration = Integration.query.filter_by(company_id=company.id, is_active=True).first()
         provider_type = integration.provider_type if integration else 'twilio'
         provider_config = integration.get_config() if integration else None
@@ -395,6 +409,9 @@ def voice_ai_conversation():
         if not call_log:
             engine = CallFlowEngine(company)
             call_log = engine.log_call(from_number, call_sid, None, 'in_progress')
+            if pilot_id:
+                call_log.pilot_id = pilot_id
+                db.session.commit()
         
         session_key = f'ai_agent_{call_sid}'
         if session_key not in session:
@@ -403,10 +420,11 @@ def voice_ai_conversation():
                 'business_hours': company.get_business_hours(),
                 'phone_number': company.phone_number
             }
-            ai_agent = AIVoiceAgent(company_config)
+            ai_agent = AIVoiceAgent(company_config, pilot_id=pilot_id)
             session[session_key] = {
                 'conversation_history': [],
-                'turn_count': 0
+                'turn_count': 0,
+                'pilot_id': pilot_id
             }
         else:
             company_config = {
@@ -414,7 +432,7 @@ def voice_ai_conversation():
                 'business_hours': company.get_business_hours(),
                 'phone_number': company.phone_number
             }
-            ai_agent = AIVoiceAgent(company_config)
+            ai_agent = AIVoiceAgent(company_config, pilot_id=session[session_key].get('pilot_id'))
             ai_agent.conversation_history = session[session_key]['conversation_history']
         
         if not speech_result or speech_result.strip() == '':
@@ -966,6 +984,114 @@ def investor_dashboard():
     }
     
     return render_template('investor_dashboard.html', company=company, stats=stats)
+
+@app.route('/pilots')
+@require_admin
+def pilots():
+    company = db.session.get(Company, current_user.company_id)
+    pilot_list = PilotCustomer.query.filter_by(company_id=company.id).order_by(PilotCustomer.created_at.desc()).all()
+    
+    total_orders = sum(len(p.orders) for p in pilot_list)
+    
+    call_counts = {}
+    total_calls = 0
+    for pilot in pilot_list:
+        count = CallLog.query.filter_by(pilot_id=pilot.id).count()
+        call_counts[pilot.id] = count
+        total_calls += count
+    
+    return render_template('pilots.html', company=company, pilots=pilot_list, 
+                          total_orders=total_orders, total_calls=total_calls, call_counts=call_counts)
+
+@app.route('/pilots/add', methods=['POST'])
+@require_admin
+def add_pilot():
+    company = db.session.get(Company, current_user.company_id)
+    
+    pilot = PilotCustomer(
+        company_id=company.id,
+        name=request.form.get('name'),
+        industry=request.form.get('industry'),
+        contact_email=request.form.get('contact_email'),
+        contact_phone=request.form.get('contact_phone'),
+        twilio_number=request.form.get('twilio_number'),
+        notes=request.form.get('notes')
+    )
+    
+    db.session.add(pilot)
+    db.session.commit()
+    
+    flash(f'Pilot customer "{pilot.name}" added successfully!', 'success')
+    return redirect(url_for('pilots'))
+
+@app.route('/pilots/<int:pilot_id>/upload', methods=['POST'])
+@require_admin
+def upload_pilot_orders(pilot_id):
+    pilot = PilotCustomer.query.get_or_404(pilot_id)
+    
+    if 'csv_file' not in request.files:
+        flash('No file uploaded', 'error')
+        return redirect(url_for('pilots'))
+    
+    file = request.files['csv_file']
+    if file.filename == '':
+        flash('No file selected', 'error')
+        return redirect(url_for('pilots'))
+    
+    try:
+        stream = io.StringIO(file.stream.read().decode('UTF-8'))
+        reader = csv.DictReader(stream)
+        
+        orders_added = 0
+        for row in reader:
+            order = PilotOrder(
+                pilot_id=pilot.id,
+                order_id=row.get('order_id', '').strip(),
+                customer_name=row.get('customer_name', '').strip(),
+                status=row.get('status', 'processing').strip(),
+                tracking_number=row.get('tracking_number', '').strip(),
+                estimated_delivery=row.get('estimated_delivery', '').strip(),
+                delivery_address=row.get('delivery_address', '').strip(),
+                order_total=row.get('order_total', '').strip()
+            )
+            db.session.add(order)
+            orders_added += 1
+        
+        db.session.commit()
+        flash(f'Successfully uploaded {orders_added} orders for {pilot.name}', 'success')
+    except Exception as e:
+        flash(f'Error processing CSV: {str(e)}', 'error')
+    
+    return redirect(url_for('pilots'))
+
+@app.route('/pilots/<int:pilot_id>/results')
+@require_admin
+def pilot_results(pilot_id):
+    company = db.session.get(Company, current_user.company_id)
+    pilot = PilotCustomer.query.get_or_404(pilot_id)
+    
+    calls = CallLog.query.filter_by(pilot_id=pilot.id).order_by(CallLog.created_at.desc()).all()
+    
+    total_calls = len(calls)
+    ai_handled = sum(1 for c in calls if c.handled_by_ai)
+    escalated = total_calls - ai_handled
+    automation_rate = round((ai_handled / total_calls * 100), 1) if total_calls > 0 else 0
+    
+    confidences = [c.ai_confidence for c in calls if c.ai_confidence]
+    avg_confidence = round((sum(confidences) / len(confidences) * 100), 1) if confidences else 0
+    
+    turns = [c.conversation_turns for c in calls if c.conversation_turns]
+    avg_turns = round(sum(turns) / len(turns), 1) if turns else 0
+    
+    intent_distribution = {}
+    for call in calls:
+        intent = call.intent or 'Unknown'
+        intent_distribution[intent] = intent_distribution.get(intent, 0) + 1
+    
+    return render_template('pilot_results.html', company=company, pilot=pilot, calls=calls,
+                          total_calls=total_calls, ai_handled=ai_handled, escalated=escalated,
+                          automation_rate=automation_rate, avg_confidence=avg_confidence,
+                          avg_turns=avg_turns, intent_distribution=intent_distribution)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

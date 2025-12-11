@@ -28,6 +28,7 @@ class Company(db.Model):
     integrations = db.relationship('Integration', backref='company', lazy=True, cascade='all, delete-orphan')
     call_logs = db.relationship('CallLog', backref='company', lazy=True, cascade='all, delete-orphan')
     voicemails = db.relationship('Voicemail', backref='company', lazy=True, cascade='all, delete-orphan')
+    pilot_customers = db.relationship('PilotCustomer', backref='company', lazy=True, cascade='all, delete-orphan')
     
     def get_menu_options(self):
         try:
@@ -139,6 +140,7 @@ class CallLog(db.Model):
     ai_confidence = db.Column(db.Float, nullable=True)
     conversation_turns = db.Column(db.Integer, default=0)
     escalation_reason = db.Column(db.String(100), nullable=True)
+    pilot_id = db.Column(db.Integer, db.ForeignKey('pilot_customers.id'), nullable=True)
     
     def get_conversation(self):
         try:
@@ -168,3 +170,43 @@ class Voicemail(db.Model):
     
     def __repr__(self):
         return f'<Voicemail {self.id} from {self.caller_phone}>'
+
+
+class PilotCustomer(db.Model):
+    __tablename__ = 'pilot_customers'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    company_id = db.Column(db.Integer, db.ForeignKey('companies.id'), nullable=False)
+    name = db.Column(db.String(200), nullable=False)
+    industry = db.Column(db.String(100), nullable=True)
+    contact_email = db.Column(db.String(200), nullable=True)
+    contact_phone = db.Column(db.String(20), nullable=True)
+    twilio_number = db.Column(db.String(20), nullable=True)
+    start_date = db.Column(db.DateTime, default=datetime.utcnow)
+    end_date = db.Column(db.DateTime, nullable=True)
+    status = db.Column(db.String(20), default='active')
+    notes = db.Column(db.Text, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    orders = db.relationship('PilotOrder', backref='pilot', lazy=True, cascade='all, delete-orphan')
+    
+    def __repr__(self):
+        return f'<PilotCustomer {self.name}>'
+
+
+class PilotOrder(db.Model):
+    __tablename__ = 'pilot_orders'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    pilot_id = db.Column(db.Integer, db.ForeignKey('pilot_customers.id'), nullable=False)
+    order_id = db.Column(db.String(100), nullable=False)
+    customer_name = db.Column(db.String(200), nullable=True)
+    status = db.Column(db.String(50), default='processing')
+    tracking_number = db.Column(db.String(100), nullable=True)
+    estimated_delivery = db.Column(db.String(100), nullable=True)
+    delivery_address = db.Column(db.Text, nullable=True)
+    order_total = db.Column(db.String(50), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def __repr__(self):
+        return f'<PilotOrder {self.order_id} for Pilot {self.pilot_id}>'

@@ -1,0 +1,274 @@
+{% extends "base.html" %}
+
+{% block title %}Pilot Results - {{ pilot.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="sidebar">
+                <div class="p-3">
+                    <h6 class="text-white-50">{{ company.name }}</h6>
+                    <hr class="bg-white">
+                </div>
+                <a href="{{ url_for('dashboard') }}">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+                <a href="{{ url_for('pilots') }}">
+                    <i class="bi bi-people"></i> Pilot Customers
+                </a>
+                {% if current_user.is_admin %}
+                <hr class="bg-white">
+                <div class="p-3">
+                    <h6 class="text-white-50">Investor Tools</h6>
+                </div>
+                <a href="{{ url_for('roadmap') }}">
+                    <i class="bi bi-map"></i> Product Roadmap
+                </a>
+                <a href="{{ url_for('investor_dashboard') }}">
+                    <i class="bi bi-graph-up-arrow"></i> Investor Metrics
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2><i class="bi bi-graph-up"></i> Pilot Results: {{ pilot.name }}</h2>
+                    <p class="lead text-muted mb-0">{{ pilot.industry or 'Industry not specified' }} | Started {{ pilot.start_date.strftime('%B %d, %Y') }}</p>
+                </div>
+                <div>
+                    <button class="btn btn-outline-primary" onclick="window.print()">
+                        <i class="bi bi-printer"></i> Print for Investors
+                    </button>
+                    <a href="{{ url_for('pilots') }}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Back
+                    </a>
+                </div>
+            </div>
+
+            <div class="card mb-4" style="border: 2px solid #1e40af;">
+                <div class="card-header" style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); color: white;">
+                    <h4 class="mb-0"><i class="bi bi-bar-chart"></i> Key Metrics</h4>
+                    <small>Investor-Ready Summary</small>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <div class="p-3 bg-light rounded">
+                                <h2 class="text-primary mb-0">{{ total_calls }}</h2>
+                                <p class="mb-0">Total Calls</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-3 bg-light rounded">
+                                <h2 class="text-success mb-0">{{ automation_rate }}%</h2>
+                                <p class="mb-0">Automation Rate</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-3 bg-light rounded">
+                                <h2 class="text-info mb-0">{{ avg_confidence }}%</h2>
+                                <p class="mb-0">Avg AI Confidence</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-3 bg-light rounded">
+                                <h2 class="text-warning mb-0">{{ avg_turns }}</h2>
+                                <p class="mb-0">Avg Conversation Turns</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-pie-chart"></i> Intent Distribution</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if intent_distribution %}
+                            <canvas id="intentChart"></canvas>
+                            {% else %}
+                            <p class="text-muted text-center">No call data yet</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-robot"></i> AI Performance</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="automationChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-cash-stack"></i> Estimated Cost Savings</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <p class="text-muted mb-1">Traditional Cost (@ $1.25/call)</p>
+                            <h3 class="text-danger">${{ "%.2f"|format(total_calls * 1.25) }}</h3>
+                        </div>
+                        <div class="col-md-4">
+                            <p class="text-muted mb-1">AI Cost (@ $0.25/call)</p>
+                            <h3 class="text-success">${{ "%.2f"|format(total_calls * 0.25) }}</h3>
+                        </div>
+                        <div class="col-md-4">
+                            <p class="text-muted mb-1">Projected Savings</p>
+                            <h3 class="text-primary">${{ "%.2f"|format(total_calls * 1.00) }}</h3>
+                            <small class="text-muted">({{ ((1 - 0.25/1.25) * 100)|round|int }}% reduction)</small>
+                        </div>
+                    </div>
+                    <div class="alert alert-info mt-3 mb-0">
+                        <i class="bi bi-info-circle"></i> <strong>Note:</strong> These are projected savings based on industry benchmarks. Actual costs vary by call duration and complexity.
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-telephone"></i> Recent Calls</h5>
+                    <span class="badge bg-primary">{{ calls|length }} calls</span>
+                </div>
+                <div class="card-body">
+                    {% if calls %}
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Intent</th>
+                                    <th>Outcome</th>
+                                    <th>AI Confidence</th>
+                                    <th>Turns</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for call in calls[:10] %}
+                                <tr>
+                                    <td>{{ call.created_at.strftime('%b %d, %H:%M') }}</td>
+                                    <td><span class="badge bg-info">{{ call.intent or 'Unknown' }}</span></td>
+                                    <td>
+                                        {% if call.handled_by_ai %}
+                                        <span class="badge bg-success">AI Resolved</span>
+                                        {% else %}
+                                        <span class="badge bg-warning">Escalated</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ (call.ai_confidence * 100)|round|int if call.ai_confidence else 'N/A' }}%</td>
+                                    <td>{{ call.conversation_turns or 0 }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% if calls|length > 10 %}
+                    <small class="text-muted">Showing 10 of {{ calls|length }} calls</small>
+                    {% endif %}
+                    {% else %}
+                    <p class="text-muted text-center mb-0">No calls recorded for this pilot yet</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-box"></i> Order Database</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>{{ pilot.orders|length }}</strong> orders loaded for this pilot</p>
+                    {% if pilot.orders %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Customer</th>
+                                    <th>Status</th>
+                                    <th>Tracking</th>
+                                    <th>Est. Delivery</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in pilot.orders[:5] %}
+                                <tr>
+                                    <td>{{ order.order_id }}</td>
+                                    <td>{{ order.customer_name or 'N/A' }}</td>
+                                    <td><span class="badge bg-info">{{ order.status }}</span></td>
+                                    <td>{{ order.tracking_number or 'N/A' }}</td>
+                                    <td>{{ order.estimated_delivery or 'N/A' }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+{% if intent_distribution %}
+const intentCtx = document.getElementById('intentChart').getContext('2d');
+new Chart(intentCtx, {
+    type: 'doughnut',
+    data: {
+        labels: {{ intent_distribution.keys()|list|tojson }},
+        datasets: [{
+            data: {{ intent_distribution.values()|list|tojson }},
+            backgroundColor: ['#0d6efd', '#198754', '#ffc107', '#dc3545', '#6c757d']
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+{% endif %}
+
+const automationCtx = document.getElementById('automationChart').getContext('2d');
+new Chart(automationCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['AI Handled', 'Escalated'],
+        datasets: [{
+            data: [{{ ai_handled }}, {{ escalated }}],
+            backgroundColor: ['#198754', '#ffc107']
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+</script>
+
+<style>
+@media print {
+    .sidebar, .btn, .no-print { display: none !important; }
+    .col-md-9 { width: 100% !important; }
+}
+</style>
+{% endblock %}

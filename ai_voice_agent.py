@@ -46,13 +46,59 @@ SENSITIVE_INTENTS = ['refund', 'return', 'cancel_order', 'billing_issue', 'compl
 
 
 class AIVoiceAgent:
-    def __init__(self, company_config):
+    def __init__(self, company_config, pilot_id=None):
         """Initialize AI agent with company-specific configuration"""
         self.company_config = company_config
+        self.pilot_id = pilot_id
         self.conversation_history = []
         self.conversation_state = 'initial'  # initial, waiting_for_order_number, order_resolved, offering_more_help, goodbye
         self.current_intent = None
         self.order_data = None
+    
+    def _lookup_pilot_order(self, order_num):
+        """Look up order from pilot's order database"""
+        if not self.pilot_id:
+            return None
+        try:
+            from models import PilotOrder
+            order = PilotOrder.query.filter_by(pilot_id=self.pilot_id, order_id=order_num).first()
+            if order:
+                status_map = {
+                    'processing': 'being prepared for shipment',
+                    'shipped': 'shipped and on the way',
+                    'out_for_delivery': 'out for delivery',
+                    'delivered': 'delivered',
+                    'cancelled': 'cancelled'
+                }
+                total = 0
+                if order.order_total:
+                    try:
+                        clean_total = order.order_total.replace('$', '').replace(',', '').strip()
+                        total = float(clean_total) if clean_total else 0
+                    except (ValueError, AttributeError):
+                        total = 0
+                return {
+                    'order_number': order.order_id,
+                    'status': order.status.lower() if order.status else 'processing',
+                    'status_text': status_map.get(order.status.lower() if order.status else 'processing', order.status or 'being processed'),
+                    'delivery_date': order.estimated_delivery or 'soon',
+                    'delivery_time': '',
+                    'delivery_address': order.delivery_address or '',
+                    'tracking_number': order.tracking_number,
+                    'items': [],
+                    'total': total,
+                    'customer_name': order.customer_name
+                }
+        except Exception as e:
+            print(f"Error looking up pilot order: {e}")
+        return None
+    
+    def _smart_lookup_order(self, order_num):
+        """Look up order from pilot database first, then fall back to demo database"""
+        pilot_order = self._lookup_pilot_order(order_num)
+        if pilot_order:
+            return pilot_order
+        return lookup_order(order_num)
         
     def process_speech(self, user_speech, context=None):
         """
@@ -102,7 +148,7 @@ class AIVoiceAgent:
         
         if order_num:
             # User provided order number in initial query
-            order_data = lookup_order(order_num)
+            order_data = self._smart_lookup_order(order_num)
             if order_data:
                 status_response = format_order_status(order_data)
                 self.conversation_state = 'offering_more_help'
@@ -182,7 +228,7 @@ class AIVoiceAgent:
             }
         
         # Look up order
-        order_data = lookup_order(order_num)
+        order_data = self._smart_lookup_order(order_num)
         
         if not order_data:
             return self._handle_order_not_found(order_num)
