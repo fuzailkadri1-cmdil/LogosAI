@@ -1,0 +1,314 @@
+{% extends "base.html" %}
+
+{% block title %}Product Roadmap - {{ company.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="sidebar">
+                <div class="p-3">
+                    <h6 class="text-white-50">{{ company.name }}</h6>
+                    <hr class="bg-white">
+                </div>
+                <a href="{{ url_for('dashboard') }}">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+                <a href="{{ url_for('listen_mode') }}">
+                    <i class="bi bi-ear"></i> Listen Mode
+                </a>
+                <a href="{{ url_for('calls') }}">
+                    <i class="bi bi-telephone"></i> Call Logs
+                </a>
+                <a href="{{ url_for('settings') }}">
+                    <i class="bi bi-gear"></i> Settings
+                </a>
+                {% if current_user.is_admin %}
+                <hr class="bg-white">
+                <div class="p-3">
+                    <h6 class="text-white-50">Investor Tools</h6>
+                </div>
+                <a href="{{ url_for('roadmap') }}" class="active">
+                    <i class="bi bi-map"></i> Product Roadmap
+                </a>
+                <a href="{{ url_for('investor_dashboard') }}">
+                    <i class="bi bi-graph-up-arrow"></i> Investor Metrics
+                </a>
+                <a href="{{ url_for('demo_script') }}">
+                    <i class="bi bi-mic"></i> Demo Script
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2><i class="bi bi-map"></i> Product Roadmap</h2>
+                    <p class="lead text-muted mb-0">What's built, what's next, and where we're going</p>
+                </div>
+                <button class="btn btn-outline-primary" onclick="window.print()">
+                    <i class="bi bi-printer"></i> Print for Investors
+                </button>
+            </div>
+            
+            <div class="alert alert-primary mb-4">
+                <i class="bi bi-info-circle"></i>
+                <strong>For Investors:</strong> This roadmap shows our current MVP capabilities and the clear path to our full platform vision. Each phase builds on the previous, with estimated delivery timelines.
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card text-center h-100" style="border-top: 4px solid #28a745;">
+                        <div class="card-body">
+                            <h1 class="display-4 text-success">{{ phase1_count }}</h1>
+                            <p class="mb-0"><strong>Features Built</strong></p>
+                            <small class="text-muted">Phase 1 Complete</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center h-100" style="border-top: 4px solid #ffc107;">
+                        <div class="card-body">
+                            <h1 class="display-4 text-warning">{{ phase2_count }}</h1>
+                            <p class="mb-0"><strong>Q1 Priority</strong></p>
+                            <small class="text-muted">Phase 2 In Progress</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center h-100" style="border-top: 4px solid #007bff;">
+                        <div class="card-body">
+                            <h1 class="display-4 text-primary">{{ phase3_count }}</h1>
+                            <p class="mb-0"><strong>Full Platform</strong></p>
+                            <small class="text-muted">Phase 3 Planned</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4" style="border-left: 5px solid #28a745;">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="bi bi-check-circle-fill"></i> Phase 1: MVP Complete</h4>
+                    <small>Live and Demo-Ready Today</small>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Core platform capabilities that are fully functional and can be demonstrated live.</p>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-success"><i class="bi bi-robot"></i> AI Voice Agent</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-check text-success"></i> Natural language understanding (GPT-4o-mini)</li>
+                                <li><i class="bi bi-check text-success"></i> Multi-turn conversations with state tracking</li>
+                                <li><i class="bi bi-check text-success"></i> 4 core intents (OrderStatus, StoreHours, Escalation, Voicemail)</li>
+                                <li><i class="bi bi-check text-success"></i> Intelligent escalation to human agents</li>
+                                <li><i class="bi bi-check text-success"></i> Order lookup with demo database</li>
+                            </ul>
+                            
+                            <h6 class="text-success mt-3"><i class="bi bi-telephone"></i> Telephony Integration</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-check text-success"></i> Twilio full integration (webhooks, TwiML)</li>
+                                <li><i class="bi bi-check text-success"></i> Speech recognition with number normalization</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-success"><i class="bi bi-speedometer2"></i> Dashboard & Analytics</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-check text-success"></i> Real-time call metrics</li>
+                                <li><i class="bi bi-check text-success"></i> AI confidence tracking</li>
+                                <li><i class="bi bi-check text-success"></i> Intent distribution charts (Chart.js)</li>
+                                <li><i class="bi bi-check text-success"></i> Daily call volume trends</li>
+                            </ul>
+                            
+                            <h6 class="text-success mt-3"><i class="bi bi-ear"></i> Listen Mode</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-check text-success"></i> Call transcript viewing</li>
+                                <li><i class="bi bi-check text-success"></i> Automation recommendations display</li>
+                            </ul>
+                            
+                            <h6 class="text-success mt-3"><i class="bi bi-lightning"></i> Quick Setup</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-check text-success"></i> Industry templates (Healthcare, eCommerce, etc.)</li>
+                                <li><i class="bi bi-check text-success"></i> One-click template application</li>
+                                <li><i class="bi bi-check text-success"></i> Voicemail recording system</li>
+                                <li><i class="bi bi-check text-success"></i> Conversation preview tester</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4" style="border-left: 5px solid #ffc107;">
+                <div class="card-header bg-warning">
+                    <h4 class="mb-0"><i class="bi bi-clock-history"></i> Phase 2: Q1 Priority</h4>
+                    <small>Next 8-12 Weeks | Estimates are illustrative</small>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">These integrations unlock the largest SMB markets (eCommerce, appointment-based businesses, subscription services).</p>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-cart"></i> E-Commerce Integrations</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-circle text-warning"></i> <strong>Shopify</strong> - Order lookup, status, tracking</li>
+                                <li><i class="bi bi-circle text-warning"></i> <strong>WooCommerce</strong> - Order management</li>
+                                <li><i class="bi bi-circle text-warning"></i> <strong>ShipStation/Shippo</strong> - Shipping updates</li>
+                            </ul>
+                            
+                            <h6 class="mt-3"><i class="bi bi-calendar"></i> Scheduling Integrations</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-circle text-warning"></i> <strong>Calendly</strong> - Book/reschedule appointments</li>
+                                <li><i class="bi bi-circle text-warning"></i> <strong>Google Calendar</strong> - Availability check</li>
+                                <li><i class="bi bi-circle text-warning"></i> <strong>Square Appointments</strong> - Booking integration</li>
+                            </ul>
+                            
+                            <h6 class="mt-3"><i class="bi bi-telephone"></i> Additional Telephony</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-circle text-warning"></i> <strong>Cisco Webex</strong> - Full webhook integration</li>
+                                <li><i class="bi bi-circle text-warning"></i> <strong>Generic SIP/VoIP</strong> - Protocol support</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-credit-card"></i> Payment & Subscriptions</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-circle text-warning"></i> <strong>Stripe</strong> - Payment processing, billing portal</li>
+                                <li><i class="bi bi-circle text-warning"></i> <strong>Recharge</strong> - Subscription management</li>
+                            </ul>
+                            
+                            <h6 class="mt-3"><i class="bi bi-sliders"></i> Listen Mode Enhancements</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-circle text-warning"></i> Intent automation toggle switches</li>
+                                <li><i class="bi bi-circle text-warning"></i> Custom intent training</li>
+                                <li><i class="bi bi-circle text-warning"></i> A/B testing for responses</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-light mt-3">
+                        <strong>Impact:</strong> These integrations unlock ~60% of the SMB market (eCommerce + appointment-based businesses). Shopify alone covers 40% of SMB eCommerce.
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4" style="border-left: 5px solid #007bff;">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="bi bi-rocket-takeoff"></i> Phase 3: Full Platform</h4>
+                    <small>6-12 Months | Series A Development</small>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">The complete vision: 200+ automations, enterprise integrations, and advanced AI capabilities.</p>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-diagram-3"></i> Enterprise CRM Integrations</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-circle text-primary"></i> <strong>Salesforce</strong> - Full CRM integration</li>
+                                <li><i class="bi bi-circle text-primary"></i> <strong>HubSpot</strong> - Contact & deal management</li>
+                                <li><i class="bi bi-circle text-primary"></i> <strong>Zendesk</strong> - Ticket creation & updates</li>
+                                <li><i class="bi bi-circle text-primary"></i> <strong>Freshdesk</strong> - Support ticket automation</li>
+                            </ul>
+                            
+                            <h6 class="mt-3"><i class="bi bi-tools"></i> Service Business Integrations</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-circle text-primary"></i> <strong>Jobber</strong> - Service scheduling</li>
+                                <li><i class="bi bi-circle text-primary"></i> <strong>Housecall Pro</strong> - Field service management</li>
+                                <li><i class="bi bi-circle text-primary"></i> <strong>ServiceTitan</strong> - HVAC/Plumbing scheduling</li>
+                            </ul>
+                            
+                            <h6 class="mt-3"><i class="bi bi-hospital"></i> Healthcare Integrations</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-circle text-primary"></i> <strong>Jane.app</strong> - Healthcare scheduling</li>
+                                <li><i class="bi bi-circle text-primary"></i> <strong>Acuity</strong> - Appointment booking</li>
+                                <li><i class="bi bi-circle text-primary"></i> <strong>Epic/Cerner</strong> - EHR integration</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-cpu"></i> Advanced AI Features</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-circle text-primary"></i> 200+ pre-built automation intents</li>
+                                <li><i class="bi bi-circle text-primary"></i> Custom intent training from call history</li>
+                                <li><i class="bi bi-circle text-primary"></i> Sentiment analysis & mood detection</li>
+                                <li><i class="bi bi-circle text-primary"></i> Real-time translation (Spanish, French)</li>
+                                <li><i class="bi bi-circle text-primary"></i> Voice cloning for brand consistency</li>
+                            </ul>
+                            
+                            <h6 class="mt-3"><i class="bi bi-arrow-repeat"></i> Extended Automations</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-circle text-primary"></i> Returns & exchanges processing</li>
+                                <li><i class="bi bi-circle text-primary"></i> Subscription pause/cancel/modify</li>
+                                <li><i class="bi bi-circle text-primary"></i> Billing inquiries & payment plans</li>
+                                <li><i class="bi bi-circle text-primary"></i> Warranty claims & product support</li>
+                                <li><i class="bi bi-circle text-primary"></i> Outbound calling campaigns</li>
+                            </ul>
+                            
+                            <h6 class="mt-3"><i class="bi bi-building"></i> Enterprise Features</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-circle text-primary"></i> White-label deployment</li>
+                                <li><i class="bi bi-circle text-primary"></i> SSO/SAML authentication</li>
+                                <li><i class="bi bi-circle text-primary"></i> Custom SLA agreements</li>
+                                <li><i class="bi bi-circle text-primary"></i> Dedicated infrastructure</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4" style="border: 2px solid #6366f1;">
+                <div class="card-header" style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); color: white;">
+                    <h4 class="mb-0"><i class="bi bi-bullseye"></i> Investment Milestones</h4>
+                    <small>Illustrative targets - actual funding needs may vary</small>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-light mb-3">
+                        <i class="bi bi-info-circle"></i> These milestones represent target outcomes at each funding level. Actual development costs and timelines will be refined during due diligence.
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            <div class="p-3 bg-light rounded">
+                                <h5 class="text-primary">~$50K</h5>
+                                <p class="mb-0"><strong>Phase 2 MVP</strong></p>
+                                <small class="text-muted">Core integrations (Shopify, Calendly)</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <div class="p-3 bg-light rounded">
+                                <h5 class="text-success">~$200K</h5>
+                                <p class="mb-0"><strong>Full Phase 2</strong></p>
+                                <small class="text-muted">All Q1 integrations + initial customers</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <div class="p-3 bg-light rounded">
+                                <h5 class="text-warning">~$500K</h5>
+                                <p class="mb-0"><strong>Series A Ready</strong></p>
+                                <small class="text-muted">Scale + Phase 3 development</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mb-4">
+                <a href="{{ url_for('investor_dashboard') }}" class="btn btn-primary btn-lg mx-2">
+                    <i class="bi bi-graph-up-arrow"></i> View Investor Metrics
+                </a>
+                <a href="{{ url_for('demo_script') }}" class="btn btn-success btn-lg mx-2">
+                    <i class="bi bi-mic"></i> Demo Script
+                </a>
+                <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary btn-lg mx-2">
+                    <i class="bi bi-house"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @media print {
+        .btn, nav, .sidebar { display: none !important; }
+        .card { page-break-inside: avoid; }
+        .col-md-9 { width: 100% !important; }
+    }
+</style>
+{% endblock %}

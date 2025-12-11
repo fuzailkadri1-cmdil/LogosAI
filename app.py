@@ -939,6 +939,16 @@ def twilio_setup():
     replit_url = request.host_url.rstrip('/')
     return render_template('twilio_setup.html', company=company, replit_url=replit_url)
 
+@app.route('/roadmap')
+@require_admin
+def roadmap():
+    company = db.session.get(Company, current_user.company_id)
+    phase1_count = 12
+    phase2_count = 14
+    phase3_count = 20
+    return render_template('roadmap.html', company=company, 
+                          phase1_count=phase1_count, phase2_count=phase2_count, phase3_count=phase3_count)
+
 @app.route('/investor-dashboard')
 @require_admin
 def investor_dashboard():
