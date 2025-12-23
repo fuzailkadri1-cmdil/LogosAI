@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify, flash
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, flash, send_file
 from models import db, Company, User, Integration, CallLog, Voicemail, PilotCustomer, PilotOrder
 import csv
 import io
@@ -984,6 +984,15 @@ def investor_dashboard():
     }
     
     return render_template('investor_dashboard.html', company=company, stats=stats)
+
+@app.route('/download-pitch-deck')
+@require_admin
+def download_pitch_deck():
+    pitch_deck_path = 'static/downloads/logos_ai_pitch_deck.pptx'
+    if not os.path.exists(pitch_deck_path):
+        from pitch_deck_generator import create_pitch_deck
+        create_pitch_deck()
+    return send_file(pitch_deck_path, as_attachment=True, download_name='Logos_AI_Investor_Pitch_Deck.pptx')
 
 @app.route('/pilots')
 @require_admin
