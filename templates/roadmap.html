@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Product Roadmap - {{ company.name }}{% endblock %}
+{% block title %}Product Roadmap - Logos AI{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-4">
@@ -8,6 +8,7 @@
         <div class="col-md-3">
             <div class="sidebar">
                 <div class="p-3">
+                    <img src="{{ url_for('static', filename='images/logos-ai-logo.png') }}" alt="Logos AI" style="height: 40px; margin-bottom: 10px;">
                     <h6 class="text-white-50">{{ company.name }}</h6>
                     <hr class="bg-white">
                 </div>
@@ -37,6 +38,9 @@
                 <a href="{{ url_for('demo_script') }}">
                     <i class="bi bi-mic"></i> Demo Script
                 </a>
+                <a href="{{ url_for('pilots') }}">
+                    <i class="bi bi-people"></i> Pilot Customers
+                </a>
                 {% endif %}
             </div>
         </div>
@@ -45,190 +49,62 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
                     <h2><i class="bi bi-map"></i> Product Roadmap</h2>
-                    <p class="lead text-muted mb-0">What's built, what's next, and where we're going</p>
+                    <p class="lead text-muted mb-0">Current prototype capabilities and future development plans</p>
                 </div>
                 <button class="btn btn-outline-primary" onclick="window.print()">
                     <i class="bi bi-printer"></i> Print for Investors
                 </button>
             </div>
             
-            <div class="alert alert-primary mb-4">
-                <i class="bi bi-info-circle"></i>
-                <strong>For Investors:</strong> This roadmap shows our current MVP capabilities and the clear path to our full platform vision. Each phase builds on the previous, with estimated delivery timelines.
+            <div class="alert alert-success mb-4">
+                <i class="bi bi-check-circle-fill"></i>
+                <strong>Investor Note:</strong> This roadmap clearly shows our current working prototype and the path to our full platform vision. We're honest about what works today versus what's planned.
             </div>
 
-            <div class="card mb-4" style="border: 2px solid #1e40af;">
-                <div class="card-header" style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); color: white;">
-                    <h4 class="mb-0"><i class="bi bi-diagram-3"></i> How It Works</h4>
-                    <small>Simple 4-Step Architecture</small>
+            <div class="card mb-4" style="border: 3px solid #10b981;">
+                <div class="card-header" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
+                    <h4 class="mb-0"><i class="bi bi-lightning-fill"></i> Current Prototype - Live & Demo-Ready</h4>
+                    <small>SMB-First AI Phone System for Retail & eCommerce</small>
                 </div>
                 <div class="card-body">
-                    <div class="row text-center align-items-center">
-                        <div class="col-md-3">
-                            <div class="p-3 bg-light rounded border">
-                                <i class="bi bi-telephone-fill text-primary" style="font-size: 2rem;"></i>
-                                <h6 class="mt-2 mb-1">1. Customer Calls</h6>
-                                <small class="text-muted">Phone connects via Twilio</small>
-                            </div>
-                        </div>
-                        <div class="col-md-1 d-none d-md-block">
-                            <i class="bi bi-arrow-right text-primary" style="font-size: 1.5rem;"></i>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="p-3 bg-light rounded border">
-                                <i class="bi bi-robot text-success" style="font-size: 2rem;"></i>
-                                <h6 class="mt-2 mb-1">2. AI Understands</h6>
-                                <small class="text-muted">GPT-4o-mini detects intent</small>
-                            </div>
-                        </div>
-                        <div class="col-md-1 d-none d-md-block">
-                            <i class="bi bi-arrow-right text-primary" style="font-size: 1.5rem;"></i>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="p-3 bg-light rounded border">
-                                <i class="bi bi-lightning-fill text-warning" style="font-size: 2rem;"></i>
-                                <h6 class="mt-2 mb-1">3. Action Taken</h6>
-                                <small class="text-muted">Order lookup or escalate to human</small>
-                            </div>
-                        </div>
+                    <div class="alert alert-light mb-4">
+                        <strong>Focus:</strong> Reduce call volume and costs for SMBs by handling repetitive inbound calls like order status, pickup readiness, store hours, and FAQs. Honest about limits - complex issues get escalated to humans.
                     </div>
-                    
-                    <div class="row mt-3">
-                        <div class="col-12 text-center">
-                            <i class="bi bi-arrow-down text-primary" style="font-size: 1.5rem;"></i>
-                        </div>
-                    </div>
-                    
-                    <div class="row mt-2">
-                        <div class="col-md-6 offset-md-3">
-                            <div class="p-3 bg-primary text-white rounded text-center">
-                                <i class="bi bi-speedometer2" style="font-size: 2rem;"></i>
-                                <h6 class="mt-2 mb-1">4. Analytics Dashboard</h6>
-                                <small>Real-time call metrics and AI performance</small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <hr class="my-4">
-                    
-                    <h6 class="text-primary mb-3"><i class="bi bi-layers"></i> System Components</h6>
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="card h-100 border-primary">
-                                <div class="card-body text-center py-2">
-                                    <i class="bi bi-telephone text-primary"></i>
-                                    <div class="fw-bold small">Telephony</div>
-                                    <small class="text-muted">Twilio (today)<br>Webex, SIP (planned)</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card h-100 border-success">
-                                <div class="card-body text-center py-2">
-                                    <i class="bi bi-cpu text-success"></i>
-                                    <div class="fw-bold small">AI Engine</div>
-                                    <small class="text-muted">OpenAI GPT-4o-mini<br>Intent detection</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card h-100 border-warning">
-                                <div class="card-body text-center py-2">
-                                    <i class="bi bi-plug text-warning"></i>
-                                    <div class="fw-bold small">Integrations</div>
-                                    <small class="text-muted">Orders (today)<br>Shopify, Calendly (planned)</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card h-100 border-info">
-                                <div class="card-body text-center py-2">
-                                    <i class="bi bi-bar-chart text-info"></i>
-                                    <div class="fw-bold small">Analytics</div>
-                                    <small class="text-muted">Real-time metrics<br>AI confidence</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row mb-4">
-                <div class="col-md-4">
-                    <div class="card text-center h-100" style="border-top: 4px solid #28a745;">
-                        <div class="card-body">
-                            <h1 class="display-4 text-success">{{ phase1_count }}</h1>
-                            <p class="mb-0"><strong>Features Built</strong></p>
-                            <small class="text-muted">Phase 1 Complete</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card text-center h-100" style="border-top: 4px solid #ffc107;">
-                        <div class="card-body">
-                            <h1 class="display-4 text-warning">{{ phase2_count }}</h1>
-                            <p class="mb-0"><strong>Q1 Priority</strong></p>
-                            <small class="text-muted">Phase 2 In Progress</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card text-center h-100" style="border-top: 4px solid #007bff;">
-                        <div class="card-body">
-                            <h1 class="display-4 text-primary">{{ phase3_count }}</h1>
-                            <p class="mb-0"><strong>Full Platform</strong></p>
-                            <small class="text-muted">Phase 3 Planned</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card mb-4" style="border-left: 5px solid #28a745;">
-                <div class="card-header bg-success text-white">
-                    <h4 class="mb-0"><i class="bi bi-check-circle-fill"></i> Phase 1: MVP Complete</h4>
-                    <small>Live and Demo-Ready Today</small>
-                </div>
-                <div class="card-body">
-                    <p class="text-muted">Core platform capabilities that are fully functional and can be demonstrated live.</p>
                     
                     <div class="row">
                         <div class="col-md-6">
-                            <h6 class="text-success"><i class="bi bi-robot"></i> AI Voice Agent</h6>
+                            <h6 class="text-success"><i class="bi bi-robot"></i> AI Voice Agent <span class="badge bg-success">Working</span></h6>
                             <ul class="list-unstyled">
-                                <li><i class="bi bi-check text-success"></i> Natural language understanding (GPT-4o-mini)</li>
-                                <li><i class="bi bi-check text-success"></i> Multi-turn conversations with state tracking</li>
-                                <li><i class="bi bi-check text-success"></i> 4 core intents (OrderStatus, StoreHours, Escalation, Voicemail)</li>
-                                <li><i class="bi bi-check text-success"></i> Intelligent escalation to human agents</li>
-                                <li><i class="bi bi-check text-success"></i> Order lookup with demo database</li>
+                                <li><i class="bi bi-check-circle-fill text-success"></i> Natural language understanding (GPT-4o-mini)</li>
+                                <li><i class="bi bi-check-circle-fill text-success"></i> Multi-turn conversations with context</li>
+                                <li><i class="bi bi-check-circle-fill text-success"></i> Order status lookup (via CSV upload)</li>
+                                <li><i class="bi bi-check-circle-fill text-success"></i> Store hours & FAQ responses</li>
+                                <li><i class="bi bi-check-circle-fill text-success"></i> Pickup readiness inquiries</li>
+                                <li><i class="bi bi-check-circle-fill text-success"></i> Intelligent human handoff</li>
                             </ul>
                             
-                            <h6 class="text-success mt-3"><i class="bi bi-telephone"></i> Telephony Integration</h6>
+                            <h6 class="text-success mt-3"><i class="bi bi-telephone"></i> Telephony <span class="badge bg-success">Working</span></h6>
                             <ul class="list-unstyled">
-                                <li><i class="bi bi-check text-success"></i> Twilio full integration (webhooks, TwiML)</li>
-                                <li><i class="bi bi-check text-success"></i> Speech recognition with number normalization</li>
+                                <li><i class="bi bi-check-circle-fill text-success"></i> Twilio integration (webhooks, TwiML)</li>
+                                <li><i class="bi bi-check-circle-fill text-success"></i> Speech recognition & synthesis</li>
+                                <li><i class="bi bi-check-circle-fill text-success"></i> Call transfer to escalation number</li>
                             </ul>
                         </div>
                         <div class="col-md-6">
-                            <h6 class="text-success"><i class="bi bi-speedometer2"></i> Dashboard & Analytics</h6>
+                            <h6 class="text-success"><i class="bi bi-speedometer2"></i> Dashboard & Analytics <span class="badge bg-success">Working</span></h6>
                             <ul class="list-unstyled">
-                                <li><i class="bi bi-check text-success"></i> Real-time call metrics</li>
-                                <li><i class="bi bi-check text-success"></i> AI confidence tracking</li>
-                                <li><i class="bi bi-check text-success"></i> Intent distribution charts (Chart.js)</li>
-                                <li><i class="bi bi-check text-success"></i> Daily call volume trends</li>
+                                <li><i class="bi bi-check-circle-fill text-success"></i> Real-time call metrics</li>
+                                <li><i class="bi bi-check-circle-fill text-success"></i> AI confidence tracking</li>
+                                <li><i class="bi bi-check-circle-fill text-success"></i> Intent distribution charts</li>
+                                <li><i class="bi bi-check-circle-fill text-success"></i> Call transcripts & history</li>
                             </ul>
                             
-                            <h6 class="text-success mt-3"><i class="bi bi-ear"></i> Listen Mode</h6>
+                            <h6 class="text-success mt-3"><i class="bi bi-people"></i> Pilot Management <span class="badge bg-success">Working</span></h6>
                             <ul class="list-unstyled">
-                                <li><i class="bi bi-check text-success"></i> Call transcript viewing</li>
-                                <li><i class="bi bi-check text-success"></i> Automation recommendations display</li>
-                            </ul>
-                            
-                            <h6 class="text-success mt-3"><i class="bi bi-lightning"></i> Quick Setup</h6>
-                            <ul class="list-unstyled">
-                                <li><i class="bi bi-check text-success"></i> Industry templates (Healthcare, eCommerce, etc.)</li>
-                                <li><i class="bi bi-check text-success"></i> One-click template application</li>
-                                <li><i class="bi bi-check text-success"></i> Voicemail recording system</li>
-                                <li><i class="bi bi-check text-success"></i> Conversation preview tester</li>
+                                <li><i class="bi bi-check-circle-fill text-success"></i> Add pilot customers</li>
+                                <li><i class="bi bi-check-circle-fill text-success"></i> CSV order data upload</li>
+                                <li><i class="bi bi-check-circle-fill text-success"></i> Per-pilot analytics & results</li>
+                                <li><i class="bi bi-check-circle-fill text-success"></i> Voicemail recording system</li>
                             </ul>
                         </div>
                     </div>
@@ -237,148 +113,109 @@
 
             <div class="card mb-4" style="border-left: 5px solid #ffc107;">
                 <div class="card-header bg-warning">
-                    <h4 class="mb-0"><i class="bi bi-clock-history"></i> Phase 2: Q1 Priority</h4>
-                    <small>Next 8-12 Weeks | Estimates are illustrative</small>
+                    <h4 class="mb-0"><i class="bi bi-clock-history"></i> Phase 2: Q1 2025 Development</h4>
+                    <small>Next 8-12 Weeks | Focused on eCommerce integrations</small>
                 </div>
                 <div class="card-body">
-                    <p class="text-muted">These integrations unlock the largest SMB markets (eCommerce, appointment-based businesses, subscription services).</p>
-                    
                     <div class="row">
                         <div class="col-md-6">
-                            <h6><i class="bi bi-cart"></i> E-Commerce Integrations</h6>
+                            <h6><i class="bi bi-cart"></i> eCommerce Integrations</h6>
                             <ul class="list-unstyled">
-                                <li><i class="bi bi-circle text-warning"></i> <strong>Shopify</strong> - Order lookup, status, tracking</li>
+                                <li><i class="bi bi-circle text-warning"></i> <strong>Shopify</strong> - Direct order lookup</li>
                                 <li><i class="bi bi-circle text-warning"></i> <strong>WooCommerce</strong> - Order management</li>
-                                <li><i class="bi bi-circle text-warning"></i> <strong>ShipStation/Shippo</strong> - Shipping updates</li>
+                                <li><i class="bi bi-circle text-warning"></i> <strong>ShipStation</strong> - Shipping updates</li>
                             </ul>
                             
-                            <h6 class="mt-3"><i class="bi bi-calendar"></i> Scheduling Integrations</h6>
+                            <h6 class="mt-3"><i class="bi bi-credit-card"></i> Payments</h6>
                             <ul class="list-unstyled">
-                                <li><i class="bi bi-circle text-warning"></i> <strong>Calendly</strong> - Book/reschedule appointments</li>
-                                <li><i class="bi bi-circle text-warning"></i> <strong>Google Calendar</strong> - Availability check</li>
-                                <li><i class="bi bi-circle text-warning"></i> <strong>Square Appointments</strong> - Booking integration</li>
-                            </ul>
-                            
-                            <h6 class="mt-3"><i class="bi bi-telephone"></i> Additional Telephony</h6>
-                            <ul class="list-unstyled">
-                                <li><i class="bi bi-circle text-warning"></i> <strong>Cisco Webex</strong> - Full webhook integration</li>
-                                <li><i class="bi bi-circle text-warning"></i> <strong>Generic SIP/VoIP</strong> - Protocol support</li>
-                            </ul>
-                        </div>
-                        <div class="col-md-6">
-                            <h6><i class="bi bi-credit-card"></i> Payment & Subscriptions</h6>
-                            <ul class="list-unstyled">
-                                <li><i class="bi bi-circle text-warning"></i> <strong>Stripe</strong> - Payment processing, billing portal</li>
+                                <li><i class="bi bi-circle text-warning"></i> <strong>Stripe</strong> - Payment status, billing</li>
                                 <li><i class="bi bi-circle text-warning"></i> <strong>Recharge</strong> - Subscription management</li>
                             </ul>
-                            
-                            <h6 class="mt-3"><i class="bi bi-sliders"></i> Listen Mode Enhancements</h6>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-calendar"></i> Scheduling</h6>
                             <ul class="list-unstyled">
-                                <li><i class="bi bi-circle text-warning"></i> Intent automation toggle switches</li>
-                                <li><i class="bi bi-circle text-warning"></i> Custom intent training</li>
-                                <li><i class="bi bi-circle text-warning"></i> A/B testing for responses</li>
+                                <li><i class="bi bi-circle text-warning"></i> <strong>Calendly</strong> - Appointment booking</li>
+                                <li><i class="bi bi-circle text-warning"></i> <strong>Google Calendar</strong> - Availability check</li>
+                            </ul>
+                            
+                            <h6 class="mt-3"><i class="bi bi-arrow-repeat"></i> Additional Intents</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-circle text-warning"></i> Returns & exchanges</li>
+                                <li><i class="bi bi-circle text-warning"></i> Subscription pause/modify</li>
                             </ul>
                         </div>
-                    </div>
-                    
-                    <div class="alert alert-light mt-3">
-                        <strong>Impact:</strong> These integrations unlock ~60% of the SMB market (eCommerce + appointment-based businesses). Shopify alone covers 40% of SMB eCommerce.
                     </div>
                 </div>
             </div>
 
-            <div class="card mb-4" style="border-left: 5px solid #007bff;">
+            <div class="card mb-4" style="border-left: 5px solid #6366f1;">
+                <div class="card-header" style="background: linear-gradient(135deg, #6366f1, #a855f7); color: white;">
+                    <h4 class="mb-0"><i class="bi bi-rocket-takeoff"></i> Phase 3: Future Industries & Enterprise</h4>
+                    <small>Q2-Q4 2025 | Expansion after proving retail/eCommerce</small>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-hospital"></i> Healthcare Vertical</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-circle text-muted"></i> Appointment scheduling</li>
+                                <li><i class="bi bi-circle text-muted"></i> Lab result inquiries</li>
+                                <li><i class="bi bi-circle text-muted"></i> EHR integrations (Epic, Cerner)</li>
+                            </ul>
+                            
+                            <h6 class="mt-3"><i class="bi bi-truck"></i> Transportation Vertical</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-circle text-muted"></i> Ride booking</li>
+                                <li><i class="bi bi-circle text-muted"></i> Delivery tracking</li>
+                                <li><i class="bi bi-circle text-muted"></i> Dispatch integrations</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-diagram-3"></i> Enterprise CRM</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-circle text-muted"></i> <strong>Salesforce</strong> - Full CRM integration</li>
+                                <li><i class="bi bi-circle text-muted"></i> <strong>Zendesk</strong> - Ticket creation</li>
+                                <li><i class="bi bi-circle text-muted"></i> <strong>HubSpot</strong> - Contact management</li>
+                            </ul>
+                            
+                            <h6 class="mt-3"><i class="bi bi-cpu"></i> Advanced AI</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-circle text-muted"></i> Multi-language support</li>
+                                <li><i class="bi bi-circle text-muted"></i> Sentiment analysis</li>
+                                <li><i class="bi bi-circle text-muted"></i> Custom AI training</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4" style="border: 2px solid #1e40af;">
                 <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0"><i class="bi bi-rocket-takeoff"></i> Phase 3: Full Platform</h4>
-                    <small>6-12 Months | Series A Development</small>
+                    <h4 class="mb-0"><i class="bi bi-bullseye"></i> Investment Opportunity</h4>
+                    <small>What funding unlocks at each stage</small>
                 </div>
                 <div class="card-body">
-                    <p class="text-muted">The complete vision: 200+ automations, enterprise integrations, and advanced AI capabilities.</p>
-                    
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h6><i class="bi bi-diagram-3"></i> Enterprise CRM Integrations</h6>
-                            <ul class="list-unstyled">
-                                <li><i class="bi bi-circle text-primary"></i> <strong>Salesforce</strong> - Full CRM integration</li>
-                                <li><i class="bi bi-circle text-primary"></i> <strong>HubSpot</strong> - Contact & deal management</li>
-                                <li><i class="bi bi-circle text-primary"></i> <strong>Zendesk</strong> - Ticket creation & updates</li>
-                                <li><i class="bi bi-circle text-primary"></i> <strong>Freshdesk</strong> - Support ticket automation</li>
-                            </ul>
-                            
-                            <h6 class="mt-3"><i class="bi bi-tools"></i> Service Business Integrations</h6>
-                            <ul class="list-unstyled">
-                                <li><i class="bi bi-circle text-primary"></i> <strong>Jobber</strong> - Service scheduling</li>
-                                <li><i class="bi bi-circle text-primary"></i> <strong>Housecall Pro</strong> - Field service management</li>
-                                <li><i class="bi bi-circle text-primary"></i> <strong>ServiceTitan</strong> - HVAC/Plumbing scheduling</li>
-                            </ul>
-                            
-                            <h6 class="mt-3"><i class="bi bi-hospital"></i> Healthcare Integrations</h6>
-                            <ul class="list-unstyled">
-                                <li><i class="bi bi-circle text-primary"></i> <strong>Jane.app</strong> - Healthcare scheduling</li>
-                                <li><i class="bi bi-circle text-primary"></i> <strong>Acuity</strong> - Appointment booking</li>
-                                <li><i class="bi bi-circle text-primary"></i> <strong>Epic/Cerner</strong> - EHR integration</li>
-                            </ul>
-                        </div>
-                        <div class="col-md-6">
-                            <h6><i class="bi bi-cpu"></i> Advanced AI Features</h6>
-                            <ul class="list-unstyled">
-                                <li><i class="bi bi-circle text-primary"></i> 200+ pre-built automation intents</li>
-                                <li><i class="bi bi-circle text-primary"></i> Custom intent training from call history</li>
-                                <li><i class="bi bi-circle text-primary"></i> Sentiment analysis & mood detection</li>
-                                <li><i class="bi bi-circle text-primary"></i> Real-time translation (Spanish, French)</li>
-                                <li><i class="bi bi-circle text-primary"></i> Voice cloning for brand consistency</li>
-                            </ul>
-                            
-                            <h6 class="mt-3"><i class="bi bi-arrow-repeat"></i> Extended Automations</h6>
-                            <ul class="list-unstyled">
-                                <li><i class="bi bi-circle text-primary"></i> Returns & exchanges processing</li>
-                                <li><i class="bi bi-circle text-primary"></i> Subscription pause/cancel/modify</li>
-                                <li><i class="bi bi-circle text-primary"></i> Billing inquiries & payment plans</li>
-                                <li><i class="bi bi-circle text-primary"></i> Warranty claims & product support</li>
-                                <li><i class="bi bi-circle text-primary"></i> Outbound calling campaigns</li>
-                            </ul>
-                            
-                            <h6 class="mt-3"><i class="bi bi-building"></i> Enterprise Features</h6>
-                            <ul class="list-unstyled">
-                                <li><i class="bi bi-circle text-primary"></i> White-label deployment</li>
-                                <li><i class="bi bi-circle text-primary"></i> SSO/SAML authentication</li>
-                                <li><i class="bi bi-circle text-primary"></i> Custom SLA agreements</li>
-                                <li><i class="bi bi-circle text-primary"></i> Dedicated infrastructure</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card mb-4" style="border: 2px solid #6366f1;">
-                <div class="card-header" style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); color: white;">
-                    <h4 class="mb-0"><i class="bi bi-bullseye"></i> Investment Milestones</h4>
-                    <small>Illustrative targets - actual funding needs may vary</small>
-                </div>
-                <div class="card-body">
-                    <div class="alert alert-light mb-3">
-                        <i class="bi bi-info-circle"></i> These milestones represent target outcomes at each funding level. Actual development costs and timelines will be refined during due diligence.
-                    </div>
                     <div class="row">
                         <div class="col-md-4 text-center">
                             <div class="p-3 bg-light rounded">
-                                <h5 class="text-primary">~$50K</h5>
-                                <p class="mb-0"><strong>Phase 2 MVP</strong></p>
-                                <small class="text-muted">Core integrations (Shopify, Calendly)</small>
+                                <h5 class="text-success">Current</h5>
+                                <p class="mb-0"><strong>Working Prototype</strong></p>
+                                <small class="text-muted">Ready for pilot customers</small>
                             </div>
                         </div>
                         <div class="col-md-4 text-center">
                             <div class="p-3 bg-light rounded">
-                                <h5 class="text-success">~$200K</h5>
-                                <p class="mb-0"><strong>Full Phase 2</strong></p>
-                                <small class="text-muted">All Q1 integrations + initial customers</small>
+                                <h5 class="text-warning">~$100-200K</h5>
+                                <p class="mb-0"><strong>Phase 2 Complete</strong></p>
+                                <small class="text-muted">Shopify + Stripe + 10 pilots</small>
                             </div>
                         </div>
                         <div class="col-md-4 text-center">
                             <div class="p-3 bg-light rounded">
-                                <h5 class="text-warning">~$500K</h5>
+                                <h5 class="text-primary">~$500K</h5>
                                 <p class="mb-0"><strong>Series A Ready</strong></p>
-                                <small class="text-muted">Scale + Phase 3 development</small>
+                                <small class="text-muted">Multi-vertical + enterprise</small>
                             </div>
                         </div>
                     </div>
@@ -389,22 +226,14 @@
                 <a href="{{ url_for('investor_dashboard') }}" class="btn btn-primary btn-lg mx-2">
                     <i class="bi bi-graph-up-arrow"></i> View Investor Metrics
                 </a>
-                <a href="{{ url_for('demo_script') }}" class="btn btn-success btn-lg mx-2">
-                    <i class="bi bi-mic"></i> Demo Script
+                <a href="{{ url_for('pilots') }}" class="btn btn-success btn-lg mx-2">
+                    <i class="bi bi-people"></i> Manage Pilots
                 </a>
-                <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary btn-lg mx-2">
-                    <i class="bi bi-house"></i> Back to Dashboard
+                <a href="{{ url_for('demo_script') }}" class="btn btn-outline-primary btn-lg mx-2">
+                    <i class="bi bi-mic"></i> Demo Script
                 </a>
             </div>
         </div>
     </div>
 </div>
-
-<style>
-    @media print {
-        .btn, nav, .sidebar { display: none !important; }
-        .card { page-break-inside: avoid; }
-        .col-md-9 { width: 100% !important; }
-    }
-</style>
 {% endblock %}

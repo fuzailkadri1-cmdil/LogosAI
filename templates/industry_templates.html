@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Industry Templates - {{ company.name }}{% endblock %}
+{% block title %}Industry Templates - Logos AI{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-4">
@@ -8,6 +8,7 @@
         <div class="col-md-3">
             <div class="sidebar">
                 <div class="p-3">
+                    <img src="{{ url_for('static', filename='images/logos-ai-logo.png') }}" alt="Logos AI" style="height: 40px; margin-bottom: 10px;">
                     <h6 class="text-white-50">{{ company.name }}</h6>
                     <hr class="bg-white">
                 </div>
@@ -27,18 +28,25 @@
             <h2 class="mb-4"><i class="bi bi-lightning-charge"></i> Industry Templates</h2>
             <p class="lead">Pre-configured call flows optimized for your industry - launch in minutes</p>
             
-            <div class="alert alert-primary">
-                <i class="bi bi-info-circle"></i>
-                <strong>Quick Setup:</strong> Choose a template below to automatically configure greetings, menu options, and business hours optimized for your industry.
+            <div class="alert alert-success">
+                <i class="bi bi-check-circle"></i>
+                <strong>Current Focus:</strong> Retail & eCommerce templates are fully supported and ready for pilot customers. Other industries are coming soon.
             </div>
             
             <div class="row g-4">
                 {% for template_id, template in templates.items() %}
                 <div class="col-md-6">
-                    <div class="card h-100 shadow-sm">
+                    {% set is_ecommerce = template_id == 'ecommerce' or template_id == 'retail' %}
+                    <div class="card h-100 shadow-sm {% if not is_ecommerce %}opacity-75{% endif %}" style="{% if is_ecommerce %}border: 2px solid #10b981;{% else %}border: 2px dashed #6366f1;{% endif %}">
                         <div class="card-body">
                             <div class="text-center mb-3">
-                                <i class="bi bi-{{ template.icon }} display-1 text-primary"></i>
+                                {% if is_ecommerce %}
+                                <span class="badge bg-success mb-2"><i class="bi bi-check-circle"></i> Available Now</span>
+                                {% else %}
+                                <span class="future-badge mb-2">Future Feature</span>
+                                {% endif %}
+                                <br>
+                                <i class="bi bi-{{ template.icon }} display-1 {% if is_ecommerce %}text-success{% else %}text-muted{% endif %}"></i>
                             </div>
                             <h3 class="card-title text-center">{{ template.name }}</h3>
                             
@@ -61,21 +69,66 @@
                                 </ul>
                             </div>
                             
+                            {% if is_ecommerce %}
                             <form method="POST" action="{{ url_for('apply_template', template_id=template_id) }}">
-                                <button type="submit" class="btn btn-primary w-100 mt-3">
+                                <button type="submit" class="btn btn-success w-100 mt-3">
                                     <i class="bi bi-check-circle"></i> Apply This Template
                                 </button>
                             </form>
+                            {% else %}
+                            <button class="btn btn-outline-secondary w-100 mt-3" disabled>
+                                <i class="bi bi-clock"></i> Coming Soon
+                            </button>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
                 {% endfor %}
             </div>
             
+            <div class="card mt-4" style="border: 2px dashed #6366f1;">
+                <div class="card-header" style="background: linear-gradient(135deg, #f5f3ff, #ede9fe);">
+                    <h5 class="mb-0"><i class="bi bi-rocket-takeoff"></i> Future Industry Support</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">We're focused on perfecting retail & eCommerce first. These industries are on our roadmap:</p>
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <div class="p-3 bg-light rounded" style="opacity: 0.7;">
+                                <i class="bi bi-hospital display-4 text-muted"></i>
+                                <p class="mb-0 text-muted">Healthcare</p>
+                                <small class="text-muted">Q2 2025</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-3 bg-light rounded" style="opacity: 0.7;">
+                                <i class="bi bi-truck display-4 text-muted"></i>
+                                <p class="mb-0 text-muted">Transportation</p>
+                                <small class="text-muted">Q2 2025</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-3 bg-light rounded" style="opacity: 0.7;">
+                                <i class="bi bi-bank display-4 text-muted"></i>
+                                <p class="mb-0 text-muted">Financial</p>
+                                <small class="text-muted">Q3 2025</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-3 bg-light rounded" style="opacity: 0.7;">
+                                <i class="bi bi-mortarboard display-4 text-muted"></i>
+                                <p class="mb-0 text-muted">Education</p>
+                                <small class="text-muted">Q3 2025</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <div class="card mt-4">
                 <div class="card-body">
                     <h5><i class="bi bi-gear"></i> Need Custom Configuration?</h5>
-                    <p>These templates provide a great starting point, but you can fully customize your call flow, menu options, and business hours in the Settings page.</p>
+                    <p>Templates provide a great starting point. You can fully customize your call flow, menu options, and business hours in the Settings page.</p>
                     <a href="{{ url_for('settings') }}" class="btn btn-outline-primary">
                         Go to Settings
                     </a>

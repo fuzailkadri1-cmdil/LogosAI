@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Listen Mode - {{ company.name }}{% endblock %}
+{% block title %}Listen Mode - Logos AI{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-4">
@@ -8,6 +8,7 @@
         <div class="col-md-3">
             <div class="sidebar">
                 <div class="p-3">
+                    <img src="{{ url_for('static', filename='images/logos-ai-logo.png') }}" alt="Logos AI" style="height: 40px; margin-bottom: 10px;">
                     <h6 class="text-white-50">{{ company.name }}</h6>
                     <hr class="bg-white">
                 </div>
@@ -30,8 +31,13 @@
         </div>
         
         <div class="col-md-9">
-            <h2 class="mb-4"><i class="bi bi-ear"></i> Listen Mode Analytics</h2>
-            <p class="lead">AI-powered analysis of your call patterns with automation recommendations</p>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2><i class="bi bi-ear"></i> Listen Mode Analytics</h2>
+                    <p class="lead text-muted mb-0">AI-powered analysis of your call patterns with automation recommendations</p>
+                </div>
+                <span class="badge bg-success"><i class="bi bi-check-circle"></i> Available Now</span>
+            </div>
             
             <div class="alert alert-info">
                 <i class="bi bi-info-circle"></i>
@@ -72,7 +78,7 @@
                                         </td>
                                         <td>
                                             {% if rec.recommended %}
-                                                <span class="badge bg-success">✓ Highly Recommended</span>
+                                                <span class="badge bg-success"><i class="bi bi-check-circle"></i> Highly Recommended</span>
                                             {% else %}
                                                 <span class="badge bg-secondary">Monitor</span>
                                             {% endif %}

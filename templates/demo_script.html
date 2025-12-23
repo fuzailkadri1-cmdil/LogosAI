@@ -1,21 +1,48 @@
 {% extends "base.html" %}
 
+{% block title %}Demo Script - Logos AI{% endblock %}
+
 {% block content %}
-<div class="container-fluid">
+<div class="container-fluid py-4">
     <div class="row">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h4><i class="bi bi-mic-fill"></i> Demo Script for Investor Presentations</h4>
+        <div class="col-md-3">
+            <div class="sidebar">
+                <div class="p-3">
+                    <img src="{{ url_for('static', filename='images/logos-ai-logo.png') }}" alt="Logos AI" style="height: 40px; margin-bottom: 10px;">
+                    <h6 class="text-white-50">Logos AI</h6>
+                    <hr class="bg-white">
+                </div>
+                <a href="{{ url_for('dashboard') }}">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+                <a href="{{ url_for('roadmap') }}">
+                    <i class="bi bi-map"></i> Roadmap
+                </a>
+                <a href="{{ url_for('investor_dashboard') }}">
+                    <i class="bi bi-graph-up-arrow"></i> Investor Metrics
+                </a>
+                <a href="{{ url_for('demo_script') }}" class="active">
+                    <i class="bi bi-mic"></i> Demo Script
+                </a>
+                <a href="{{ url_for('pilots') }}">
+                    <i class="bi bi-people"></i> Pilot Customers
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <div class="card mb-4">
+                <div class="card-header" style="background: linear-gradient(135deg, #1e40af 0%, #10b981 100%); color: white;">
+                    <h4><i class="bi bi-mic-fill"></i> Logos AI - Investor Demo Script</h4>
+                    <p class="mb-0">SMB-First AI Phone System for Retail & eCommerce</p>
                 </div>
                 <div class="card-body">
-                    <p class="lead">Follow this 5-10 minute script to showcase your call center automation platform effectively.</p>
+                    <p class="lead">Follow this 5-10 minute script to showcase Logos AI effectively to investors.</p>
                     
-                    <div class="alert alert-info">
-                        <i class="bi bi-lightbulb-fill"></i> <strong>Pro Tip:</strong> This script has sections tailored for different audiences. Use the tabs below to switch between versions.
+                    <div class="alert alert-success">
+                        <i class="bi bi-check-circle-fill"></i> <strong>Key Message:</strong> We're honest about what our prototype does today (retail/eCommerce order status, store hours, FAQs) versus what's on our roadmap. Investors appreciate transparency.
                     </div>
                     
-                    <!-- Audience Selector Tabs -->
                     <ul class="nav nav-pills mb-4" id="audienceTabs" role="tablist">
                         <li class="nav-item" role="presentation">
                             <button class="nav-link active" id="general-tab" data-bs-toggle="pill" data-bs-target="#general" type="button" role="tab">
@@ -27,14 +54,8 @@
                                 <i class="bi bi-cpu-fill"></i> Technical Investors
                             </button>
                         </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="industry-tab" data-bs-toggle="pill" data-bs-target="#industry" type="button" role="tab">
-                                <i class="bi bi-graph-up-arrow"></i> Industry-Focused Investors
-                            </button>
-                        </li>
                     </ul>
                     
-                    <!-- Technical Investors Section -->
                     <div class="tab-content" id="audienceTabsContent">
                         <div class="tab-pane fade" id="technical" role="tabpanel">
                             <div class="card mb-4 border-primary">
@@ -42,293 +63,173 @@
                                     <h5><i class="bi bi-cpu-fill"></i> Technical Investor Talking Points</h5>
                                 </div>
                                 <div class="card-body">
-                                    <p class="text-muted">Emphasize these points when presenting to technical investors (VCs with engineering backgrounds, CTOs, technical advisors):</p>
-                                    
                                     <h6 class="mt-3"><i class="bi bi-1-circle-fill text-primary"></i> AI Architecture</h6>
                                     <ul>
-                                        <li><strong>GPT-4o-mini integration:</strong> "We use OpenAI's latest efficient model for natural language understanding with sub-second response times"</li>
-                                        <li><strong>Intent detection pipeline:</strong> "Our two-stage system does keyword-based fast matching first, then falls back to LLM for complex queries"</li>
-                                        <li><strong>Cached responses:</strong> "Common intents like store hours bypass the API entirely - instant response"</li>
-                                        <li><strong>Speech normalization:</strong> "We handle Twilio's varied transcriptions ('one one one' vs '1,1,1' vs '111') with robust normalization"</li>
+                                        <li><strong>GPT-4o-mini integration:</strong> "We use OpenAI's efficient model for natural language understanding"</li>
+                                        <li><strong>Intent detection:</strong> "Two-stage system: keyword matching first, then LLM for complex queries"</li>
+                                        <li><strong>Speech normalization:</strong> "We handle Twilio's varied transcriptions robustly"</li>
                                     </ul>
                                     
-                                    <h6 class="mt-3"><i class="bi bi-2-circle-fill text-primary"></i> Scalability & Multi-Tenancy</h6>
+                                    <h6 class="mt-3"><i class="bi bi-2-circle-fill text-primary"></i> Current vs Future</h6>
                                     <ul>
-                                        <li><strong>Tenant isolation:</strong> "Each company's data is logically separated with company_id scoping throughout"</li>
-                                        <li><strong>Pluggable telephony:</strong> "Provider abstraction layer supports Twilio, Cisco Webex, and generic SIP/VoIP"</li>
-                                        <li><strong>Webhook routing:</strong> "Dynamic routing matches incoming calls to the correct tenant by phone number"</li>
-                                        <li><strong>Conversation state machine:</strong> "Multi-turn conversations track state (initial, waiting_for_order, offering_help, goodbye)"</li>
+                                        <li><span class="badge bg-success">Now</span> CSV order upload, 4 intents, Twilio integration</li>
+                                        <li><span class="future-badge">Q1 2025</span> Shopify integration, Stripe integration</li>
+                                        <li><span class="future-badge">Q2 2025</span> Healthcare & transportation verticals</li>
                                     </ul>
-                                    
-                                    <h6 class="mt-3"><i class="bi bi-3-circle-fill text-primary"></i> Intelligent Escalation</h6>
-                                    <ul>
-                                        <li><strong>Confidence thresholds:</strong> "Automatic escalation when AI confidence drops below 0.5"</li>
-                                        <li><strong>Sensitive intent detection:</strong> "Refunds, billing, complaints auto-route to humans"</li>
-                                        <li><strong>Keyword triggers:</strong> "Phrases like 'speak to manager' or 'real person' immediately escalate"</li>
-                                    </ul>
-                                    
-                                    <h6 class="mt-3"><i class="bi bi-4-circle-fill text-primary"></i> Technical Demo Flow</h6>
-                                    <ol>
-                                        <li>Show <code>ai_voice_agent.py</code> architecture (if appropriate)</li>
-                                        <li>Demonstrate speech normalization with "order one" vs "order 1"</li>
-                                        <li>Show webhook flow in <code>app.py</code> with TwiML generation</li>
-                                        <li>Explain conversation state transitions in Listen Mode</li>
-                                    </ol>
                                 </div>
                             </div>
                         </div>
                         
-                        <!-- Industry-Focused Investors Section -->
-                        <div class="tab-pane fade" id="industry" role="tabpanel">
-                            <div class="card mb-4 border-success">
-                                <div class="card-header bg-success text-white">
-                                    <h5><i class="bi bi-graph-up-arrow"></i> Industry-Focused Investor Talking Points</h5>
-                                </div>
-                                <div class="card-body">
-                                    <p class="text-muted">Emphasize these points when presenting to industry-focused investors (PE firms, industry veterans, operators):</p>
-                                    
-                                    <h6 class="mt-3"><i class="bi bi-1-circle-fill text-success"></i> Market Opportunity</h6>
-                                    <ul>
-                                        <li><strong>TAM:</strong> "$25B North American contact center market growing 19% annually"</li>
-                                        <li><strong>SAM:</strong> "$3.8B serviceable market - SMBs with 5-500 seats"</li>
-                                        <li><strong>Pain point:</strong> "54% cite cost and complexity as barriers to automation"</li>
-                                        <li><strong>Employment context:</strong> "3.05M customer service reps in US+Canada (7th largest job)"</li>
-                                    </ul>
-                                    
-                                    <h6 class="mt-3"><i class="bi bi-2-circle-fill text-success"></i> ROI & Unit Economics</h6>
-                                    <ul>
-                                        <li><strong>Cost reduction:</strong> "$1.25/call → $0.25/call (80% reduction)"</li>
-                                        <li><strong>Automation rate:</strong> "50% automation vs. legacy 10%"</li>
-                                        <li><strong>Customer savings:</strong> "Average customer saves $420K annually"</li>
-                                        <li><strong>Setup time:</strong> "5-10 minutes vs. 12 months for legacy"</li>
-                                        <li><strong>Zero upfront cost:</strong> "Performance-based pricing with 30-day free trial"</li>
-                                    </ul>
-                                    
-                                    <h6 class="mt-3"><i class="bi bi-3-circle-fill text-success"></i> Industry Verticals</h6>
-                                    <table class="table table-sm table-bordered">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>Vertical</th>
-                                                <th>Market Share</th>
-                                                <th>Key Use Cases</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td>Banking/Financial</td>
-                                                <td>21.7%</td>
-                                                <td>Account balance, transaction status</td>
-                                            </tr>
-                                            <tr>
-                                                <td>IT/Telecom</td>
-                                                <td>24.7%</td>
-                                                <td>Tech support triage, outage updates</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Healthcare</td>
-                                                <td>Fastest growth</td>
-                                                <td>Appointment scheduling, Rx refills</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Retail/eCommerce</td>
-                                                <td>53% inbound</td>
-                                                <td>Order status, returns, store hours</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                    
-                                    <h6 class="mt-3"><i class="bi bi-4-circle-fill text-success"></i> Competitive Advantages</h6>
-                                    <ul>
-                                        <li><strong>vs. Dialpad/Five9:</strong> "They require 6-figure contracts and long setup. We're $99/mo and live in 10 minutes"</li>
-                                        <li><strong>vs. Legacy IVR:</strong> "Rigid menus vs. natural conversation. 'Press 1' is frustrating; 'Where's my order?' just works"</li>
-                                        <li><strong>vs. Consultants:</strong> "12 months + $1M vs. 5 minutes + free trial"</li>
-                                    </ul>
-                                    
-                                    <h6 class="mt-3"><i class="bi bi-5-circle-fill text-success"></i> Industry Demo Flow</h6>
-                                    <ol>
-                                        <li>Start with <a href="/roi-calculator" target="_blank">ROI Calculator</a> - plug in their industry numbers</li>
-                                        <li>Show <a href="/industry-templates" target="_blank">Industry Templates</a> - "Healthcare clinic live in 5 minutes"</li>
-                                        <li>Demo <a href="/investor-dashboard" target="_blank">Investor Dashboard</a> - market metrics, competitive positioning</li>
-                                        <li>End with pricing: "$99/mo Starter → $299/mo Pro → Custom Enterprise"</li>
-                                    </ol>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- General Script (Default) -->
                         <div class="tab-pane fade show active" id="general" role="tabpanel">
 
-                    <!-- Opening -->
                     <div class="card mb-4">
                         <div class="card-header bg-dark text-white">
-                            <h5>1. Opening Hook (30 seconds)</h5>
+                            <h5>1. Opening - The Problem (30 seconds)</h5>
                         </div>
                         <div class="card-body">
-                            <h6><i class="bi bi-chat-quote"></i> What to Say:</h6>
                             <blockquote class="blockquote">
-                                "Customer service is the <strong>7th largest job in North America</strong> with 3.05 million employees (2.8M US + 250K Canada). Companies spend <strong>$1.25 per call</strong> on average handling repetitive questions like 'What's my order status?' or 'What are your hours?'
+                                "SMB retail and eCommerce businesses waste 30-50% of their support time on repetitive calls: <strong>'Where's my order?' 'What are your store hours?' 'Is my pickup ready?'</strong>
                                 <br><br>
-                                We're the first <strong>true SaaS solution</strong> that automates <strong>50% of calls immediately</strong>—vs. legacy consultants who take 12 months and $1M+ to deliver just 10% automation. We drop cost per call to <strong>$0.25</strong> with zero upfront investment."
+                                Enterprise solutions cost $50K+ and take months to implement. Small businesses are stuck with expensive manual support or frustrating IVR menus."
                             </blockquote>
-                            <h6 class="mt-3"><i class="bi bi-hand-index-thumb"></i> Action:</h6>
-                            <p>Open the <a href="/roi-calculator" target="_blank">ROI Calculator</a> and plug in real numbers:</p>
-                            <ul>
-                                <li>Example: 20-seat call center = 840,000 calls/year</li>
-                                <li>50% automation rate (vs legacy 10%)</li>
-                                <li>Cost per call: $1.25 → $0.25 (80% reduction)</li>
-                                <li><strong>Annual savings: $420,000</strong></li>
-                            </ul>
                         </div>
                     </div>
 
-                    <!-- Problem/Solution -->
                     <div class="card mb-4">
                         <div class="card-header bg-dark text-white">
-                            <h5>2. Problem → Solution (2 minutes)</h5>
+                            <h5>2. Our Solution - Logos AI (1 minute)</h5>
                         </div>
                         <div class="card-body">
-                            <h6><i class="bi bi-chat-quote"></i> What to Say:</h6>
                             <blockquote class="blockquote">
-                                "<strong>54% of companies</strong> cite cost and complexity as barriers to automation. Traditional solutions require consultants, take 12 months to implement, and cost 7 figures.
+                                "Logos AI is an AI phone system built specifically for SMB retail and eCommerce. We handle the repetitive calls automatically and escalate complex issues to humans.
                                 <br><br>
-                                We flip that model: <strong>signup online, configure in 5-10 minutes, turn it on</strong>. $0 upfront + performance-based pricing + 30-day free trial. Our conversational AI handles natural language—whether callers say 'track my package' or 'where's my order?'—no rigid menus."
-                            </blockquote>
-                            <h6 class="mt-3"><i class="bi bi-hand-index-thumb"></i> Action:</h6>
-                            <p>Walk through the <a href="/" target="_blank">landing page</a>:</p>
-                            <ul>
-                                <li>Show the conversational UI examples (eCommerce, Healthcare, Transportation)</li>
-                                <li>Point out industry-specific pain points</li>
-                                <li>Emphasize "This works across Twilio, Cisco, and any VoIP provider"</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <!-- Live Demo -->
-                    <div class="card mb-4">
-                        <div class="card-header bg-dark text-white">
-                            <h5>3. Live Product Demo (5 minutes)</h5>
-                        </div>
-                        <div class="card-body">
-                            <h6><i class="bi bi-chat-quote"></i> What to Say:</h6>
-                            <blockquote class="blockquote">
-                                "Let me show you how easy it is to set up and use. We'll walk through the actual platform."
-                            </blockquote>
-                            
-                            <h6 class="mt-3"><i class="bi bi-1-circle-fill"></i> Step 1: Conversation Preview (1 min)</h6>
-                            <p>Open <a href="/conversation-preview" target="_blank">Conversation Preview</a></p>
-                            <ul>
-                                <li>Type: "What's my order status for order #12345?"</li>
-                                <li><strong>Point out:</strong> "Notice it detected 'OrderStatus' intent without the caller pressing any buttons"</li>
-                                <li>Type: "What are your store hours?"</li>
-                                <li><strong>Point out:</strong> "Instant response, no wait time, no agent needed"</li>
-                            </ul>
-
-                            <h6 class="mt-3"><i class="bi bi-2-circle-fill"></i> Step 2: Listen Mode Analytics (2 min)</h6>
-                            <p>Open <a href="/listen-mode" target="_blank">Listen Mode</a></p>
-                            <ul>
-                                <li><strong>Say:</strong> "This is where the AI learns. It analyzes call patterns and recommends which intents to automate."</li>
-                                <li>Point to high-volume intents: "See this? 150 calls asking about order status. That's an easy automation."</li>
-                                <li>Show automation potential: "We estimate 85% of these could be handled by AI."</li>
-                            </ul>
-
-                            <h6 class="mt-3"><i class="bi bi-3-circle-fill"></i> Step 3: Industry Templates (1 min)</h6>
-                            <p>Open <a href="/industry-templates" target="_blank">Industry Templates</a></p>
-                            <ul>
-                                <li><strong>Say:</strong> "A healthcare clinic can go live in 5 minutes with our pre-built templates."</li>
-                                <li>Click on "Healthcare" template</li>
-                                <li>Show the pre-configured greetings and menu options</li>
-                                <li><strong>Optionally:</strong> Click "Apply Template" to show instant setup</li>
-                            </ul>
-
-                            <h6 class="mt-3"><i class="bi bi-4-circle-fill"></i> Step 4: Dashboard Overview (1 min)</h6>
-                            <p>Open <a href="/dashboard" target="_blank">Dashboard</a></p>
-                            <ul>
-                                <li>Point out automation rate, cost savings, and call volume</li>
-                                <li><strong>Say:</strong> "Every company gets real-time visibility into exactly what their AI is doing."</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <!-- Market Opportunity -->
-                    <div class="card mb-4">
-                        <div class="card-header bg-dark text-white">
-                            <h5>4. Market Opportunity (1-2 minutes)</h5>
-                        </div>
-                        <div class="card-body">
-                            <h6><i class="bi bi-chat-quote"></i> What to Say:</h6>
-                            <blockquote class="blockquote">
-                                "North America contact center market is <strong>$25 billion</strong> with 19% annual growth. Our serviceable market—SMBs with 5-500 seats—is <strong>$3.8 billion</strong>, and 54% cite cost/complexity barriers that we solve.
-                                <br><br>
-                                We target Banking (21.7% of market), IT/Telecom (24.7%), Healthcare (fastest growth), and Retail/eCommerce (53% inbound post-sale). These verticals see immediate ROI—average customer saves <strong>$420K annually</strong>."
-                            </blockquote>
-                            <h6 class="mt-3"><i class="bi bi-hand-index-thumb"></i> Action:</h6>
-                            <p>Open <a href="/investor-dashboard" target="_blank">Investor Dashboard</a> to show:</p>
-                            <ul>
-                                <li>TAM/SAM/SOM breakdown</li>
-                                <li>Competitive positioning (vs. Dialpad, Zendesk Talk, traditional IVR)</li>
-                                <li>Unit economics and growth projections</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <!-- Closing -->
-                    <div class="card mb-4">
-                        <div class="card-header bg-dark text-white">
-                            <h5>5. Closing & Ask (30 seconds)</h5>
-                        </div>
-                        <div class="card-body">
-                            <h6><i class="bi bi-chat-quote"></i> What to Say:</h6>
-                            <blockquote class="blockquote">
-                                "We've built this MVP in [X weeks/months] and we're ready to onboard our first 10 customers. 
-                                <br><br>
-                                We're raising <strong>$500K</strong> to:
+                                What makes us different:
                                 <ul>
-                                    <li>Hire 2 engineers to build advanced AI features</li>
-                                    <li>Launch integrations with Shopify, Salesforce, and Zendesk</li>
-                                    <li>Acquire our first 50 paying customers through targeted marketing</li>
-                                </ul>
-                                Are you interested in leading or participating in this round?"
+                                    <li><strong>Honest about limits:</strong> We automate what we can, escalate what we can't</li>
+                                    <li><strong>Simple setup:</strong> Upload your order CSV, configure your greeting, go live in 1 day</li>
+                                    <li><strong>SMB pricing:</strong> $99/month pilot program, not $50K enterprise contracts</li>
+                                </ul>"
                             </blockquote>
                         </div>
                     </div>
 
-                    <!-- Q&A Prep -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-dark text-white">
+                            <h5>3. Live Demo (3-5 minutes)</h5>
+                        </div>
+                        <div class="card-body">
+                            <h6><i class="bi bi-1-circle-fill text-success"></i> Show Working Prototype</h6>
+                            <ol>
+                                <li>Open <a href="{{ url_for('conversation_preview') }}" target="_blank">Conversation Preview</a></li>
+                                <li>Type: "What's my order status for order #12345?"</li>
+                                <li>Show AI response with order details</li>
+                                <li>Type: "What are your store hours?"</li>
+                                <li>Type: "I need to speak with someone about a refund"</li>
+                                <li><strong>Point out:</strong> "Notice it escalates to human when needed"</li>
+                            </ol>
+
+                            <h6 class="mt-4"><i class="bi bi-2-circle-fill text-success"></i> Show Dashboard & Analytics</h6>
+                            <ol>
+                                <li>Open <a href="{{ url_for('dashboard') }}" target="_blank">Dashboard</a></li>
+                                <li>Point out: "Real-time call metrics, AI automation rate, intent distribution"</li>
+                                <li>Show call history and transcripts</li>
+                            </ol>
+
+                            <h6 class="mt-4"><i class="bi bi-3-circle-fill text-success"></i> Show Pilot Management</h6>
+                            <ol>
+                                <li>Open <a href="{{ url_for('pilots') }}" target="_blank">Pilot Customers</a></li>
+                                <li>"This is how we onboard pilot customers - simple CSV upload"</li>
+                                <li>"Each pilot gets their own phone number and analytics"</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <div class="card mb-4" style="border: 2px solid #10b981;">
+                        <div class="card-header" style="background: linear-gradient(135deg, #10b981, #059669); color: white;">
+                            <h5>4. What Works Today vs Roadmap (1 minute)</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="text-success"><i class="bi bi-check-circle-fill"></i> Working Now</h6>
+                                    <ul>
+                                        <li>AI order status lookup (via CSV)</li>
+                                        <li>Store hours & FAQ responses</li>
+                                        <li>Pickup readiness inquiries</li>
+                                        <li>Intelligent human handoff</li>
+                                        <li>Twilio phone integration</li>
+                                        <li>Analytics dashboard</li>
+                                        <li>Pilot customer management</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="text-muted"><i class="bi bi-clock"></i> On Roadmap</h6>
+                                    <ul>
+                                        <li>Q1 2025: Shopify integration</li>
+                                        <li>Q1 2025: Stripe integration</li>
+                                        <li>Q2 2025: Healthcare vertical</li>
+                                        <li>Q2 2025: Transportation vertical</li>
+                                        <li>Q3 2025: Salesforce/Zendesk</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <blockquote class="blockquote mt-3">
+                                "We're honest about what works today. This is a prototype ready for pilot customers, not a finished product. But it proves the core technology works."
+                            </blockquote>
+                        </div>
+                    </div>
+
+                    <div class="card mb-4">
+                        <div class="card-header bg-dark text-white">
+                            <h5>5. Investment Ask (30 seconds)</h5>
+                        </div>
+                        <div class="card-body">
+                            <blockquote class="blockquote">
+                                "We're raising $100K-$500K to:
+                                <ul>
+                                    <li>Build Shopify and Stripe integrations</li>
+                                    <li>Onboard 10-20 pilot customers</li>
+                                    <li>Prove 30-50% call reduction ROI</li>
+                                    <li>Position for Series A</li>
+                                </ul>
+                                Are you interested in joining our seed round?"
+                            </blockquote>
+                        </div>
+                    </div>
+
                     <div class="card mb-4">
                         <div class="card-header bg-warning">
-                            <h5>6. Common Investor Questions & Answers</h5>
+                            <h5>Common Investor Questions</h5>
                         </div>
                         <div class="card-body">
-                            <h6><strong>Q: How is this different from existing IVR systems?</strong></h6>
-                            <p><strong>A:</strong> Traditional IVR uses rigid menu trees (press 1, press 2). We use conversational AI that understands natural language—whether someone says "track my order" or "where's my package," it works.</p>
+                            <h6><strong>Q: Why focus on retail/eCommerce first?</strong></h6>
+                            <p><strong>A:</strong> Order status is the #1 inbound call type. It's well-structured data, easy to automate, and proves immediate ROI. Once we nail this vertical, we expand.</p>
 
-                            <h6 class="mt-3"><strong>Q: What about competitors like Dialpad or Five9?</strong></h6>
-                            <p><strong>A:</strong> They're enterprise-focused with 6-figure contracts and long setup times. We're SMB-focused, self-serve, and customers can launch in under 10 minutes. Our starting price is $99/month vs. their $50K+ annual contracts.</p>
+                            <h6 class="mt-3"><strong>Q: What about competitors like Dialpad?</strong></h6>
+                            <p><strong>A:</strong> They're enterprise-focused with 6-figure contracts. We're SMB-focused with $99/month pricing and 1-day setup.</p>
 
-                            <h6 class="mt-3"><strong>Q: How do you make money?</strong></h6>
-                            <p><strong>A:</strong> SaaS subscription model with 3 tiers: Starter ($99/mo), Professional ($299/mo), Enterprise (custom). Average customer LTV is $10,800 over 3 years with CAC under $500.</p>
+                            <h6 class="mt-3"><strong>Q: How do you handle edge cases?</strong></h6>
+                            <p><strong>A:</strong> We're honest about limits. Complex issues get escalated to humans. We don't try to automate everything - just the 30-50% that's repetitive.</p>
 
-                            <h6 class="mt-3"><strong>Q: Why will customers switch from their current system?</strong></h6>
-                            <p><strong>A:</strong> ROI is clear and immediate. If a business handles 1,000 calls/month, we save them $10K+ annually. Plus, setup is 10 minutes vs. weeks with legacy systems.</p>
-
-                            <h6 class="mt-3"><strong>Q: What's your go-to-market strategy?</strong></h6>
-                            <p><strong>A:</strong> 1) Content marketing targeting "reduce call center costs" searches, 2) Partnerships with Shopify/WooCommerce app stores, 3) Outbound to mid-market eCommerce brands with >10K monthly orders.</p>
-
-                            <h6 class="mt-3"><strong>Q: What are the technical risks?</strong></h6>
-                            <p><strong>A:</strong> Voice AI accuracy is our biggest risk. Currently at 85% intent detection accuracy. We're planning OpenAI integration to boost this to 95%+. We also have fallback to human agents for edge cases.</p>
+                            <h6 class="mt-3"><strong>Q: What's your technical moat?</strong></h6>
+                            <p><strong>A:</strong> Our moat is focus: SMB-first, retail-first, simple setup. Enterprise competitors can't serve this market profitably.</p>
                         </div>
                     </div>
 
-                    <!-- Print/Export -->
                     <div class="text-center mt-4">
                         <button class="btn btn-primary btn-lg" onclick="window.print()">
                             <i class="bi bi-printer"></i> Print This Script
                         </button>
-                        <a href="/dashboard" class="btn btn-secondary btn-lg">
-                            <i class="bi bi-arrow-left"></i> Back to Dashboard
+                        <a href="{{ url_for('investor_dashboard') }}" class="btn btn-success btn-lg mx-2">
+                            <i class="bi bi-graph-up-arrow"></i> Investor Dashboard
+                        </a>
+                        <a href="{{ url_for('roadmap') }}" class="btn btn-outline-primary btn-lg">
+                            <i class="bi bi-map"></i> Roadmap
                         </a>
                     </div>
-                        </div><!-- End general tab-pane -->
-                    </div><!-- End tab-content -->
+                    
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -336,19 +237,9 @@
 </div>
 
 <style>
-    blockquote {
-        border-left: 4px solid #007bff;
-        padding-left: 20px;
-        font-style: italic;
-        background: #f8f9fa;
-        padding: 15px 20px;
-        margin: 15px 0;
-    }
-    .card-header h5 {
-        margin: 0;
-    }
     @media print {
-        .btn, nav, .sidebar { display: none; }
+        .btn, nav, .sidebar { display: none !important; }
+        .card { page-break-inside: avoid; }
     }
 </style>
 {% endblock %}

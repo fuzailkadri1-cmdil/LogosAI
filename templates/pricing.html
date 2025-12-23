@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pricing - Call Center Automation</title>
+    <title>Pricing - Logos AI</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
@@ -39,16 +39,20 @@
             box-shadow: 0 20px 60px rgba(0,0,0,0.25);
         }
         .pricing-card.featured {
-            border: 3px solid #1e40af;
+            border: 3px solid #10b981;
             transform: scale(1.05);
         }
-        .pricing-card.featured .badge {
-            background: linear-gradient(135deg, #1e40af 0%, #10b981 100%);
+        .pricing-card.featured .badge-featured {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
             padding: 8px 20px;
             border-radius: 20px;
             font-size: 0.85rem;
             margin-bottom: 15px;
+        }
+        .pricing-card.future-plan {
+            opacity: 0.85;
+            border: 2px dashed #6366f1;
         }
         .plan-name {
             font-size: 1.5rem;
@@ -85,8 +89,13 @@
             border-bottom: none;
         }
         .feature-list i {
-            color: #28a745;
             margin-right: 10px;
+        }
+        .feature-list .available i {
+            color: #28a745;
+        }
+        .feature-list .future i {
+            color: #6366f1;
         }
         .feature-list .not-included i {
             color: #ddd;
@@ -105,12 +114,12 @@
             transition: all 0.3s ease;
         }
         .cta-button.primary {
-            background: linear-gradient(135deg, #1e40af 0%, #10b981 100%);
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
         }
         .cta-button.primary:hover {
             transform: scale(1.05);
-            box-shadow: 0 5px 20px rgba(30, 64, 175, 0.4);
+            box-shadow: 0 5px 20px rgba(16, 185, 129, 0.4);
         }
         .cta-button.secondary {
             background: white;
@@ -121,105 +130,130 @@
             background: #1e40af;
             color: white;
         }
-        .savings-note {
-            text-align: center;
+        .future-badge {
+            background: linear-gradient(135deg, #6366f1, #a855f7);
             color: white;
-            margin-top: 30px;
-            font-size: 1.1rem;
+            font-size: 0.6rem;
+            padding: 2px 6px;
+            border-radius: 8px;
+            margin-left: 5px;
+            font-weight: 600;
         }
-        .savings-note .highlight {
-            background: rgba(255,255,255,0.2);
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-weight: bold;
+        .pilot-badge {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            font-size: 0.7rem;
+            padding: 3px 8px;
+            border-radius: 8px;
+            display: inline-block;
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="pricing-header">
-            <h1>Simple, Transparent Pricing</h1>
-            <p>Start automating your support calls today. No hidden fees, cancel anytime.</p>
+            <span class="pilot-badge"><i class="bi bi-star-fill"></i> PILOT PRICING</span>
+            <h1>Simple, Honest Pricing</h1>
+            <p>Start with our pilot program. Pay only for what's available today.</p>
         </div>
 
         <div class="row g-4">
-            <!-- Starter Plan -->
-            <div class="col-md-4">
-                <div class="pricing-card">
-                    <div class="plan-name">Starter</div>
-                    <div class="plan-price">$99<small>/month</small></div>
-                    <div class="plan-description">Perfect for small businesses getting started with automation</div>
-                    
-                    <ul class="feature-list">
-                        <li><i class="bi bi-check-circle-fill"></i> Up to 500 calls/month</li>
-                        <li><i class="bi bi-check-circle-fill"></i> 1 phone number</li>
-                        <li><i class="bi bi-check-circle-fill"></i> Basic intent detection</li>
-                        <li><i class="bi bi-check-circle-fill"></i> Voicemail recording</li>
-                        <li><i class="bi bi-check-circle-fill"></i> Call analytics dashboard</li>
-                        <li><i class="bi bi-check-circle-fill"></i> Email support</li>
-                        <li class="not-included"><i class="bi bi-x-circle-fill"></i> Industry templates</li>
-                        <li class="not-included"><i class="bi bi-x-circle-fill"></i> Listen Mode analytics</li>
-                        <li class="not-included"><i class="bi bi-x-circle-fill"></i> Priority support</li>
-                    </ul>
-                    
-                    <button class="cta-button secondary" onclick="window.location.href='/register'">Get Started</button>
-                </div>
-            </div>
-
-            <!-- Professional Plan (Featured) -->
             <div class="col-md-4">
                 <div class="pricing-card featured">
-                    <div class="badge">MOST POPULAR</div>
-                    <div class="plan-name">Professional</div>
-                    <div class="plan-price">$299<small>/month</small></div>
-                    <div class="plan-description">For growing businesses that need advanced automation</div>
+                    <div class="badge-featured">PILOT PROGRAM - AVAILABLE NOW</div>
+                    <div class="plan-name">Pilot</div>
+                    <div class="plan-price">$99<small>/month</small></div>
+                    <div class="plan-description">Perfect for testing with real customers and proving ROI</div>
                     
                     <ul class="feature-list">
-                        <li><i class="bi bi-check-circle-fill"></i> Up to 2,500 calls/month</li>
-                        <li><i class="bi bi-check-circle-fill"></i> 3 phone numbers</li>
-                        <li><i class="bi bi-check-circle-fill"></i> Advanced AI intent detection</li>
-                        <li><i class="bi bi-check-circle-fill"></i> Voicemail & transcription</li>
-                        <li><i class="bi bi-check-circle-fill"></i> Real-time analytics & ROI</li>
-                        <li><i class="bi bi-check-circle-fill"></i> Listen Mode recommendations</li>
-                        <li><i class="bi bi-check-circle-fill"></i> Industry templates</li>
-                        <li><i class="bi bi-check-circle-fill"></i> Conversation preview tester</li>
-                        <li><i class="bi bi-check-circle-fill"></i> Priority email & chat support</li>
+                        <li class="available"><i class="bi bi-check-circle-fill"></i> Up to 500 calls/month</li>
+                        <li class="available"><i class="bi bi-check-circle-fill"></i> 1 Twilio phone number</li>
+                        <li class="available"><i class="bi bi-check-circle-fill"></i> Order status lookup (CSV)</li>
+                        <li class="available"><i class="bi bi-check-circle-fill"></i> Store hours & FAQs</li>
+                        <li class="available"><i class="bi bi-check-circle-fill"></i> Human handoff/escalation</li>
+                        <li class="available"><i class="bi bi-check-circle-fill"></i> Voicemail recording</li>
+                        <li class="available"><i class="bi bi-check-circle-fill"></i> Analytics dashboard</li>
+                        <li class="available"><i class="bi bi-check-circle-fill"></i> Email support</li>
                     </ul>
                     
-                    <button class="cta-button primary" onclick="window.location.href='/register'">Get Started</button>
+                    <button class="cta-button primary" onclick="window.location.href='/register'">Start Pilot</button>
                 </div>
             </div>
 
-            <!-- Enterprise Plan -->
             <div class="col-md-4">
-                <div class="pricing-card">
+                <div class="pricing-card future-plan">
+                    <span class="future-badge">COMING Q1 2025</span>
+                    <div class="plan-name">Professional</div>
+                    <div class="plan-price">$299<small>/month</small></div>
+                    <div class="plan-description">For growing businesses with advanced automation needs</div>
+                    
+                    <ul class="feature-list">
+                        <li class="future"><i class="bi bi-clock-fill"></i> Up to 2,500 calls/month</li>
+                        <li class="future"><i class="bi bi-clock-fill"></i> 3 phone numbers</li>
+                        <li class="future"><i class="bi bi-clock-fill"></i> Shopify integration</li>
+                        <li class="future"><i class="bi bi-clock-fill"></i> Stripe integration</li>
+                        <li class="future"><i class="bi bi-clock-fill"></i> Returns & exchanges</li>
+                        <li class="future"><i class="bi bi-clock-fill"></i> Subscription management</li>
+                        <li class="future"><i class="bi bi-clock-fill"></i> Advanced analytics</li>
+                        <li class="future"><i class="bi bi-clock-fill"></i> Priority support</li>
+                    </ul>
+                    
+                    <button class="cta-button secondary" disabled>Coming Soon</button>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="pricing-card future-plan">
+                    <span class="future-badge">COMING Q2 2025</span>
                     <div class="plan-name">Enterprise</div>
                     <div class="plan-price">Custom</div>
                     <div class="plan-description">For large organizations with complex requirements</div>
                     
                     <ul class="feature-list">
-                        <li><i class="bi bi-check-circle-fill"></i> Unlimited calls</li>
-                        <li><i class="bi bi-check-circle-fill"></i> Unlimited phone numbers</li>
-                        <li><i class="bi bi-check-circle-fill"></i> Custom AI training</li>
-                        <li><i class="bi bi-check-circle-fill"></i> Advanced integrations (Salesforce, Zendesk)</li>
-                        <li><i class="bi bi-check-circle-fill"></i> Custom analytics & reporting</li>
-                        <li><i class="bi bi-check-circle-fill"></i> White-label options</li>
-                        <li><i class="bi bi-check-circle-fill"></i> Dedicated account manager</li>
-                        <li><i class="bi bi-check-circle-fill"></i> SLA guarantee (99.9% uptime)</li>
-                        <li><i class="bi bi-check-circle-fill"></i> 24/7 phone & priority support</li>
+                        <li class="future"><i class="bi bi-clock-fill"></i> Unlimited calls</li>
+                        <li class="future"><i class="bi bi-clock-fill"></i> Unlimited phone numbers</li>
+                        <li class="future"><i class="bi bi-clock-fill"></i> Custom AI training</li>
+                        <li class="future"><i class="bi bi-clock-fill"></i> Salesforce/Zendesk integration</li>
+                        <li class="future"><i class="bi bi-clock-fill"></i> Custom analytics</li>
+                        <li class="future"><i class="bi bi-clock-fill"></i> White-label options</li>
+                        <li class="future"><i class="bi bi-clock-fill"></i> Dedicated account manager</li>
+                        <li class="future"><i class="bi bi-clock-fill"></i> 24/7 phone support</li>
                     </ul>
                     
-                    <button class="cta-button secondary" onclick="alert('Please contact sales@callcenterautomation.com for enterprise pricing')">Contact Sales</button>
+                    <button class="cta-button secondary" disabled>Coming Soon</button>
                 </div>
             </div>
         </div>
 
-        <div class="savings-note">
-            <span class="highlight">💰 Save 20% with annual billing</span> • All plans include 30-day free trial
-        </div>
-        
-        <div class="text-center mt-3" style="color: rgba(255,255,255,0.85); font-size: 0.95rem;">
-            <i class="bi bi-check-circle me-1"></i> AI usage included in all plans - no hidden API fees
+        <div class="text-center mt-5">
+            <div class="card bg-white p-4" style="border-radius: 15px;">
+                <h4 class="mb-3">What's Available Today in the Pilot</h4>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-success"><i class="bi bi-check-circle-fill"></i> Current Capabilities</h6>
+                        <ul class="text-start small">
+                            <li>AI-powered order status lookup via CSV</li>
+                            <li>Store hours and FAQ responses</li>
+                            <li>Pickup readiness inquiries</li>
+                            <li>Intelligent escalation to human agents</li>
+                            <li>Real-time call analytics dashboard</li>
+                            <li>Voicemail recording and transcription</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted"><i class="bi bi-clock-fill"></i> Future Development</h6>
+                        <ul class="text-start small text-muted">
+                            <li>Direct Shopify/WooCommerce integration</li>
+                            <li>Returns and exchanges processing</li>
+                            <li>Subscription management</li>
+                            <li>Multi-language support</li>
+                            <li>Healthcare & transportation verticals</li>
+                            <li>Advanced CRM integrations</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="text-center mt-4">

@@ -8,6 +8,7 @@
         <div class="col-md-3">
             <div class="sidebar">
                 <div class="p-3">
+                    <img src="{{ url_for('static', filename='images/logos-ai-logo.png') }}" alt="Logos AI" style="height: 40px; margin-bottom: 10px;">
                     <h6 class="text-white-50">{{ company.name }}</h6>
                     <hr class="bg-white">
                 </div>
@@ -41,8 +42,11 @@
                 {% if current_user.is_admin %}
                 <hr class="bg-white">
                 <div class="p-3">
-                    <h6 class="text-white-50">Investor Tools</h6>
+                    <h6 class="text-white-50">Admin & Investor Tools</h6>
                 </div>
+                <a href="{{ url_for('pilots') }}">
+                    <i class="bi bi-people"></i> Pilot Customers
+                </a>
                 <a href="{{ url_for('roadmap') }}">
                     <i class="bi bi-map"></i> Product Roadmap
                 </a>
@@ -61,9 +65,6 @@
                 <a href="{{ url_for('roi_calculator') }}">
                     <i class="bi bi-calculator"></i> ROI Calculator
                 </a>
-                <a href="{{ url_for('pilots') }}">
-                    <i class="bi bi-people"></i> Pilot Customers
-                </a>
                 {% endif %}
                 <hr class="bg-white">
                 <a href="{{ url_for('logout') }}">
@@ -73,7 +74,14 @@
         </div>
         
         <div class="col-md-9">
-            <h2 class="mb-4">Dashboard</h2>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Dashboard</h2>
+                <span class="badge bg-success"><i class="bi bi-check-circle"></i> Prototype Active</span>
+            </div>
+            
+            <div class="alert alert-info mb-4">
+                <i class="bi bi-info-circle"></i> <strong>Pilot Mode:</strong> Your AI phone system is ready for testing. Upload order data via <a href="{{ url_for('pilots') }}">Pilot Customers</a> to enable order status lookups.
+            </div>
             
             <div class="row">
                 <div class="col-md-4">
@@ -181,6 +189,41 @@
                         </div>
                         <div class="card-body">
                             <canvas id="dailyCallsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card" style="border: 2px dashed #6366f1;">
+                        <div class="card-header d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #f5f3ff, #ede9fe);">
+                            <h5 class="mb-0"><i class="bi bi-bar-chart-line"></i> Advanced Analytics</h5>
+                            <span class="future-badge">Future Feature</span>
+                        </div>
+                        <div class="card-body text-center py-4" style="opacity: 0.7;">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <i class="bi bi-emoji-smile display-4 text-muted"></i>
+                                    <p class="text-muted mb-0">Sentiment Analysis</p>
+                                    <small class="text-muted">Q2 2025</small>
+                                </div>
+                                <div class="col-md-3">
+                                    <i class="bi bi-graph-up-arrow display-4 text-muted"></i>
+                                    <p class="text-muted mb-0">Trend Predictions</p>
+                                    <small class="text-muted">Q2 2025</small>
+                                </div>
+                                <div class="col-md-3">
+                                    <i class="bi bi-file-earmark-pdf display-4 text-muted"></i>
+                                    <p class="text-muted mb-0">Custom Reports</p>
+                                    <small class="text-muted">Q2 2025</small>
+                                </div>
+                                <div class="col-md-3">
+                                    <i class="bi bi-bell display-4 text-muted"></i>
+                                    <p class="text-muted mb-0">Alert System</p>
+                                    <small class="text-muted">Q2 2025</small>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

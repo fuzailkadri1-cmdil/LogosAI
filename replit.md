@@ -1,45 +1,87 @@
-# Call Center Automation Platform
+# Logos AI - SMB-First AI Phone System
 
 ## Overview
-This is a multi-tenant SaaS platform designed to automate call centers using AI-powered voice assistants. It integrates with various telephony providers (Twilio, Cisco Webex, SIP/VoIP), offers intelligent call routing with intent detection, and provides comprehensive analytics. The platform aims to revolutionize call center operations by significantly increasing automation rates, reducing per-call costs, and shortening setup times compared to traditional solutions. Key capabilities include live AI conversations, multi-turn order lookup, intelligent escalation, and detailed performance metrics. The business vision is to capture a significant share of the North American call center automation market by offering an accessible, performant, and cost-effective solution for businesses of all sizes, with a particular focus on fast-growing sectors like healthcare, retail/eCommerce, and IT/Telecom.
+Logos AI is an AI-powered phone system designed for small and medium retail/eCommerce businesses. It automates repetitive inbound calls like order status, pickup readiness, store hours, and FAQs, while intelligently escalating complex issues to human agents.
+
+## Current State (Prototype)
+**Status:** Live and demo-ready for pilot customers
+
+### What Works Today
+- AI order status lookup via CSV upload
+- Store hours and FAQ responses
+- Pickup readiness inquiries
+- Intelligent human handoff/escalation
+- Twilio phone integration
+- Real-time analytics dashboard
+- Pilot customer management with CSV order upload
+- Voicemail recording system
+
+### Target Customers
+- SMB retail and eCommerce businesses
+- 10-500 employees
+- Looking to reduce call volume on repetitive queries
+
+## Architecture
+
+### Tech Stack
+- **Backend:** Python Flask
+- **Database:** PostgreSQL (via SQLAlchemy)
+- **AI:** OpenAI GPT-4o-mini
+- **Telephony:** Twilio
+- **Frontend:** Bootstrap 5, Chart.js
+
+### Key Files
+- `app.py` - Main Flask application with all routes
+- `models.py` - SQLAlchemy database models
+- `ai_voice_agent.py` - OpenAI-powered voice AI agent
+- `call_engine.py` - Call flow logic and intent routing
+- `providers.py` - Telephony provider abstraction
+
+### Templates
+- `templates/index.html` - Landing page (investor-focused)
+- `templates/dashboard.html` - Main user dashboard
+- `templates/pilots.html` - Pilot customer management
+- `templates/roadmap.html` - Product roadmap
+- `templates/investor_dashboard.html` - Investor metrics
+- `templates/pricing.html` - Pricing page
+- `templates/settings.html` - Company settings
+
+## Roadmap
+
+### Current (Phase 1) - Available Now
+- Retail/eCommerce focus
+- CSV order data upload
+- 4 core intents (OrderStatus, StoreHours, FAQs, Escalation)
+- Twilio integration
+- Analytics dashboard
+
+### Q1 2025 (Phase 2) - Planned
+- Shopify integration
+- Stripe integration
+- Returns & exchanges
+- Subscription management
+
+### Q2-Q4 2025 (Phase 3) - Future
+- Healthcare vertical
+- Transportation vertical
+- Salesforce/Zendesk integrations
+- Multi-language support
+- Advanced AI training
+
+## Running the Application
+
+The Flask server runs on port 5000:
+```bash
+python main.py
+```
+
+## Environment Variables
+- `DATABASE_URL` - PostgreSQL connection string
+- `SESSION_SECRET` - Flask session secret
+- OpenAI API key is managed via Replit integrations
 
 ## User Preferences
-None specified yet.
-
-## System Architecture
-The platform is built on Python 3.11 using Flask and Flask-SQLAlchemy, with PostgreSQL database (Neon-backed via Replit). It features a multi-tenant architecture managing companies, users, integrations, call logs, and voicemails.
-
-**UI/UX Decisions:**
-- The frontend utilizes Bootstrap 5, Chart.js, and Vanilla JavaScript.
-- Design incorporates a professional enterprise blue color scheme (`#1e40af`, `#1e3a8a`, `#10b981`) across all templates.
-- Features a redesigned landing page with industry-specific sections, conversational UI demos, and an interactive Conversation Preview/Tester.
-- Includes an ROI Calculator tool and Industry Templates for quick setup.
-- Navigation is enhanced for quick access to all features.
-
-**Technical Implementations & Feature Specifications:**
-- **Pluggable Telephony Provider Abstraction:** Supports Twilio, Cisco Webex, and generic SIP/VoIP providers, allowing dynamic webhook routing to the correct company based on phone number.
-- **AI-powered Call Flow Engine:** Employs intent detection (OrderStatus, StoreHours, ConnectAgent, Voicemail) for both DTMF and speech input.
-- **AI Voice Agent:** Utilizes OpenAI GPT-4o-mini for natural language understanding and human-like responses. It supports multi-turn conversations, maintains conversation state (initial, waiting_for_order_number, offering_more_help, goodbye), and handles flexible order number matching. Optimized for speed with: shorter system prompts, reduced max_tokens (80), cached responses for common intents (store hours, goodbye, escalation), and limited conversation history to reduce API latency.
-- **Intelligent Escalation:** AI automatically escalates to human agents for sensitive topics, low confidence scores (<0.5), or explicit requests.
-- **Order Database Integration:** Includes a mock order database (`orders_db.py`) with 9 demo-ready orders using single-digit numbers (1-9) for optimal Twilio speech recognition. All orders feature full delivery addresses for realistic investor demos.
-- **Speech Recognition Number Normalization:** Advanced `normalize_spoken_numbers()` function converts Twilio speech transcriptions ("one", "two", "three") to digits ("1", "2", "3"). Features two-tier pattern matching to prevent false positives (e.g., "I have 2 questions" won't extract "2"). Handles spoken numbers, comma-separated digits, and requires explicit order context ("order 1", "number is 1", "it's 1") for single-digit extractions.
-- **Exact-Match Order Lookup:** `lookup_order()` uses exact matching for single-digit orders to prevent false positives (e.g., "111" won't match order "1"). Flexible substring matching is reserved for multi-digit orders (3+ characters).
-- **Analytics Dashboard:** Real-time metrics and Chart.js visualizations display AI performance (average confidence, conversation turns, escalation rate, AI resolution rate) and overall call center performance.
-- **Voicemail System:** Supports recording, storage, and transcription per company.
-- **Onboarding Wizard:** A Bootstrap-styled interface guides setup of telephony providers.
-- **Call Simulation Endpoint:** Allows testing without requiring live phone calls.
-- **Investor-Ready Tools:** Includes a professional pricing page, a comprehensive demo script, a Twilio setup guide, an investor dashboard with market metrics and competitive analysis, and a Product Roadmap page (`/roadmap`) with honest 3-phase feature breakdown (MVP Complete: 12 features, Q1 Priority: 14 integrations, Full Platform: 20 features) with investment milestone disclaimers.
-- **Legal Documentation:** Professional Terms of Service (`/terms`) and Privacy Policy (`/privacy`) pages covering AI disclaimers, call recording consent, GDPR/CCPA compliance, data retention policies, and security measures. Footer links on all pages.
-
-**System Design Choices:**
-- **Robust Error Handling:** All webhooks return valid TwiML even on failures to prevent call drops.
-- **Conversation Tracking:** Full dialogue history, confidence scores, and turn counts are stored in the database.
-- **Dynamic Configuration:** Company-specific settings (greeting message, menu options, business hours, escalation numbers) are configurable per tenant.
-- **Authentication:** Uses Replit Auth (OpenID Connect) for secure enterprise login via Google, GitHub, Apple, or email. Flask-Login and Flask-Dance handle session management.
-- **Admin Access Control:** First user to register automatically becomes admin with access to investor tools (demo script, investor dashboard, ROI calculator, Twilio setup). Regular customers only see the standard dashboard.
-- **Call Duration Tracking:** Duration is automatically calculated from call start to completion timestamps.
-
-## External Dependencies
-- **Telephony Services:** Twilio (SDK integrated), Cisco Webex, generic SIP/VoIP providers.
-- **AI/NLP:** OpenAI GPT-4o-mini.
-- **Frontend Libraries:** Bootstrap 5, Chart.js.
+- Company name: Logos AI
+- Focus: SMB retail/eCommerce
+- Honest about capabilities vs future features
+- Clear "Future Feature" badges on upcoming functionality

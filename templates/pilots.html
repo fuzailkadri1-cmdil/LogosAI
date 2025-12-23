@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Pilot Customers - {{ company.name }}{% endblock %}
+{% block title %}Pilot Customers - Logos AI{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-4">
@@ -8,6 +8,7 @@
         <div class="col-md-3">
             <div class="sidebar">
                 <div class="p-3">
+                    <img src="{{ url_for('static', filename='images/logos-ai-logo.png') }}" alt="Logos AI" style="height: 40px; margin-bottom: 10px;">
                     <h6 class="text-white-50">{{ company.name }}</h6>
                     <hr class="bg-white">
                 </div>
@@ -52,11 +53,15 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
                     <h2><i class="bi bi-people"></i> Pilot Customers</h2>
-                    <p class="lead text-muted mb-0">Manage pilot customers and their order data</p>
+                    <p class="lead text-muted mb-0">Manage pilot customers and upload their order data for real-world testing</p>
                 </div>
                 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPilotModal">
                     <i class="bi bi-plus-circle"></i> Add Pilot
                 </button>
+            </div>
+
+            <div class="alert alert-success mb-4">
+                <i class="bi bi-lightbulb"></i> <strong>Pilot Program:</strong> Add retail/eCommerce pilot customers, upload their order CSV, and let them test your AI phone system with real calls. Track results to prove ROI to investors.
             </div>
 
             {% with messages = get_flashed_messages(with_categories=true) %}
@@ -105,8 +110,13 @@
                         <h5 class="mb-0">
                             <i class="bi bi-building"></i> {{ pilot.name }}
                             <span class="badge bg-{{ 'success' if pilot.status == 'active' else 'secondary' }}">{{ pilot.status }}</span>
+                            {% if pilot.industry == 'eCommerce' %}
+                            <span class="badge bg-primary">Retail/eCommerce</span>
+                            {% elif pilot.industry %}
+                            <span class="badge bg-info">{{ pilot.industry }}</span>
+                            {% endif %}
                         </h5>
-                        <small class="text-muted">{{ pilot.industry or 'Industry not specified' }} | Started {{ pilot.start_date.strftime('%b %d, %Y') }}</small>
+                        <small class="text-muted">Started {{ pilot.start_date.strftime('%b %d, %Y') }}</small>
                     </div>
                     <div>
                         <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editModal{{ pilot.id }}">
@@ -139,7 +149,7 @@
                     
                     {% if pilot.orders %}
                     <hr>
-                    <h6>Recent Orders ({{ pilot.orders|length }} total)</h6>
+                    <h6>Recent Orders ({{ pilot.orders|length }} total) <span class="badge bg-success">Ready for AI Lookup</span></h6>
                     <div class="table-responsive">
                         <table class="table table-sm">
                             <thead>
@@ -169,8 +179,8 @@
                     </div>
                     {% else %}
                     <div class="alert alert-warning mt-3 mb-0">
-                        <i class="bi bi-exclamation-triangle"></i> No orders uploaded yet. 
-                        <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#uploadModal{{ pilot.id }}">Upload CSV</button>
+                        <i class="bi bi-exclamation-triangle"></i> No orders uploaded yet. Upload a CSV to enable order status lookups for this pilot.
+                        <button class="btn btn-sm btn-warning ms-2" data-bs-toggle="modal" data-bs-target="#uploadModal{{ pilot.id }}">Upload CSV</button>
                     </div>
                     {% endif %}
                 </div>
@@ -194,6 +204,9 @@
                                     <code>order_id,customer_name,status,tracking_number,estimated_delivery,delivery_address,order_total</code><br><br>
                                     <strong>Example:</strong><br>
                                     <code>12345,John Smith,shipped,1Z999AA10123456784,Dec 15,123 Main St,49.99</code>
+                                </div>
+                                <div class="alert alert-success">
+                                    <i class="bi bi-check-circle"></i> Once uploaded, customers can call and ask "Where is my order?" and the AI will look up their order by order number.
                                 </div>
                             </div>
                             <div class="modal-footer">
@@ -222,13 +235,14 @@
                                     <label class="form-label">Industry</label>
                                     <select class="form-select" name="industry">
                                         <option value="">Select industry...</option>
-                                        <option value="eCommerce" {{ 'selected' if pilot.industry == 'eCommerce' }}>eCommerce / Retail</option>
-                                        <option value="Healthcare" {{ 'selected' if pilot.industry == 'Healthcare' }}>Healthcare</option>
-                                        <option value="Transportation" {{ 'selected' if pilot.industry == 'Transportation' }}>Transportation / Logistics</option>
-                                        <option value="IT/Telecom" {{ 'selected' if pilot.industry == 'IT/Telecom' }}>IT / Telecom</option>
-                                        <option value="Financial" {{ 'selected' if pilot.industry == 'Financial' }}>Financial Services</option>
+                                        <option value="eCommerce" {{ 'selected' if pilot.industry == 'eCommerce' }}>eCommerce / Retail (Current Focus)</option>
+                                        <option value="Healthcare" {{ 'selected' if pilot.industry == 'Healthcare' }}>Healthcare (Future)</option>
+                                        <option value="Transportation" {{ 'selected' if pilot.industry == 'Transportation' }}>Transportation / Logistics (Future)</option>
+                                        <option value="IT/Telecom" {{ 'selected' if pilot.industry == 'IT/Telecom' }}>IT / Telecom (Future)</option>
+                                        <option value="Financial" {{ 'selected' if pilot.industry == 'Financial' }}>Financial Services (Future)</option>
                                         <option value="Other" {{ 'selected' if pilot.industry == 'Other' }}>Other</option>
                                     </select>
+                                    <small class="text-muted">Retail/eCommerce is currently supported. Other industries coming soon.</small>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Status</label>
@@ -271,7 +285,7 @@
                 <div class="card-body text-center py-5">
                     <i class="bi bi-people" style="font-size: 4rem; color: #ccc;"></i>
                     <h4 class="mt-3">No Pilot Customers Yet</h4>
-                    <p class="text-muted">Add your first pilot customer to start tracking real-world results.</p>
+                    <p class="text-muted">Add your first retail/eCommerce pilot customer to start testing with real calls and proving ROI.</p>
                     <button class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#addPilotModal">
                         <i class="bi bi-plus-circle"></i> Add Your First Pilot
                     </button>
@@ -291,6 +305,9 @@
             </div>
             <form action="{{ url_for('add_pilot') }}" method="POST">
                 <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> Currently optimized for retail & eCommerce businesses. Other industries coming in future releases.
+                    </div>
                     <div class="mb-3">
                         <label class="form-label">Company Name *</label>
                         <input type="text" class="form-control" name="name" required placeholder="Acme Electronics">
@@ -299,11 +316,11 @@
                         <label class="form-label">Industry</label>
                         <select class="form-select" name="industry">
                             <option value="">Select industry...</option>
-                            <option value="eCommerce">eCommerce / Retail</option>
-                            <option value="Healthcare">Healthcare</option>
-                            <option value="Transportation">Transportation / Logistics</option>
-                            <option value="IT/Telecom">IT / Telecom</option>
-                            <option value="Financial">Financial Services</option>
+                            <option value="eCommerce" selected>eCommerce / Retail (Current Focus)</option>
+                            <option value="Healthcare">Healthcare (Future)</option>
+                            <option value="Transportation">Transportation / Logistics (Future)</option>
+                            <option value="IT/Telecom">IT / Telecom (Future)</option>
+                            <option value="Financial">Financial Services (Future)</option>
                             <option value="Other">Other</option>
                         </select>
                     </div>

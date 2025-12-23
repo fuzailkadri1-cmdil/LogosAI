@@ -8,6 +8,7 @@
         <div class="col-md-3">
             <div class="sidebar">
                 <div class="p-3">
+                    <img src="{{ url_for('static', filename='images/logos-ai-logo.png') }}" alt="Logos AI" style="height: 40px; margin-bottom: 10px;">
                     <h6 class="text-white-50">{{ company.name }}</h6>
                     <hr class="bg-white">
                 </div>
@@ -33,8 +34,9 @@
             <h2 class="mb-4">Company Settings</h2>
             
             <div class="card mb-4">
-                <div class="card-header">
+                <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Call Flow Configuration</h5>
+                    <span class="badge bg-success"><i class="bi bi-check-circle"></i> Available Now</span>
                 </div>
                 <div class="card-body">
                     <form method="POST">
@@ -84,9 +86,10 @@
                 </div>
             </div>
             
-            <div class="card">
-                <div class="card-header">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Active Integrations</h5>
+                    <span class="badge bg-success"><i class="bi bi-check-circle"></i> Available Now</span>
                 </div>
                 <div class="card-body">
                     {% if integrations %}
@@ -112,6 +115,106 @@
                     {% else %}
                         <p class="text-muted mb-0">No integrations configured. <a href="{{ url_for('onboarding') }}">Add one now</a></p>
                     {% endif %}
+                </div>
+            </div>
+
+            <div class="card mb-4" style="border: 2px dashed #6366f1;">
+                <div class="card-header d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #f5f3ff, #ede9fe);">
+                    <h5 class="mb-0"><i class="bi bi-stars"></i> Advanced Settings</h5>
+                    <span class="future-badge">Future Feature</span>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-3">These advanced features are planned for future releases:</p>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card mb-3" style="opacity: 0.7;">
+                                <div class="card-body">
+                                    <h6 class="text-muted"><i class="bi bi-translate"></i> Multi-Language Support <span class="future-badge">Q2 2025</span></h6>
+                                    <p class="small text-muted mb-0">Support for Spanish, French, and other languages</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card mb-3" style="opacity: 0.7;">
+                                <div class="card-body">
+                                    <h6 class="text-muted"><i class="bi bi-mic"></i> Voice Customization <span class="future-badge">Q2 2025</span></h6>
+                                    <p class="small text-muted mb-0">Custom voice selection and tone settings</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card mb-3" style="opacity: 0.7;">
+                                <div class="card-body">
+                                    <h6 class="text-muted"><i class="bi bi-diagram-3"></i> Custom Workflows <span class="future-badge">Q3 2025</span></h6>
+                                    <p class="small text-muted mb-0">Build custom call flows with visual editor</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card mb-3" style="opacity: 0.7;">
+                                <div class="card-body">
+                                    <h6 class="text-muted"><i class="bi bi-sliders"></i> AI Training <span class="future-badge">Q3 2025</span></h6>
+                                    <p class="small text-muted mb-0">Train AI on your specific business terminology</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="border: 2px dashed #6366f1;">
+                <div class="card-header d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #f5f3ff, #ede9fe);">
+                    <h5 class="mb-0"><i class="bi bi-plug"></i> Future Integrations</h5>
+                    <span class="future-badge">Coming Soon</span>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-3">These integrations are on our roadmap:</p>
+                    
+                    <div class="row text-center">
+                        <div class="col-4 col-md-2 mb-3">
+                            <div class="p-2 rounded" style="background: #f8f9fa; opacity: 0.7;">
+                                <i class="bi bi-bag display-6 text-muted"></i>
+                                <p class="small text-muted mb-0">Shopify</p>
+                                <small class="text-muted">Q1 2025</small>
+                            </div>
+                        </div>
+                        <div class="col-4 col-md-2 mb-3">
+                            <div class="p-2 rounded" style="background: #f8f9fa; opacity: 0.7;">
+                                <i class="bi bi-credit-card display-6 text-muted"></i>
+                                <p class="small text-muted mb-0">Stripe</p>
+                                <small class="text-muted">Q1 2025</small>
+                            </div>
+                        </div>
+                        <div class="col-4 col-md-2 mb-3">
+                            <div class="p-2 rounded" style="background: #f8f9fa; opacity: 0.7;">
+                                <i class="bi bi-calendar display-6 text-muted"></i>
+                                <p class="small text-muted mb-0">Calendly</p>
+                                <small class="text-muted">Q1 2025</small>
+                            </div>
+                        </div>
+                        <div class="col-4 col-md-2 mb-3">
+                            <div class="p-2 rounded" style="background: #f8f9fa; opacity: 0.7;">
+                                <i class="bi bi-cloud display-6 text-muted"></i>
+                                <p class="small text-muted mb-0">Salesforce</p>
+                                <small class="text-muted">Q2 2025</small>
+                            </div>
+                        </div>
+                        <div class="col-4 col-md-2 mb-3">
+                            <div class="p-2 rounded" style="background: #f8f9fa; opacity: 0.7;">
+                                <i class="bi bi-headset display-6 text-muted"></i>
+                                <p class="small text-muted mb-0">Zendesk</p>
+                                <small class="text-muted">Q2 2025</small>
+                            </div>
+                        </div>
+                        <div class="col-4 col-md-2 mb-3">
+                            <div class="p-2 rounded" style="background: #f8f9fa; opacity: 0.7;">
+                                <i class="bi bi-plus-circle display-6 text-muted"></i>
+                                <p class="small text-muted mb-0">More</p>
+                                <small class="text-muted">Planned</small>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
