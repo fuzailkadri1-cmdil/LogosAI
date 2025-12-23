@@ -1024,6 +1024,24 @@ def add_pilot():
     flash(f'Pilot customer "{pilot.name}" added successfully!', 'success')
     return redirect(url_for('pilots'))
 
+@app.route('/pilots/<int:pilot_id>/edit', methods=['POST'])
+@require_admin
+def edit_pilot(pilot_id):
+    pilot = PilotCustomer.query.get_or_404(pilot_id)
+    
+    pilot.name = request.form.get('name', pilot.name)
+    pilot.industry = request.form.get('industry', pilot.industry)
+    pilot.status = request.form.get('status', pilot.status)
+    pilot.contact_email = request.form.get('contact_email', pilot.contact_email)
+    pilot.contact_phone = request.form.get('contact_phone', pilot.contact_phone)
+    pilot.twilio_number = request.form.get('twilio_number', pilot.twilio_number)
+    pilot.notes = request.form.get('notes', pilot.notes)
+    
+    db.session.commit()
+    
+    flash(f'Pilot "{pilot.name}" updated successfully!', 'success')
+    return redirect(url_for('pilots'))
+
 @app.route('/pilots/<int:pilot_id>/upload', methods=['POST'])
 @require_admin
 def upload_pilot_orders(pilot_id):
