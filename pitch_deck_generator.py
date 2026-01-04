@@ -193,11 +193,11 @@ def create_pitch_deck():
     
     add_content_slide("Our Solution", [
         "AI system that answers business phone calls for common questions",
-        "Currently handles: order status, store hours, and pickup readiness automatically",
+        "2 AI intents live today: order status (via CSV) and store hours",
         "Intelligently escalates complex issues to human agents",
         "Simple setup: upload your order data via CSV, customize greetings, go live",
         "Integrates with Twilio for reliable telephony",
-        "Real-time analytics dashboard and Listen Mode to track performance"
+        "Listen Mode analytics and voicemail recording included"
     ])
     
     add_content_slide("Why Logos AI is Different", [
@@ -268,11 +268,11 @@ def create_pitch_deck():
     
     add_content_slide("Traction & Proof Points", [
         "Live working prototype ready for pilot customers",
-        "3 intents working today: order status, store hours, pickup readiness",
+        "2 AI intents working today: order status (CSV), store hours",
         "Twilio telephony integration operational",
-        "Listen Mode analytics for call pattern insights",
-        "Voicemail recording system active",
-        "FAQ responses and Shopify integration planned for Q1 2025"
+        "Human handoff + voicemail + Listen Mode analytics all functional",
+        "FAQ responses planned for Q1 2025",
+        "Shopify integration planned for Q1 2025"
     ])
     
     add_two_column_slide(

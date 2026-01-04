@@ -1,15 +1,14 @@
 # Logos AI - SMB-First AI Phone System
 
 ## Overview
-Logos AI is an AI-powered phone system designed for small and medium retail/eCommerce businesses. It automates repetitive inbound calls like order status, pickup readiness, and store hours, while intelligently escalating complex issues to human agents.
+Logos AI is an AI-powered phone system designed for small and medium retail/eCommerce businesses. It automates repetitive inbound calls like order status and store hours, while intelligently escalating complex issues to human agents.
 
 ## Current State (Prototype)
 **Status:** Live and demo-ready for pilot customers
 
-### What Works Today (3 Core Intents)
+### What Works Today (2 AI Intents)
 - AI order status lookup via CSV upload
 - Store hours responses
-- Pickup readiness inquiries
 - Intelligent human handoff/escalation
 - Twilio phone integration
 - Real-time analytics dashboard with Listen Mode
@@ -57,7 +56,7 @@ Logos AI is an AI-powered phone system designed for small and medium retail/eCom
 ### Current (Phase 1) - Available Now
 - Retail/eCommerce focus
 - CSV order data upload
-- 3 core intents (OrderStatus, StoreHours, PickupReadiness) + Escalation
+- 2 AI intents (OrderStatus, StoreHours) + Human Handoff + Voicemail
 - Twilio integration
 - Analytics dashboard with Listen Mode
 
