@@ -24,6 +24,9 @@ database_url = os.environ.get("DATABASE_URL")
 if database_url:
     # Use connection pooler for production deployments
     database_url = database_url.replace('.us-east-2', '-pooler.us-east-2')
+else:
+    logging.error("DATABASE_URL environment variable is not set!")
+    
 app.config["SQLALCHEMY_DATABASE_URI"] = database_url
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
@@ -33,9 +36,13 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
 
 db.init_app(app)
 
-with app.app_context():
-    db.create_all()
-    logging.info("Database tables created")
+if database_url:
+    try:
+        with app.app_context():
+            db.create_all()
+            logging.info("Database tables created")
+    except Exception as e:
+        logging.error(f"Failed to initialize database: {e}")
 
 from replit_auth import init_auth, require_login, require_admin
 init_auth(app)
