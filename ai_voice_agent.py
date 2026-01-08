@@ -2,6 +2,8 @@ import os
 import json
 from openai import OpenAI
 from orders_db import lookup_order, format_order_status, extract_order_number_from_speech, normalize_spoken_numbers
+from ssml_helper import get_cached_ssml, conversational_response, SSML_ENABLED
+from latency_logger import get_tracker, reset_tracker, start_new_turn
 
 def get_openai_client():
     """Initialize OpenAI client with Replit AI Integrations"""
@@ -11,6 +13,10 @@ def get_openai_client():
     )
 
 SYSTEM_PROMPT = """You're a warm, helpful customer service assistant. Speak naturally like a real person - use contractions (I'm, you're, we'll), vary your sentence length, and sound genuinely friendly. Keep responses brief (1-2 sentences). You can help with orders, store hours, and general questions. For refunds, returns, billing, or complaints, warmly offer to connect the caller with a team member."""
+
+def get_response(key):
+    """Get cached response with SSML if enabled."""
+    return get_cached_ssml(key)
 
 CACHED_RESPONSES = {
     'store_hours': "We're open Monday through Friday, 9 to 5! Anything else I can help with?",
@@ -46,14 +52,19 @@ SENSITIVE_INTENTS = ['refund', 'return', 'cancel_order', 'billing_issue', 'compl
 
 
 class AIVoiceAgent:
-    def __init__(self, company_config, pilot_id=None):
+    def __init__(self, company_config, pilot_id=None, call_sid=None):
         """Initialize AI agent with company-specific configuration"""
         self.company_config = company_config
         self.pilot_id = pilot_id
+        self.call_sid = call_sid
         self.conversation_history = []
         self.conversation_state = 'initial'  # initial, waiting_for_order_number, order_resolved, offering_more_help, goodbye
         self.current_intent = None
         self.order_data = None
+        self.use_ssml = SSML_ENABLED
+        
+        # Initialize latency tracking (will be started per turn)
+        self.latency_tracker = None
     
     def _lookup_pilot_order(self, order_num):
         """Look up order from pilot's order database"""
@@ -112,6 +123,10 @@ class AIVoiceAgent:
             'escalation_reason': str or None
         }
         """
+        # Start fresh latency tracking for this turn
+        self.latency_tracker = start_new_turn(self.call_sid)
+        self.latency_tracker.checkpoint('stt_complete')
+        
         # Add user message to conversation history
         self.conversation_history.append({
             'role': 'user',
@@ -154,12 +169,18 @@ class AIVoiceAgent:
                 self.conversation_state = 'offering_more_help'
                 self.order_data = order_data
                 
-                response_text = f"{status_response} Anything else I can help with?"
+                # Use SSML-enhanced response
+                response_text = f"{status_response} {get_response('anything_else')}"
                 
                 self.conversation_history.append({
                     'role': 'assistant',
                     'content': response_text
                 })
+                
+                # Log response ready
+                if self.latency_tracker:
+                    self.latency_tracker.checkpoint('response_ready')
+                    self.latency_tracker.log_summary()
                 
                 return {
                     'response': response_text,
@@ -177,12 +198,18 @@ class AIVoiceAgent:
         self.conversation_state = 'waiting_for_order_number'
         self.current_intent = 'order_status'
         
-        response_text = CACHED_RESPONSES['ask_order_number']
+        # Use SSML-enhanced response
+        response_text = get_response('ask_order_number')
         
         self.conversation_history.append({
             'role': 'assistant',
             'content': response_text
         })
+        
+        # Log response ready
+        if self.latency_tracker:
+            self.latency_tracker.checkpoint('response_ready')
+            self.latency_tracker.log_summary()
         
         return {
             'response': response_text,
@@ -210,13 +237,18 @@ class AIVoiceAgent:
                 order_num = bare_match.group(1)
         
         if not order_num:
-            # Couldn't extract order number, ask again
-            response_text = CACHED_RESPONSES['didnt_catch']
+            # Couldn't extract order number, ask again with SSML
+            response_text = get_response('didnt_catch')
             
             self.conversation_history.append({
                 'role': 'assistant',
                 'content': response_text
             })
+            
+            # Log response ready
+            if self.latency_tracker:
+                self.latency_tracker.checkpoint('response_ready')
+                self.latency_tracker.log_summary()
             
             return {
                 'response': response_text,
@@ -233,17 +265,23 @@ class AIVoiceAgent:
         if not order_data:
             return self._handle_order_not_found(order_num)
         
-        # Success! Provide order status
+        # Success! Provide order status with SSML
         status_response = format_order_status(order_data)
         self.conversation_state = 'offering_more_help'
         self.order_data = order_data
         
-        response_text = f"{status_response} Anything else I can help with?"
+        # Use SSML-enhanced response
+        response_text = f"{status_response} {get_response('anything_else')}"
         
         self.conversation_history.append({
             'role': 'assistant',
             'content': response_text
         })
+        
+        # Log response ready
+        if self.latency_tracker:
+            self.latency_tracker.checkpoint('response_ready')
+            self.latency_tracker.log_summary()
         
         return {
             'response': response_text,
@@ -256,12 +294,18 @@ class AIVoiceAgent:
     
     def _handle_order_not_found(self, order_num):
         """Handle when order number is not found in database"""
-        response_text = f"I couldn't find order {order_num}. " + CACHED_RESPONSES['order_not_found'].split('. ')[1]
+        # Use SSML-enhanced response
+        response_text = get_response('order_not_found')
         
         self.conversation_history.append({
             'role': 'assistant',
             'content': response_text
         })
+        
+        # Log response ready
+        if self.latency_tracker:
+            self.latency_tracker.checkpoint('response_ready')
+            self.latency_tracker.log_summary()
         
         return {
             'response': response_text,
@@ -282,7 +326,7 @@ class AIVoiceAgent:
         for phrase in GOODBYE_PHRASES:
             if phrase in user_lower:
                 self.conversation_state = 'goodbye'
-                response_text = CACHED_RESPONSES['goodbye']
+                response_text = get_response('goodbye')
                 
                 self.conversation_history.append({
                     'role': 'assistant',
@@ -302,7 +346,7 @@ class AIVoiceAgent:
         for word in GOODBYE_WORDS:
             if re.search(r'\b' + re.escape(word) + r'\b', user_lower):
                 self.conversation_state = 'goodbye'
-                response_text = CACHED_RESPONSES['goodbye']
+                response_text = get_response('goodbye')
                 
                 self.conversation_history.append({
                     'role': 'assistant',
@@ -321,7 +365,7 @@ class AIVoiceAgent:
         # Special case: bare "no" ONLY when it's the complete response
         if user_lower in ['no', 'no.', 'no!']:
             self.conversation_state = 'goodbye'
-            response_text = CACHED_RESPONSES['goodbye']
+            response_text = get_response('goodbye')
             
             self.conversation_history.append({
                 'role': 'assistant',
@@ -353,9 +397,23 @@ class AIVoiceAgent:
         """Generate AI response using GPT for general queries"""
         if intent_analysis['intent'] == 'store_hours':
             hours = self.company_config.get('business_hours', 'Monday through Friday, 9 AM to 5 PM')
-            response_text = f"Our business hours are {hours}. {CACHED_RESPONSES['anything_else']}"
+            anything_else = get_response('anything_else')
+            
+            # Build response with SSML if enabled
+            if self.use_ssml:
+                response_text = conversational_response(f"Our business hours are {hours}.") + " " + anything_else
+            else:
+                response_text = f"Our business hours are {hours}. {CACHED_RESPONSES['anything_else']}"
+            
             self.conversation_state = 'offering_more_help'
             self.conversation_history.append({'role': 'assistant', 'content': response_text})
+            
+            # Log LLM complete (cached response, so instant)
+            if self.latency_tracker:
+                self.latency_tracker.checkpoint('llm_complete')
+                self.latency_tracker.checkpoint('response_ready')
+                self.latency_tracker.log_summary()
+            
             return {
                 'response': response_text,
                 'should_escalate': False,
@@ -379,14 +437,22 @@ class AIVoiceAgent:
                 max_tokens=80
             )
             
+            # Log LLM complete
+            if self.latency_tracker:
+                self.latency_tracker.checkpoint('llm_complete')
+            
             ai_response = response.choices[0].message.content
+            
+            # Apply SSML to AI response if enabled
+            if self.use_ssml:
+                ai_response = conversational_response(ai_response)
             
             # Check if we should offer more help after this response
             should_offer_help = self._should_offer_more_help(intent_analysis['intent'])
             
             if should_offer_help:
                 self.conversation_state = 'offering_more_help'
-                ai_response += " " + CACHED_RESPONSES['anything_else']
+                ai_response += " " + get_response('anything_else')
             
             # Add AI response to history
             self.conversation_history.append({
@@ -396,6 +462,11 @@ class AIVoiceAgent:
             
             # Re-analyze for escalation after GPT response
             final_analysis = self._check_for_escalation_in_response(ai_response, intent_analysis)
+            
+            # Log response ready
+            if self.latency_tracker:
+                self.latency_tracker.checkpoint('response_ready')
+                self.latency_tracker.log_summary()
             
             return {
                 'response': ai_response,
@@ -441,7 +512,7 @@ Phone: {self.company_config.get('phone_number', '')}
         for keyword in ESCALATION_KEYWORDS:
             if keyword in user_lower:
                 return {
-                    'response': CACHED_RESPONSES['escalate'],
+                    'response': get_response('escalate'),
                     'should_escalate': True,
                     'should_end_call': False,
                     'intent': 'escalate_requested',

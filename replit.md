@@ -14,6 +14,8 @@ Logos AI is an AI-powered phone system designed for small and medium retail/eCom
 - Real-time analytics dashboard with Listen Mode
 - Pilot customer management with CSV order upload
 - Voicemail recording system
+- **SSML voice optimization** for natural-sounding TTS (Tier 1)
+- **Latency logging** to measure STT→LLM→TTS performance
 
 ### Coming Q1 2025
 - FAQ responses (custom Q&A)
@@ -41,6 +43,8 @@ Logos AI is an AI-powered phone system designed for small and medium retail/eCom
 - `ai_voice_agent.py` - OpenAI-powered voice AI agent
 - `call_engine.py` - Call flow logic and intent routing
 - `providers.py` - Telephony provider abstraction
+- `ssml_helper.py` - SSML voice optimization (breaks, prosody, emphasis)
+- `latency_logger.py` - Voice pipeline latency measurement
 
 ### Templates
 - `templates/index.html` - Landing page (investor-focused)
@@ -83,7 +87,17 @@ python main.py
 ## Environment Variables
 - `DATABASE_URL` - PostgreSQL connection string
 - `SESSION_SECRET` - Flask session secret
+- `SSML_ENABLED` - Enable/disable SSML voice optimization (default: true)
 - OpenAI API key is managed via Replit integrations
+
+## Voice Quality (Tier 1 SSML)
+The voice AI uses SSML (Speech Synthesis Markup Language) for more natural-sounding responses:
+- Natural pauses at punctuation (400ms after sentences, 200ms after commas)
+- Emphasis on key words (order, delivered, help, sorry)
+- Prosody adjustments for warmth (95% rate, -2% pitch)
+- Uses Polly.Joanna voice (more natural than alice)
+
+To disable SSML for rollback: Set `SSML_ENABLED=false` in environment variables
 
 ## User Preferences
 - Company name: Logos AI

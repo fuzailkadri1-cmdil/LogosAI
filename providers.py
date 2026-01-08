@@ -3,6 +3,7 @@ from twilio.rest import Client
 from twilio.twiml.voice_response import VoiceResponse, Gather, Say, Record, Dial
 import os
 from typing import Any
+from ssml_helper import conversational_response, get_cached_ssml, SSML_ENABLED
 
 class TelephonyProvider(ABC):
     
@@ -40,9 +41,18 @@ class TwilioProvider(TelephonyProvider):
             except Exception as e:
                 print(f"Error initializing Twilio client: {e}")
     
-    def create_call_response(self, message, next_action=None):
+    def create_call_response(self, message, next_action=None, use_ssml=True):
         response = VoiceResponse()
-        response.say(message, voice='alice', language='en-US')
+        
+        # Apply SSML if enabled and requested
+        if use_ssml and SSML_ENABLED and not message.startswith('<speak>'):
+            message = conversational_response(message)
+        
+        # Use SSML-aware say method
+        if message.startswith('<speak>'):
+            response.say(message, voice='Polly.Joanna', language='en-US')
+        else:
+            response.say(message, voice='Polly.Joanna', language='en-US')
         
         if next_action:
             response.redirect(next_action)
@@ -51,7 +61,7 @@ class TwilioProvider(TelephonyProvider):
         
         return str(response)
     
-    def create_gather_response(self, message, action_url, input_type='dtmf', timeout=5, speech_timeout=None, speech_model=None):
+    def create_gather_response(self, message, action_url, input_type='dtmf', timeout=5, speech_timeout=None, speech_model=None, use_ssml=True):
         response = VoiceResponse()
         
         if input_type == 'speech' or input_type == 'both':
@@ -76,17 +86,29 @@ class TwilioProvider(TelephonyProvider):
                 num_digits=1
             )
         
-        gather.say(message, voice='alice', language='en-US')
+        # Apply SSML if enabled and requested
+        if use_ssml and SSML_ENABLED and not message.startswith('<speak>'):
+            message = conversational_response(message)
+        
+        # Use Polly.Joanna for more natural voice
+        gather.say(message, voice='Polly.Joanna', language='en-US')
         response.append(gather)
         
-        response.say("We didn't receive any input. Please try again.", voice='alice')
+        # Use cached SSML for no-input message
+        no_input_msg = get_cached_ssml('no_input')
+        response.say(no_input_msg, voice='Polly.Joanna', language='en-US')
         response.redirect(action_url)
         
         return str(response)
     
-    def create_record_response(self, message, action_url, max_length=60):
+    def create_record_response(self, message, action_url, max_length=60, use_ssml=True):
         response = VoiceResponse()
-        response.say(message, voice='alice', language='en-US')
+        
+        # Apply SSML if enabled
+        if use_ssml and SSML_ENABLED and not message.startswith('<speak>'):
+            message = conversational_response(message)
+        
+        response.say(message, voice='Polly.Joanna', language='en-US')
         response.record(
             action=action_url,
             method='POST',
@@ -99,7 +121,9 @@ class TwilioProvider(TelephonyProvider):
     
     def transfer_call(self, phone_number):
         response = VoiceResponse()
-        response.say("Please hold while we transfer your call.", voice='alice')
+        # Use cached SSML for transfer message
+        transfer_msg = get_cached_ssml('transfer_hold')
+        response.say(transfer_msg, voice='Polly.Joanna', language='en-US')
         dial = Dial()
         dial.number(phone_number)
         response.append(dial)
