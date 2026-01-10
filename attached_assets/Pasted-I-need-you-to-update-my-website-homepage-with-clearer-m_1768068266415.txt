@@ -1,0 +1,161 @@
+I need you to update my website homepage with clearer, more specific messaging
+for my target customer: local retail stores with 1–3 locations in Toronto & Montreal that need an AI voice receptionist to answer calls 24/7.
+
+MY CALENDLY BOOKING LINK:
+https://calendly.com/logos_ai_ca-g6z3/new-meeting
+
+CURRENT HOMEPAGE PROBLEM:
+The headline "Answer order status & store hours questions automatically" is too generic.
+Visitors don't know if this is for them.
+
+GOAL:
+Make it immediately clear WHO this product is for and WHAT the benefit is.
+When a local retail store lands on this page, they should instantly know
+"This is for me" or "This is not for me."
+
+CONTEXT (USE THIS IN THE COPY):
+
+Local retail stores lose $30–40K/year in after-hours orders because customers can't reach them.
+
+Staff waste 11 hours/week answering repetitive "Where's my order?" calls.
+
+That’s $40–50K/year total walking out the door.
+
+
+"We're built for Canadian retail—starting with English, but bilingual-ready for Quebec expansion."
+
+Positioning statements (weave these into sections where relevant):
+
+"We ONLY serve retail. Your order status workflow is already built—just upload your CSV and go."
+
+"Most AI voice systems require weeks of API integration. We work with a simple CSV upload. You're live in 30 minutes."
+
+"Big AI companies treat you like ticket #7482. I treat you like my only customer. 1-hour response time, personal phone support, founder-led."
+
+NEW HOMEPAGE STRUCTURE (Keep this exact order and formatting):
+
+HEADLINE (Replace current headline):
+"24/7 AI Voice Receptionist for Local Retail (Montreal & Toronto)"
+
+SUBHEADLINE (Add below headline):
+"Recover $30–40K/year in after-hours orders and stop losing customers to missed calls"
+
+CUSTOMER AVATAR SECTION (Add new section, adapt with context above):
+
+WHO THIS IS FOR:
+Local retail stores with 1–3 locations that lose $30–40K/year
+to missed after-hours orders and calls, plus $40–50K/year total when you include staff time wasted on "Where’s my order?" calls.
+
+Example: Boutique Chic Montreal was losing $4K/month to
+“Where’s my order?” and “Are you open?” calls between 6pm–9am. We deployed
+an AI voice receptionist that answered 75% of those calls automatically.
+
+Result: $4K/month revenue recovered + 11 hours/week staff time saved.
+
+"We’re built for Canadian retail—starting with English, but bilingual-ready for Quebec expansion."
+
+METRICS SECTION (Add new section, use this exact text, but you may reference the context):
+
+WHAT YOU GET:
+✓ 75% call automation rate (from day 1)
+✓ $3–5K/month revenue recovered (average)
+✓ 11 hours/week staff time saved
+✓ 8x ROI in first 60 days
+✓ 30-minute setup (CSV upload, no integration)
+✓ Personal founder support (1-hour response time, phone support, founder-led)
+
+HOW IT WORKS SECTION (Add new section, integrate positioning):
+
+HOW IT WORKS:
+
+Upload your order CSV (5 min) – your order status workflow is already built.
+
+Connect your store phone number (10 min).
+
+Go live with customers (same day).
+
+Watch automation rate grow (60+ days).
+
+Most AI voice systems require weeks of API integration.
+We work with a simple CSV upload. You’re live in 30 minutes.
+
+WHO WE WORK WITH SECTION (Add new section, use this exact text):
+
+WHO WE WORK WITH:
+✓ Boutique clothing stores
+✓ Electronics retailers
+✓ Furniture stores
+✓ Specialty food shops
+✓ Gift shops
+(Any retail with 1–3 locations + 20–40 calls/day)
+
+We ONLY serve retail, so everything is tailored to store workflows, order status, and local customers.
+
+PRICING SECTION (Add new section, use this exact text):
+
+PRICING:
+$500/month pilot (60 days)
+✓ 60% automation rate guarantee
+✓ Money back if you don't hit it
+✓ Auto-converts to $1,000/month after pilot ends
+
+CALL-TO-ACTION BUTTON:
+
+Create a prominent button with:
+
+Button text: "Book a 15-Minute Demo"
+
+Button link: https://calendly.com/yourname/15min
+[USE THE CALENDLY URL FROM THE TOP OF THIS PROMPT]
+
+Make it stand out visually (big size, contrasting color).
+
+CONTENT TO REMOVE:
+
+Any mention of "Enterprise-grade"
+
+Buzzwords: "Powered by AI", "Seamless integration", "Next-generation"
+
+Generic phrases: "cutting-edge", "innovative", "revolutionary"
+
+CONTENT TO KEEP (AND HIGHLIGHT):
+
+Specific numbers: $30–40K in after-hours orders, $40–50K/year total loss, $4K/month, 75%, 11 hours, 8x ROI
+
+Specific locations: Montreal & Toronto, Quebec & Ontario
+
+Specific features: CSV upload, 30-minute setup, $500/month pilot
+
+Specific benefits: recover lost revenue, save staff time, bilingual FR+EN for Quebec, Canadian retail focus for Ontario
+
+Positioning: ONLY retail, no APIs, CSV-only setup, founder-led support
+
+DESIGN REQUIREMENTS:
+
+Keep design simple and clean (no animations)
+
+Use clear section headings (like "WHO THIS IS FOR", "WHAT YOU GET")
+
+Use checkmarks (✓) for lists
+
+Use white space between sections
+
+Make CTA button prominent and easy to click
+
+Mobile-responsive design (works on phones + tablets)
+
+Professional but friendly tone
+
+Return complete, production-ready HTML code that includes:
+
+All sections above in exact order
+
+Embedded CSS (in <style> tag)
+
+Responsive design (mobile + desktop)
+
+Working button link to my Calendly
+
+Clean, semantic HTML structure
+
+No placeholder text (only the Calendly URL)
