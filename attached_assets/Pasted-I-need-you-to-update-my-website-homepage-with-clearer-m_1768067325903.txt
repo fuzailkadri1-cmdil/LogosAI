@@ -1,0 +1,90 @@
+I need you to update my website homepage with clearer, more specific messaging 
+for my target customer (local retail stores with 1-3 locations in Montreal & Toronto).
+MY CALENDLY BOOKING LINK: https://calendly.com/logos_ai_ca-g6z3/new-meeting
+---
+CURRENT HOMEPAGE PROBLEM:
+The headline "Answer order status & store hours questions automatically" is too generic.
+Visitors don't know if this is for them.
+GOAL:
+Make it immediately clear WHO this product is for and WHAT the benefit is.
+When a local retail store lands on this page, they should instantly know 
+"This is for me" or "This is not for me."
+---
+NEW HOMEPAGE STRUCTURE (Keep this exact order and formatting):
+1. HEADLINE (Replace current headline):
+"24/7 AI Receptionist for Local Retail (Montreal & Toronto)"
+2. SUBHEADLINE (Add below headline):
+"Recover $30K+/year in after-hours orders"
+3. CUSTOMER AVATAR SECTION (Add new section, use this exact text):
+WHO THIS IS FOR:
+Local retail stores with 1-3 locations who lose $30-40K/year 
+to missed after-hours calls.
+Example: Boutique Chic Montreal was losing $4K/month to 
+"Where's my order?" calls between 6pm-9am. We deployed 
+an AI receptionist that answered 75% of those calls automatically.
+Result: $4K/month revenue recovered + 11 hours/week staff time saved.
+---
+4. METRICS SECTION (Add new section, use this exact text):
+WHAT YOU GET:
+✓ 75% call automation rate (from day 1)
+✓ $3-5K/month revenue recovered (average)
+✓ 11 hours/week staff time saved
+✓ 8x ROI in first 60 days
+✓ 30-minute setup (CSV upload, no integration)
+✓ Personal founder support (1-hour response time)
+---
+5. HOW IT WORKS SECTION (Add new section, use this exact text):
+HOW IT WORKS:
+1. Upload your order CSV (5 min)
+2. Connect your phone number (10 min)
+3. Go live with customers (same day)
+4. Watch automation rate grow (60+ days)
+---
+6. WHO WE WORK WITH SECTION (Add new section, use this exact text):
+WHO WE WORK WITH:
+✓ Boutique clothing stores
+✓ Electronics retailers
+✓ Furniture stores
+✓ Specialty food shops
+✓ Gift shops
+(Any retail with 1-3 locations + 20-40 calls/day)
+---
+7. PRICING SECTION (Add new section, use this exact text):
+PRICING:
+$500/month pilot (60 days)
+✓ 60% automation rate guarantee
+✓ Money back if you don't hit it
+✓ Auto-converts to $1,000/month after pilot ends
+---
+8. CALL-TO-ACTION BUTTON:
+Create a prominent button with:
+- Button text: "Book a 15-Minute Demo"
+- Button link: https://calendly.com/yourname/15min
+[USE THE CALENDLY URL FROM THE TOP OF THIS PROMPT]
+Make it stand out visually (big size, contrasting color).
+---
+CONTENT TO REMOVE:
+- Any mention of "Enterprise-grade"
+- Buzzwords: "Powered by AI", "Seamless integration", "Next-generation"
+- Generic phrases: "cutting-edge", "innovative", "revolutionary"
+CONTENT TO KEEP:
+- Specific numbers: $30K, $4K, 75%, 11 hours, 8x ROI
+- Specific locations: Montreal & Toronto
+- Specific features: CSV upload, 30-minute setup, $500/month
+- Specific benefit: recover lost revenue + save staff time
+DESIGN REQUIREMENTS:
+- Keep design simple and clean (no animations)
+- Use clear section headings (like "WHO THIS IS FOR", "WHAT YOU GET")
+- Use checkmarks (✓) for lists
+- Use white space between sections
+- Make CTA button prominent and easy to click
+- Mobile-responsive design (works on phones + tablets)
+- Professional but friendly tone
+---
+Return complete, production-ready HTML code that includes:
+- All sections above in exact order
+- Embedded CSS (in <style> tag)
+- Responsive design (mobile + desktop)
+- Working button link to my Calendly
+- Clean, semantic HTML structure
+- No placeholder text (only the Calendly URL)

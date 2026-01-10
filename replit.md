@@ -24,9 +24,9 @@ Logos AI is an AI-powered phone system designed for small and medium retail/eCom
 - Returns & exchanges automation
 
 ### Target Customers
-- SMB retail and eCommerce businesses
-- 10-500 employees
-- Looking to reduce call volume on repetitive queries
+- Local retail stores with 1-3 locations in Montreal & Toronto
+- Boutique clothing, electronics, furniture, specialty food, gift shops
+- 20-40 calls/day, losing $30-40K/year to missed after-hours calls
 
 ## Architecture
 
