@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify, flash, send_file
-from models import db, Company, User, Integration, CallLog, Voicemail, PilotCustomer, PilotOrder
+from models import db, Company, User, Integration, CallLog, Voicemail, PilotCustomer, PilotOrder, Lead
 import csv
 import io
 from providers import get_provider
@@ -248,6 +248,47 @@ def mark_voicemail_listened(voicemail_id):
     
     return jsonify({'success': True})
 
+@app.route('/leads')
+@login_required
+def leads():
+    company = db.session.get(Company, current_user.company_id)
+    
+    all_leads = Lead.query.filter_by(company_id=company.id)\
+        .order_by(Lead.created_at.desc())\
+        .all()
+    
+    new_leads_count = Lead.query.filter_by(company_id=company.id, status='new').count()
+    
+    after_hours_count = Lead.query.filter(
+        Lead.company_id == company.id,
+        Lead.call_type == 'after_hours',
+        Lead.status == 'new'
+    ).count()
+    
+    return render_template('leads.html', 
+                         leads=all_leads, 
+                         company=company,
+                         new_leads_count=new_leads_count,
+                         after_hours_count=after_hours_count)
+
+
+@app.route('/leads/<int:lead_id>/status', methods=['POST'])
+@login_required
+def update_lead_status(lead_id):
+    lead = Lead.query.get_or_404(lead_id)
+    
+    if lead.company_id != current_user.company_id:
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    new_status = request.json.get('status', 'new')
+    if new_status in ['new', 'contacted', 'converted', 'not_interested']:
+        lead.status = new_status
+        db.session.commit()
+        return jsonify({'success': True, 'status': new_status})
+    
+    return jsonify({'error': 'Invalid status'}), 400
+
+
 @app.route('/api/stats')
 @login_required
 def api_stats():
@@ -431,7 +472,7 @@ def voice_ai_conversation():
                 'business_hours': company.get_business_hours(),
                 'phone_number': company.phone_number
             }
-            ai_agent = AIVoiceAgent(company_config, pilot_id=pilot_id)
+            ai_agent = AIVoiceAgent(company_config, pilot_id=pilot_id, caller_phone=from_number)
             session[session_key] = {
                 'conversation_history': [],
                 'turn_count': 0,
@@ -443,8 +484,10 @@ def voice_ai_conversation():
                 'business_hours': company.get_business_hours(),
                 'phone_number': company.phone_number
             }
-            ai_agent = AIVoiceAgent(company_config, pilot_id=session[session_key].get('pilot_id'))
+            ai_agent = AIVoiceAgent(company_config, pilot_id=session[session_key].get('pilot_id'), caller_phone=from_number)
             ai_agent.conversation_history = session[session_key]['conversation_history']
+            if 'lead_data' in session[session_key]:
+                ai_agent.lead_data = session[session_key]['lead_data']
         
         if not speech_result or speech_result.strip() == '':
             # First time or no speech detected - provide welcome and gather
@@ -462,6 +505,7 @@ def voice_ai_conversation():
         
         session[session_key]['conversation_history'] = ai_agent.conversation_history
         session[session_key]['turn_count'] += 1
+        session[session_key]['lead_data'] = ai_agent.lead_data
         
         call_log.intent = ai_result['intent']
         call_log.ai_confidence = ai_result['confidence']
@@ -475,12 +519,29 @@ def voice_ai_conversation():
         call_log.transcript = transcript_text
         
         if ai_result.get('should_end_call', False):
-            # User said goodbye - end call gracefully
             call_log.outcome = 'completed'
             call_log.handled_by_ai = True
             call_log.completed_at = datetime.utcnow()
             if call_log.created_at:
                 call_log.duration_seconds = int((call_log.completed_at - call_log.created_at).total_seconds())
+            
+            lead_data = ai_result.get('lead_data') or ai_agent.get_lead_data()
+            if lead_data and lead_data.get('captured'):
+                try:
+                    new_lead = Lead(
+                        company_id=company.id,
+                        pilot_id=pilot_id,
+                        caller_name=lead_data.get('caller_name'),
+                        caller_phone=lead_data.get('caller_phone', from_number),
+                        inquiry=lead_data.get('inquiry'),
+                        call_type=lead_data.get('call_type', 'after_hours'),
+                        status='new',
+                        call_log_id=call_log.id
+                    )
+                    db.session.add(new_lead)
+                except Exception as e:
+                    print(f"Error saving lead: {e}")
+            
             db.session.commit()
             
             session.pop(session_key, None)
@@ -494,6 +555,24 @@ def voice_ai_conversation():
             call_log.completed_at = datetime.utcnow()
             if call_log.created_at:
                 call_log.duration_seconds = int((call_log.completed_at - call_log.created_at).total_seconds())
+            
+            lead_data = ai_result.get('lead_data') or ai_agent.get_lead_data()
+            if lead_data and lead_data.get('captured'):
+                try:
+                    new_lead = Lead(
+                        company_id=company.id,
+                        pilot_id=pilot_id,
+                        caller_name=lead_data.get('caller_name'),
+                        caller_phone=lead_data.get('caller_phone', from_number),
+                        inquiry=lead_data.get('inquiry'),
+                        call_type=lead_data.get('call_type', 'during_hours'),
+                        status='new',
+                        call_log_id=call_log.id
+                    )
+                    db.session.add(new_lead)
+                except Exception as e:
+                    print(f"Error saving lead: {e}")
+            
             db.session.commit()
             
             session.pop(session_key, None)

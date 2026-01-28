@@ -210,3 +210,25 @@ class PilotOrder(db.Model):
     
     def __repr__(self):
         return f'<PilotOrder {self.order_id} for Pilot {self.pilot_id}>'
+
+
+class Lead(db.Model):
+    __tablename__ = 'leads'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    company_id = db.Column(db.Integer, db.ForeignKey('companies.id'), nullable=False)
+    pilot_id = db.Column(db.Integer, db.ForeignKey('pilot_customers.id'), nullable=True)
+    caller_name = db.Column(db.String(200), nullable=True)
+    caller_phone = db.Column(db.String(20), nullable=False)
+    inquiry = db.Column(db.Text, nullable=True)
+    call_type = db.Column(db.String(20), default='during_hours')
+    status = db.Column(db.String(20), default='new')
+    call_log_id = db.Column(db.Integer, db.ForeignKey('call_logs.id'), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    notes = db.Column(db.Text, nullable=True)
+    
+    company = db.relationship('Company', backref=db.backref('leads', lazy=True))
+    pilot = db.relationship('PilotCustomer', backref=db.backref('leads', lazy=True))
+    
+    def __repr__(self):
+        return f'<Lead {self.id} - {self.caller_name or self.caller_phone}>'

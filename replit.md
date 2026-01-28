@@ -6,14 +6,16 @@ Logos AI is an AI-powered phone system designed for small and medium retail/eCom
 ## Current State (Prototype)
 **Status:** Live and demo-ready for pilot customers
 
-### What Works Today (2 AI Intents)
+### What Works Today (3 AI Intents)
 - AI order status lookup via CSV upload
 - Store hours responses
+- **Lead capture for purchase inquiries** (during-hours + after-hours flows)
 - Intelligent human handoff/escalation
 - Twilio phone integration
 - Real-time analytics dashboard with Listen Mode
 - Pilot customer management with CSV order upload
 - Voicemail recording system
+- **Leads dashboard** with after-hours lead flagging and status tracking
 - **SSML voice optimization** for natural-sounding TTS (Tier 1)
 - **Latency logging** to measure STT→LLM→TTS performance
 
@@ -39,8 +41,9 @@ Logos AI is an AI-powered phone system designed for small and medium retail/eCom
 
 ### Key Files
 - `app.py` - Main Flask application with all routes
-- `models.py` - SQLAlchemy database models
-- `ai_voice_agent.py` - OpenAI-powered voice AI agent
+- `models.py` - SQLAlchemy database models (includes Lead model)
+- `ai_voice_agent.py` - OpenAI-powered voice AI agent with lead capture flow
+- `business_hours.py` - Business hours checking utility
 - `call_engine.py` - Call flow logic and intent routing
 - `providers.py` - Telephony provider abstraction
 - `ssml_helper.py` - SSML voice optimization (breaks, prosody, emphasis)
@@ -49,6 +52,7 @@ Logos AI is an AI-powered phone system designed for small and medium retail/eCom
 ### Templates
 - `templates/index.html` - Landing page (investor-focused)
 - `templates/dashboard.html` - Main user dashboard
+- `templates/leads.html` - Leads management dashboard
 - `templates/pilots.html` - Pilot customer management
 - `templates/roadmap.html` - Product roadmap
 - `templates/investor_dashboard.html` - Investor metrics
@@ -60,9 +64,11 @@ Logos AI is an AI-powered phone system designed for small and medium retail/eCom
 ### Current (Phase 1) - Available Now
 - Retail/eCommerce focus
 - CSV order data upload
-- 2 AI intents (OrderStatus, StoreHours) + Human Handoff + Voicemail
+- 3 AI intents (OrderStatus, StoreHours, PurchaseInquiry) + Human Handoff + Voicemail
+- **Lead capture system** with during-hours transfer + after-hours callback flows
 - Twilio integration
 - Analytics dashboard with Listen Mode
+- Leads dashboard with status tracking
 
 ### Q1 2025 (Phase 2) - Planned
 - FAQ responses (custom Q&A)

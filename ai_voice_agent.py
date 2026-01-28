@@ -4,6 +4,7 @@ from openai import OpenAI
 from orders_db import lookup_order, format_order_status, extract_order_number_from_speech, normalize_spoken_numbers
 from ssml_helper import get_cached_ssml, conversational_response, SSML_ENABLED
 from latency_logger import get_tracker, reset_tracker, start_new_turn
+from business_hours import is_store_open
 
 def get_openai_client():
     """Initialize OpenAI client with Replit AI Integrations"""
@@ -50,21 +51,55 @@ GOODBYE_WORDS = [
 
 SENSITIVE_INTENTS = ['refund', 'return', 'cancel_order', 'billing_issue', 'complaint']
 
+PURCHASE_INTENT_PHRASES = [
+    'do you have', 'looking for', 'i want to buy', 'i want to order',
+    'is this in stock', 'in stock', 'available', 'do you carry',
+    'can i order', 'can i buy', 'i need', "i'm looking for", 'i am looking for',
+    'do you sell', 'price of', 'how much is', 'how much does',
+    'purchase', 'interested in', 'want to get', 'can you get'
+]
+
 
 class AIVoiceAgent:
-    def __init__(self, company_config, pilot_id=None, call_sid=None):
+    def __init__(self, company_config, pilot_id=None, call_sid=None, caller_phone=None):
         """Initialize AI agent with company-specific configuration"""
         self.company_config = company_config
         self.pilot_id = pilot_id
         self.call_sid = call_sid
+        self.caller_phone = caller_phone
         self.conversation_history = []
-        self.conversation_state = 'initial'  # initial, waiting_for_order_number, order_resolved, offering_more_help, goodbye
+        self.conversation_state = 'initial'
         self.current_intent = None
         self.order_data = None
         self.use_ssml = SSML_ENABLED
         
-        # Initialize latency tracking (will be started per turn)
+        self.lead_data = {
+            'caller_name': None,
+            'caller_phone': caller_phone,
+            'inquiry': None,
+            'call_type': None,
+            'captured': False
+        }
+        
         self.latency_tracker = None
+    
+    def _detect_purchase_intent(self, user_speech):
+        """Detect if user has purchase/product inquiry intent"""
+        user_lower = user_speech.lower()
+        for phrase in PURCHASE_INTENT_PHRASES:
+            if phrase in user_lower:
+                return True
+        return False
+    
+    def _extract_inquiry_details(self, user_speech):
+        """Extract what the caller is looking for from their speech"""
+        return user_speech.strip()
+    
+    def _is_store_open(self):
+        """Check if store is currently open based on business hours"""
+        business_hours = self.company_config.get('business_hours', {})
+        result = is_store_open(business_hours)
+        return result['is_open']
     
     def _lookup_pilot_order(self, order_num):
         """Look up order from pilot's order database"""
@@ -135,17 +170,28 @@ class AIVoiceAgent:
         
         # Handle different conversation states
         if self.conversation_state == 'offering_more_help':
-            # User responded to "Is there anything else I can help you with?"
             return self._handle_followup_response(user_speech)
         
         if self.conversation_state == 'waiting_for_order_number':
-            # User should be providing their order number
             return self._handle_order_number_response(user_speech)
+        
+        if self.conversation_state == 'capturing_lead_name':
+            return self._handle_lead_name_response(user_speech)
+        
+        if self.conversation_state == 'capturing_lead_details':
+            return self._handle_lead_details_response(user_speech)
+        
+        if self.conversation_state == 'confirming_callback':
+            return self._handle_callback_confirmation(user_speech)
         
         # Check for immediate escalation triggers
         escalation_check = self._check_escalation(user_speech)
         if escalation_check['should_escalate']:
             return escalation_check
+        
+        # Check for purchase intent - trigger lead capture flow
+        if self._detect_purchase_intent(user_speech):
+            return self._handle_purchase_intent(user_speech)
         
         # Determine intent and handle accordingly
         intent_analysis = self._analyze_intent(user_speech)
@@ -577,3 +623,177 @@ Phone: {self.company_config.get('phone_number', '')}
             'state': self.conversation_state,
             'intent': self.current_intent
         }
+    
+    def _handle_purchase_intent(self, user_speech):
+        """Handle purchase intent - start lead capture flow"""
+        store_open = self._is_store_open()
+        self.lead_data['inquiry'] = self._extract_inquiry_details(user_speech)
+        self.lead_data['call_type'] = 'during_hours' if store_open else 'after_hours'
+        
+        if store_open:
+            response_text = "Let me connect you with our team. Before I transfer, can I get your name in case we get disconnected?"
+        else:
+            store_name = self.company_config.get('name', 'our store')
+            response_text = f"Thanks for calling {store_name}! We're currently closed, but I'd love to make sure someone helps you first thing. Can I get your name?"
+        
+        self.conversation_state = 'capturing_lead_name'
+        self.current_intent = 'purchase_inquiry'
+        
+        if self.use_ssml:
+            response_text = conversational_response(response_text)
+        
+        self.conversation_history.append({
+            'role': 'assistant',
+            'content': response_text
+        })
+        
+        if self.latency_tracker:
+            self.latency_tracker.checkpoint('response_ready')
+            self.latency_tracker.log_summary()
+        
+        return {
+            'response': response_text,
+            'should_escalate': False,
+            'should_end_call': False,
+            'intent': 'purchase_inquiry',
+            'confidence': 0.9,
+            'escalation_reason': None
+        }
+    
+    def _handle_lead_name_response(self, user_speech):
+        """Handle caller providing their name"""
+        self.lead_data['caller_name'] = user_speech.strip()
+        store_open = self.lead_data['call_type'] == 'during_hours'
+        
+        inquiry = self.lead_data.get('inquiry', '')
+        
+        if store_open:
+            response_text = f"And you're looking for {inquiry} - any specific size, color, or other details?"
+            self.conversation_state = 'capturing_lead_details'
+        else:
+            response_text = "And what are you looking for today?"
+            self.conversation_state = 'capturing_lead_details'
+        
+        if self.use_ssml:
+            response_text = conversational_response(response_text)
+        
+        self.conversation_history.append({
+            'role': 'assistant',
+            'content': response_text
+        })
+        
+        if self.latency_tracker:
+            self.latency_tracker.checkpoint('response_ready')
+            self.latency_tracker.log_summary()
+        
+        return {
+            'response': response_text,
+            'should_escalate': False,
+            'should_end_call': False,
+            'intent': 'purchase_inquiry',
+            'confidence': 0.9,
+            'escalation_reason': None
+        }
+    
+    def _handle_lead_details_response(self, user_speech):
+        """Handle caller providing inquiry details"""
+        if self.lead_data.get('inquiry'):
+            self.lead_data['inquiry'] += f" - {user_speech.strip()}"
+        else:
+            self.lead_data['inquiry'] = user_speech.strip()
+        
+        store_open = self.lead_data['call_type'] == 'during_hours'
+        caller_name = self.lead_data.get('caller_name', 'there')
+        
+        if store_open:
+            self.lead_data['captured'] = True
+            response_text = f"Got it, {caller_name}. Transferring you now."
+            
+            if self.use_ssml:
+                response_text = conversational_response(response_text)
+            
+            self.conversation_history.append({
+                'role': 'assistant',
+                'content': response_text
+            })
+            
+            if self.latency_tracker:
+                self.latency_tracker.checkpoint('response_ready')
+                self.latency_tracker.log_summary()
+            
+            return {
+                'response': response_text,
+                'should_escalate': True,
+                'should_end_call': False,
+                'intent': 'purchase_inquiry',
+                'confidence': 0.95,
+                'escalation_reason': 'lead_transfer',
+                'lead_data': self.lead_data
+            }
+        else:
+            caller_phone = self.lead_data.get('caller_phone', '')
+            display_phone = caller_phone[-4:] if caller_phone else 'your number'
+            response_text = f"Perfect, {caller_name}. Someone from our team will call you back when we open. Is {display_phone} the best number to reach you?"
+            self.conversation_state = 'confirming_callback'
+            
+            if self.use_ssml:
+                response_text = conversational_response(response_text)
+            
+            self.conversation_history.append({
+                'role': 'assistant',
+                'content': response_text
+            })
+            
+            if self.latency_tracker:
+                self.latency_tracker.checkpoint('response_ready')
+                self.latency_tracker.log_summary()
+            
+            return {
+                'response': response_text,
+                'should_escalate': False,
+                'should_end_call': False,
+                'intent': 'purchase_inquiry',
+                'confidence': 0.9,
+                'escalation_reason': None
+            }
+    
+    def _handle_callback_confirmation(self, user_speech):
+        """Handle caller confirming callback number"""
+        user_lower = user_speech.lower().strip()
+        
+        if any(word in user_lower for word in ['yes', 'yeah', 'yep', 'correct', 'that\'s right', 'sure']):
+            pass
+        else:
+            self.lead_data['caller_phone'] = user_speech.strip()
+        
+        self.lead_data['captured'] = True
+        store_name = self.company_config.get('name', 'our store')
+        caller_name = self.lead_data.get('caller_name', '')
+        
+        response_text = f"Great, expect a call from us soon! Thanks for calling {store_name}. Talk to you soon!"
+        
+        if self.use_ssml:
+            response_text = conversational_response(response_text)
+        
+        self.conversation_history.append({
+            'role': 'assistant',
+            'content': response_text
+        })
+        
+        if self.latency_tracker:
+            self.latency_tracker.checkpoint('response_ready')
+            self.latency_tracker.log_summary()
+        
+        return {
+            'response': response_text,
+            'should_escalate': False,
+            'should_end_call': True,
+            'intent': 'purchase_inquiry',
+            'confidence': 0.95,
+            'escalation_reason': None,
+            'lead_data': self.lead_data
+        }
+    
+    def get_lead_data(self):
+        """Get captured lead data"""
+        return self.lead_data if self.lead_data.get('captured') else None

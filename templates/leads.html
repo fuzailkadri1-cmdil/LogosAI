@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+
+{% block title %}Leads - {{ company.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="sidebar">
+                <div class="p-3">
+                    <img src="{{ url_for('static', filename='images/logos-ai-logo.png') }}" alt="Logos AI" style="height: 40px; margin-bottom: 10px;">
+                    <h6 class="text-white-50">{{ company.name }}</h6>
+                    <hr class="bg-white">
+                </div>
+                <a href="{{ url_for('dashboard') }}">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+                <a href="{{ url_for('listen_mode') }}">
+                    <i class="bi bi-ear"></i> Listen Mode
+                </a>
+                <a href="{{ url_for('conversation_preview') }}">
+                    <i class="bi bi-chat-dots"></i> Test AI
+                </a>
+                <a href="{{ url_for('leads') }}" class="active">
+                    <i class="bi bi-person-plus"></i> Leads
+                    {% if new_leads_count > 0 %}
+                        <span class="badge bg-success">{{ new_leads_count }}</span>
+                    {% endif %}
+                </a>
+                <a href="{{ url_for('calls') }}">
+                    <i class="bi bi-telephone"></i> Call Logs
+                </a>
+                <a href="{{ url_for('voicemails') }}">
+                    <i class="bi bi-voicemail"></i> Voicemails
+                </a>
+                <a href="{{ url_for('industry_templates') }}">
+                    <i class="bi bi-lightning"></i> Templates
+                </a>
+                <a href="{{ url_for('settings') }}">
+                    <i class="bi bi-gear"></i> Settings
+                </a>
+                <a href="{{ url_for('onboarding') }}">
+                    <i class="bi bi-rocket"></i> Integrations
+                </a>
+                {% if current_user.is_admin %}
+                <hr class="bg-white">
+                <div class="p-3">
+                    <h6 class="text-white-50">Admin & Investor Tools</h6>
+                </div>
+                <a href="{{ url_for('pilots') }}">
+                    <i class="bi bi-people"></i> Pilot Customers
+                </a>
+                <a href="{{ url_for('roadmap') }}">
+                    <i class="bi bi-map"></i> Product Roadmap
+                </a>
+                <a href="{{ url_for('pricing') }}">
+                    <i class="bi bi-tag"></i> Pricing
+                </a>
+                <a href="{{ url_for('demo_script') }}">
+                    <i class="bi bi-mic"></i> Demo Script
+                </a>
+                <a href="{{ url_for('twilio_setup') }}">
+                    <i class="bi bi-telephone-outbound"></i> Twilio Setup
+                </a>
+                <a href="{{ url_for('investor_dashboard') }}">
+                    <i class="bi bi-graph-up-arrow"></i> Investor Metrics
+                </a>
+                <a href="{{ url_for('roi_calculator') }}">
+                    <i class="bi bi-calculator"></i> ROI Calculator
+                </a>
+                {% endif %}
+                <hr class="bg-white">
+                <a href="{{ url_for('logout') }}">
+                    <i class="bi bi-box-arrow-right"></i> Logout
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="bi bi-person-plus"></i> Leads</h2>
+                {% if after_hours_count > 0 %}
+                <span class="badge bg-warning text-dark fs-6">
+                    <i class="bi bi-moon-stars"></i> {{ after_hours_count }} After-Hours Lead{{ 's' if after_hours_count != 1 else '' }} - Call Back!
+                </span>
+                {% endif %}
+            </div>
+            
+            {% if after_hours_count > 0 %}
+            <div class="alert alert-warning mb-4">
+                <i class="bi bi-exclamation-triangle"></i> <strong>Action Required:</strong> You have {{ after_hours_count }} new after-hours lead{{ 's' if after_hours_count != 1 else '' }} waiting for callback. These callers were interested in making a purchase but called when you were closed.
+            </div>
+            {% endif %}
+            
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card stat-card">
+                        <div class="card-body">
+                            <h6 class="text-muted">Total Leads</h6>
+                            <h2 class="mb-0">{{ leads|length }}</h2>
+                            <small class="text-muted">All captured leads</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card stat-card" style="border-left: 4px solid #ffc107;">
+                        <div class="card-body">
+                            <h6 class="text-muted">New Leads</h6>
+                            <h2 class="mb-0">{{ new_leads_count }}</h2>
+                            <small class="text-muted">Awaiting follow-up</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card stat-card" style="border-left: 4px solid #6f42c1;">
+                        <div class="card-body">
+                            <h6 class="text-muted">After-Hours</h6>
+                            <h2 class="mb-0">{{ after_hours_count }}</h2>
+                            <small class="text-muted">Needs callback</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">All Leads</h5>
+                </div>
+                <div class="card-body">
+                    {% if leads %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date/Time</th>
+                                    <th>Caller</th>
+                                    <th>Phone</th>
+                                    <th>Looking For</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for lead in leads %}
+                                <tr class="{% if lead.call_type == 'after_hours' and lead.status == 'new' %}table-warning{% endif %}">
+                                    <td>
+                                        <small>{{ lead.created_at.strftime('%b %d, %Y') }}</small><br>
+                                        <small class="text-muted">{{ lead.created_at.strftime('%I:%M %p') }}</small>
+                                    </td>
+                                    <td>
+                                        {% if lead.caller_name %}
+                                            <strong>{{ lead.caller_name }}</strong>
+                                        {% else %}
+                                            <span class="text-muted">Unknown</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="tel:{{ lead.caller_phone }}" class="text-decoration-none">
+                                            {{ lead.caller_phone }}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <div style="max-width: 250px;">
+                                            {{ lead.inquiry or 'No details' }}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if lead.call_type == 'after_hours' %}
+                                            <span class="badge bg-dark"><i class="bi bi-moon-stars"></i> After Hours</span>
+                                        {% else %}
+                                            <span class="badge bg-light text-dark"><i class="bi bi-sun"></i> During Hours</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <select class="form-select form-select-sm status-select" data-lead-id="{{ lead.id }}" style="width: auto;">
+                                            <option value="new" {% if lead.status == 'new' %}selected{% endif %}>New</option>
+                                            <option value="contacted" {% if lead.status == 'contacted' %}selected{% endif %}>Contacted</option>
+                                            <option value="converted" {% if lead.status == 'converted' %}selected{% endif %}>Converted</option>
+                                            <option value="not_interested" {% if lead.status == 'not_interested' %}selected{% endif %}>Not Interested</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <a href="tel:{{ lead.caller_phone }}" class="btn btn-sm btn-success">
+                                            <i class="bi bi-telephone"></i> Call
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-person-plus display-1 text-muted"></i>
+                        <h4 class="mt-3">No leads yet</h4>
+                        <p class="text-muted">When callers express interest in products or services, their information will appear here.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.querySelectorAll('.status-select').forEach(select => {
+    select.addEventListener('change', function() {
+        const leadId = this.dataset.leadId;
+        const newStatus = this.value;
+        
+        fetch(`/leads/${leadId}/status`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ status: newStatus })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const row = this.closest('tr');
+                if (newStatus === 'new' && row.classList.contains('table-warning') === false) {
+                    row.classList.add('table-warning');
+                } else if (newStatus !== 'new') {
+                    row.classList.remove('table-warning');
+                }
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    });
+});
+</script>
+{% endblock %}
