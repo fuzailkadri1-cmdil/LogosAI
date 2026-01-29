@@ -13,7 +13,7 @@ def get_openai_client():
         api_key=os.environ.get('AI_INTEGRATIONS_OPENAI_API_KEY')
     )
 
-SYSTEM_PROMPT = """You're a warm, helpful customer service assistant. Speak naturally like a real person - use contractions (I'm, you're, we'll), vary your sentence length, and sound genuinely friendly. Keep responses brief (1-2 sentences). You can help with orders, store hours, and general questions. For refunds, returns, billing, or complaints, warmly offer to connect the caller with a team member."""
+SYSTEM_PROMPT = """You're a warm, helpful customer service assistant. Speak naturally like a real person - use contractions (I'm, you're, we'll), vary your sentence length, and sound genuinely friendly. Keep responses brief (1-2 sentences). You can help with orders, store hours, pickup status, and general questions."""
 
 def get_response(key):
     """Get cached response with SSML if enabled."""
@@ -23,21 +23,17 @@ CACHED_RESPONSES = {
     'store_hours': "We're open Monday through Friday, 9 to 5! Anything else I can help with?",
     'greeting': "Hi there! What can I help you with today?",
     'ask_order_number': "Sure thing! What's your order number?",
-    'order_not_found': "Hmm, I'm not finding that one. Let me get you to someone who can dig a bit deeper.",
+    'order_not_found': "Hmm, I'm not finding that one. Could you double-check that order number for me?",
     'goodbye': "Thanks so much for calling! Take care!",
     'escalate': "Absolutely, let me get you to someone who can help with that right away.",
     'anything_else': "Anything else I can help with?",
-    'didnt_catch': "Sorry, I didn't quite catch that. What was your order number again?"
+    'didnt_catch': "Sorry, I didn't quite catch that. What was your order number again?",
+    'after_hours_human_needed': "We're currently closed, but I'd love to have someone call you back. Can I get your name?",
+    'pickup_ready': "Great news! Your order is ready for pickup.",
+    'pickup_not_ready': "Your order is still being prepared. We'll let you know as soon as it's ready!"
 }
 
-ESCALATION_KEYWORDS = [
-    'speak to someone', 'human', 'agent', 'representative', 'manager',
-    'refund', 'return', 'cancel', 'dispute', 'complaint', 'angry',
-    'supervisor', 'person', 'real person'
-]
-
 GOODBYE_PHRASES = [
-    # Exact phrases (for whole phrase matching)
     "that's all", "that's it", "i'm good", "i'm done",
     "nothing else", "no thanks", "no thank you", "that'll be all",
     "all set", "i'm all set", "that helps", "that's everything",
@@ -45,18 +41,61 @@ GOODBYE_PHRASES = [
 ]
 
 GOODBYE_WORDS = [
-    # Single words requiring word boundary matching
     'nope', 'goodbye', 'bye'
 ]
 
-SENSITIVE_INTENTS = ['refund', 'return', 'cancel_order', 'billing_issue', 'complaint']
+# Intent Categories - determines escalation behavior
+INTENT_CATEGORIES = {
+    # AI handles these 24/7, no escalation needed
+    'AI_RESOLVABLE': ['order_status', 'store_hours', 'pickup_readiness', 'general_inquiry', 'greeting', 'goodbye'],
+    # Sales inquiries - capture lead, escalate only during hours
+    'SALES_LEAD': ['purchase_inquiry'],
+    # Requires human - escalate during hours, offer callback after hours
+    'HUMAN_REQUIRED': ['refund', 'return', 'cancel_order', 'billing_issue', 'complaint', 'speak_to_human']
+}
 
+# Keywords that explicitly request human assistance
+EXPLICIT_HUMAN_REQUEST = [
+    'speak to someone', 'human', 'agent', 'representative', 'manager',
+    'supervisor', 'person', 'real person', 'talk to someone', 'speak to a person'
+]
+
+# Keywords for human-required intents (issues needing human judgment)
+HUMAN_REQUIRED_KEYWORDS = {
+    'refund': ['refund', 'money back', 'get my money'],
+    'return': ['return', 'send back', 'exchange'],
+    'cancel_order': ['cancel my order', 'cancel order', 'cancel the order'],
+    'billing_issue': ['billing', 'charged wrong', 'overcharged', 'double charged', 'payment issue'],
+    'complaint': ['complaint', 'angry', 'upset', 'frustrated', 'disappointed', 'terrible', 'horrible', 'worst']
+}
+
+# Phrases indicating purchase/sales intent
 PURCHASE_INTENT_PHRASES = [
     'do you have', 'looking for', 'i want to buy', 'i want to order',
     'is this in stock', 'in stock', 'available', 'do you carry',
     'can i order', 'can i buy', 'i need', "i'm looking for", 'i am looking for',
     'do you sell', 'price of', 'how much is', 'how much does',
-    'purchase', 'interested in', 'want to get', 'can you get'
+    'purchase', 'interested in', 'want to get', 'can you get',
+    'do you stock', 'can i get', 'looking to buy'
+]
+
+# Phrases for pickup readiness inquiries
+PICKUP_READINESS_PHRASES = [
+    'is my order ready', 'order ready for pickup', 'ready for pickup',
+    'can i pick up', 'pickup ready', 'is it ready', 'ready to pick up',
+    'when can i pick up', 'pickup status', 'ready yet'
+]
+
+# Order status inquiry phrases
+ORDER_STATUS_PHRASES = [
+    'order status', 'where is my order', 'track my order', 'tracking',
+    'shipment', 'delivery', 'package', 'when will', 'order number'
+]
+
+# Store hours inquiry phrases
+STORE_HOURS_PHRASES = [
+    'hours', 'open', 'close', 'closing', 'opening', 'when do you',
+    'what time', 'are you open', 'business hours'
 ]
 
 
@@ -184,22 +223,31 @@ class AIVoiceAgent:
         if self.conversation_state == 'confirming_callback':
             return self._handle_callback_confirmation(user_speech)
         
-        # Check for immediate escalation triggers
-        escalation_check = self._check_escalation(user_speech)
-        if escalation_check['should_escalate']:
-            return escalation_check
+        # Analyze intent first to determine proper routing
+        intent_analysis = self._analyze_intent(user_speech)
+        category = intent_analysis.get('category', 'AI_RESOLVABLE')
         
-        # Check for purchase intent - trigger lead capture flow
-        if self._detect_purchase_intent(user_speech):
+        # Handle HUMAN_REQUIRED intents (respects business hours)
+        if category == 'HUMAN_REQUIRED':
+            escalation_check = self._check_escalation(user_speech)
+            if escalation_check.get('should_escalate') or escalation_check.get('response'):
+                return escalation_check
+        
+        # Handle SALES_LEAD intents - trigger lead capture flow
+        if category == 'SALES_LEAD' or self._detect_purchase_intent(user_speech):
             return self._handle_purchase_intent(user_speech)
         
-        # Determine intent and handle accordingly
-        intent_analysis = self._analyze_intent(user_speech)
-        
+        # Handle AI_RESOLVABLE intents - AI handles 24/7
         if intent_analysis['intent'] == 'order_status':
             return self._handle_order_status_inquiry(user_speech)
         
-        # For other intents, use GPT to generate response
+        if intent_analysis['intent'] == 'pickup_readiness':
+            return self._handle_pickup_readiness_inquiry(user_speech)
+        
+        if intent_analysis['intent'] == 'store_hours':
+            return self._handle_store_hours_inquiry(user_speech)
+        
+        # For general inquiries, use GPT to generate response
         return self._generate_ai_response(user_speech, intent_analysis)
     
     def _handle_order_status_inquiry(self, user_speech):
@@ -267,7 +315,7 @@ class AIVoiceAgent:
         }
     
     def _handle_order_number_response(self, user_speech):
-        """Handle user providing their order number"""
+        """Handle user providing their order number - routes based on current_intent"""
         import re
         
         # First try standard extraction
@@ -275,15 +323,12 @@ class AIVoiceAgent:
         
         # If that fails, accept bare digits since we're already waiting for an order number
         if not order_num:
-            # Normalize spoken numbers first
             normalized = normalize_spoken_numbers(user_speech)
-            # Accept standalone digits (1-9) or multi-digit numbers
             bare_match = re.match(r'^\s*(\d+)\s*$', normalized)
             if bare_match:
                 order_num = bare_match.group(1)
         
         if not order_num:
-            # Couldn't extract order number, ask again with SSML
             response_text = get_response('didnt_catch')
             
             self.conversation_history.append({
@@ -291,7 +336,6 @@ class AIVoiceAgent:
                 'content': response_text
             })
             
-            # Log response ready
             if self.latency_tracker:
                 self.latency_tracker.checkpoint('response_ready')
                 self.latency_tracker.log_summary()
@@ -300,7 +344,7 @@ class AIVoiceAgent:
                 'response': response_text,
                 'should_escalate': False,
                 'should_end_call': False,
-                'intent': 'order_status',
+                'intent': self.current_intent or 'order_status',
                 'confidence': 0.7,
                 'escalation_reason': None
             }
@@ -311,20 +355,61 @@ class AIVoiceAgent:
         if not order_data:
             return self._handle_order_not_found(order_num)
         
-        # Success! Provide order status with SSML
-        status_response = format_order_status(order_data)
+        # Route based on current_intent (pickup_readiness vs order_status)
+        if self.current_intent == 'pickup_readiness':
+            status = order_data.get('status', '').lower()
+            if status in ['ready', 'ready_for_pickup', 'available']:
+                response_text = f"Great news! Order {order_num} is ready for pickup. You can come get it during our business hours."
+            elif status == 'delivered':
+                response_text = f"It looks like order {order_num} has already been picked up or delivered."
+            else:
+                response_text = f"Order {order_num} is still being prepared. We'll let you know as soon as it's ready for pickup!"
+            
+            if self.use_ssml:
+                response_text = conversational_response(response_text)
+            intent = 'pickup_readiness'
+        else:
+            # Default: order status
+            status_response = format_order_status(order_data)
+            response_text = status_response
+            intent = 'order_status'
+        
         self.conversation_state = 'offering_more_help'
         self.order_data = order_data
-        
-        # Use SSML-enhanced response
-        response_text = f"{status_response} {get_response('anything_else')}"
+        response_text += " " + get_response('anything_else')
         
         self.conversation_history.append({
             'role': 'assistant',
             'content': response_text
         })
         
-        # Log response ready
+        if self.latency_tracker:
+            self.latency_tracker.checkpoint('response_ready')
+            self.latency_tracker.log_summary()
+        
+        return {
+            'response': response_text,
+            'should_escalate': False,
+            'should_end_call': False,
+            'intent': intent,
+            'confidence': 0.95,
+            'escalation_reason': None
+        }
+    
+    def _handle_order_not_found(self, order_num):
+        """Handle when order number is not found in database - ask to retry, no escalation"""
+        response_text = "Hmm, I'm not finding that order. Could you double-check the number and try again? It's usually on your order confirmation email."
+        
+        if self.use_ssml:
+            response_text = conversational_response(response_text)
+        
+        self.conversation_state = 'waiting_for_order_number'
+        
+        self.conversation_history.append({
+            'role': 'assistant',
+            'content': response_text
+        })
+        
         if self.latency_tracker:
             self.latency_tracker.checkpoint('response_ready')
             self.latency_tracker.log_summary()
@@ -334,32 +419,124 @@ class AIVoiceAgent:
             'should_escalate': False,
             'should_end_call': False,
             'intent': 'order_status',
-            'confidence': 0.95,
+            'confidence': 0.9,
             'escalation_reason': None
         }
     
-    def _handle_order_not_found(self, order_num):
-        """Handle when order number is not found in database"""
-        # Use SSML-enhanced response
-        response_text = get_response('order_not_found')
+    def _handle_pickup_readiness_inquiry(self, user_speech):
+        """Handle pickup readiness inquiry - ask for order number and check status"""
+        order_num = extract_order_number_from_speech(user_speech)
+        
+        if order_num:
+            order_data = self._smart_lookup_order(order_num)
+            if order_data:
+                status = order_data.get('status', '').lower()
+                if status in ['ready', 'ready_for_pickup', 'available']:
+                    response_text = f"Great news! Order {order_num} is ready for pickup. You can come get it during our business hours."
+                elif status == 'delivered':
+                    response_text = f"It looks like order {order_num} has already been picked up or delivered."
+                else:
+                    response_text = f"Order {order_num} is still being prepared. We'll let you know as soon as it's ready for pickup!"
+                
+                if self.use_ssml:
+                    response_text = conversational_response(response_text)
+                
+                response_text += " " + get_response('anything_else')
+                self.conversation_state = 'offering_more_help'
+                
+                self.conversation_history.append({
+                    'role': 'assistant',
+                    'content': response_text
+                })
+                
+                if self.latency_tracker:
+                    self.latency_tracker.checkpoint('response_ready')
+                    self.latency_tracker.log_summary()
+                
+                return {
+                    'response': response_text,
+                    'should_escalate': False,
+                    'should_end_call': False,
+                    'intent': 'pickup_readiness',
+                    'confidence': 0.95,
+                    'escalation_reason': None
+                }
+            else:
+                response_text = "I couldn't find that order. What's your order number? It should be on your confirmation email."
+                self.conversation_state = 'waiting_for_order_number'
+                self.current_intent = 'pickup_readiness'
+                
+                if self.use_ssml:
+                    response_text = conversational_response(response_text)
+                
+                self.conversation_history.append({
+                    'role': 'assistant',
+                    'content': response_text
+                })
+                
+                return {
+                    'response': response_text,
+                    'should_escalate': False,
+                    'should_end_call': False,
+                    'intent': 'pickup_readiness',
+                    'confidence': 0.8,
+                    'escalation_reason': None
+                }
+        
+        response_text = "Sure, I can check if your order is ready! What's your order number?"
+        self.conversation_state = 'waiting_for_order_number'
+        self.current_intent = 'pickup_readiness'
+        
+        if self.use_ssml:
+            response_text = conversational_response(response_text)
         
         self.conversation_history.append({
             'role': 'assistant',
             'content': response_text
         })
         
-        # Log response ready
         if self.latency_tracker:
             self.latency_tracker.checkpoint('response_ready')
             self.latency_tracker.log_summary()
         
         return {
             'response': response_text,
-            'should_escalate': True,
+            'should_escalate': False,
             'should_end_call': False,
-            'intent': 'order_status',
+            'intent': 'pickup_readiness',
             'confidence': 0.9,
-            'escalation_reason': 'order_not_found'
+            'escalation_reason': None
+        }
+    
+    def _handle_store_hours_inquiry(self, user_speech):
+        """Handle store hours inquiry - AI resolves 24/7"""
+        hours = self.company_config.get('business_hours', 'Monday through Friday, 9 AM to 5 PM')
+        
+        if self.use_ssml:
+            response_text = conversational_response(f"Our business hours are {hours}.")
+        else:
+            response_text = f"Our business hours are {hours}."
+        
+        response_text += " " + get_response('anything_else')
+        self.conversation_state = 'offering_more_help'
+        
+        self.conversation_history.append({
+            'role': 'assistant',
+            'content': response_text
+        })
+        
+        if self.latency_tracker:
+            self.latency_tracker.checkpoint('llm_complete')
+            self.latency_tracker.checkpoint('response_ready')
+            self.latency_tracker.log_summary()
+        
+        return {
+            'response': response_text,
+            'should_escalate': False,
+            'should_end_call': False,
+            'intent': 'store_hours',
+            'confidence': 0.95,
+            'escalation_reason': None
         }
     
     def _handle_followup_response(self, user_speech):
@@ -440,35 +617,7 @@ class AIVoiceAgent:
         return self.process_speech(user_speech)
     
     def _generate_ai_response(self, user_speech, intent_analysis):
-        """Generate AI response using GPT for general queries"""
-        if intent_analysis['intent'] == 'store_hours':
-            hours = self.company_config.get('business_hours', 'Monday through Friday, 9 AM to 5 PM')
-            anything_else = get_response('anything_else')
-            
-            # Build response with SSML if enabled
-            if self.use_ssml:
-                response_text = conversational_response(f"Our business hours are {hours}.") + " " + anything_else
-            else:
-                response_text = f"Our business hours are {hours}. {CACHED_RESPONSES['anything_else']}"
-            
-            self.conversation_state = 'offering_more_help'
-            self.conversation_history.append({'role': 'assistant', 'content': response_text})
-            
-            # Log LLM complete (cached response, so instant)
-            if self.latency_tracker:
-                self.latency_tracker.checkpoint('llm_complete')
-                self.latency_tracker.checkpoint('response_ready')
-                self.latency_tracker.log_summary()
-            
-            return {
-                'response': response_text,
-                'should_escalate': False,
-                'should_end_call': False,
-                'intent': 'store_hours',
-                'confidence': 0.95,
-                'escalation_reason': None
-            }
-        
+        """Generate AI response using GPT for general queries - AI handles without escalation"""
         system_msg = self._build_system_prompt()
         
         try:
@@ -525,15 +674,26 @@ class AIVoiceAgent:
             
         except Exception as e:
             print(f"OpenAI API error: {e}")
-            # Fallback to safe escalation
-            return {
-                'response': "I'm having trouble processing your request. Let me connect you with someone who can help.",
-                'should_escalate': True,
-                'should_end_call': False,
-                'intent': 'error',
-                'confidence': 0.0,
-                'escalation_reason': 'api_error'
-            }
+            # Fallback - escalate during hours, apologize after hours
+            store_open = self._is_store_open()
+            if store_open:
+                return {
+                    'response': "I'm having trouble processing your request. Let me connect you with someone who can help.",
+                    'should_escalate': True,
+                    'should_end_call': False,
+                    'intent': 'error',
+                    'confidence': 0.0,
+                    'escalation_reason': 'api_error'
+                }
+            else:
+                return {
+                    'response': "I'm sorry, I'm having some trouble right now. Please try calling back during our business hours.",
+                    'should_escalate': False,
+                    'should_end_call': True,
+                    'intent': 'error',
+                    'confidence': 0.0,
+                    'escalation_reason': None
+                }
     
     def _should_offer_more_help(self, intent):
         """Determine if we should offer continued assistance after this response"""
@@ -551,67 +711,146 @@ Phone: {self.company_config.get('phone_number', '')}
         return SYSTEM_PROMPT + "\n\n" + company_info
     
     def _check_escalation(self, user_speech):
-        """Check if user speech contains escalation triggers"""
+        """Check if user speech contains escalation triggers - respects business hours"""
         user_lower = user_speech.lower()
+        store_open = self._is_store_open()
         
-        # Check for explicit escalation keywords
-        for keyword in ESCALATION_KEYWORDS:
-            if keyword in user_lower:
-                return {
-                    'response': get_response('escalate'),
-                    'should_escalate': True,
-                    'should_end_call': False,
-                    'intent': 'escalate_requested',
-                    'confidence': 1.0,
-                    'escalation_reason': f'keyword: {keyword}'
-                }
+        # Check for explicit human request
+        for phrase in EXPLICIT_HUMAN_REQUEST:
+            if phrase in user_lower:
+                if store_open:
+                    return {
+                        'response': get_response('escalate'),
+                        'should_escalate': True,
+                        'should_end_call': False,
+                        'intent': 'speak_to_human',
+                        'confidence': 1.0,
+                        'escalation_reason': f'explicit_request: {phrase}'
+                    }
+                else:
+                    # After hours - start callback capture flow
+                    return self._handle_after_hours_human_request(user_speech)
+        
+        # Check for human-required intents
+        for intent, keywords in HUMAN_REQUIRED_KEYWORDS.items():
+            for keyword in keywords:
+                if keyword in user_lower:
+                    if store_open:
+                        return {
+                            'response': get_response('escalate'),
+                            'should_escalate': True,
+                            'should_end_call': False,
+                            'intent': intent,
+                            'confidence': 0.9,
+                            'escalation_reason': f'human_required: {intent}'
+                        }
+                    else:
+                        # After hours - start callback capture flow
+                        return self._handle_after_hours_human_request(user_speech)
         
         return {'should_escalate': False}
     
+    def _handle_after_hours_human_request(self, user_speech):
+        """Handle requests that need humans when store is closed - offer callback"""
+        self.lead_data['inquiry'] = user_speech.strip()
+        self.lead_data['call_type'] = 'after_hours'
+        
+        store_name = self.company_config.get('name', 'our store')
+        response_text = f"We're currently closed at {store_name}, but I want to make sure you get the help you need. Can I get your name so someone can call you back first thing?"
+        
+        self.conversation_state = 'capturing_lead_name'
+        self.current_intent = 'callback_request'
+        
+        if self.use_ssml:
+            response_text = conversational_response(response_text)
+        
+        self.conversation_history.append({
+            'role': 'assistant',
+            'content': response_text
+        })
+        
+        if self.latency_tracker:
+            self.latency_tracker.checkpoint('response_ready')
+            self.latency_tracker.log_summary()
+        
+        return {
+            'response': response_text,
+            'should_escalate': False,
+            'should_end_call': False,
+            'intent': 'callback_request',
+            'confidence': 0.9,
+            'escalation_reason': None
+        }
+    
     def _analyze_intent(self, user_speech):
-        """Analyze intent from user speech"""
+        """Analyze intent from user speech using comprehensive phrase matching"""
         user_lower = user_speech.lower()
         
-        # Detect common intents
-        if any(word in user_lower for word in ['order', 'tracking', 'shipment', 'delivery', 'package']):
-            return {'intent': 'order_status', 'confidence': 0.9}
-        elif any(word in user_lower for word in ['hours', 'open', 'close', 'location', 'when']):
-            return {'intent': 'store_hours', 'confidence': 0.9}
-        elif any(word in user_lower for word in ['appointment', 'schedule', 'book']):
-            return {'intent': 'appointment', 'confidence': 0.8}
-        elif any(word in user_lower for word in ['refund', 'return', 'send back']):
-            return {'intent': 'refund', 'confidence': 0.9}
-        elif any(word in user_lower for word in ['billing', 'charge', 'payment', 'invoice']):
-            return {'intent': 'billing', 'confidence': 0.8}
-        else:
-            return {'intent': 'general_inquiry', 'confidence': 0.6}
+        # Check for explicit human request first
+        for phrase in EXPLICIT_HUMAN_REQUEST:
+            if phrase in user_lower:
+                return {'intent': 'speak_to_human', 'confidence': 1.0, 'category': 'HUMAN_REQUIRED'}
+        
+        # Check for human-required intents (refund, return, billing, complaint)
+        for intent, keywords in HUMAN_REQUIRED_KEYWORDS.items():
+            for keyword in keywords:
+                if keyword in user_lower:
+                    return {'intent': intent, 'confidence': 0.9, 'category': 'HUMAN_REQUIRED'}
+        
+        # Check for purchase/sales intent
+        for phrase in PURCHASE_INTENT_PHRASES:
+            if phrase in user_lower:
+                return {'intent': 'purchase_inquiry', 'confidence': 0.9, 'category': 'SALES_LEAD'}
+        
+        # Check for pickup readiness
+        for phrase in PICKUP_READINESS_PHRASES:
+            if phrase in user_lower:
+                return {'intent': 'pickup_readiness', 'confidence': 0.9, 'category': 'AI_RESOLVABLE'}
+        
+        # Check for order status
+        for phrase in ORDER_STATUS_PHRASES:
+            if phrase in user_lower:
+                return {'intent': 'order_status', 'confidence': 0.9, 'category': 'AI_RESOLVABLE'}
+        
+        # Check for store hours
+        for phrase in STORE_HOURS_PHRASES:
+            if phrase in user_lower:
+                return {'intent': 'store_hours', 'confidence': 0.9, 'category': 'AI_RESOLVABLE'}
+        
+        # Default to general inquiry (AI can handle)
+        return {'intent': 'general_inquiry', 'confidence': 0.7, 'category': 'AI_RESOLVABLE'}
+    
+    def _get_intent_category(self, intent):
+        """Get the category for a given intent"""
+        for category, intents in INTENT_CATEGORIES.items():
+            if intent in intents:
+                return category
+        return 'AI_RESOLVABLE'
     
     def _check_for_escalation_in_response(self, ai_response, intent_analysis):
-        """Check if AI response or intent requires escalation"""
-        # Sensitive intents always escalate
-        if intent_analysis['intent'] in SENSITIVE_INTENTS:
-            return {
-                'should_escalate': True,
-                'escalation_reason': f"sensitive_intent: {intent_analysis['intent']}"
-            }
+        """Check if AI response requires escalation based on intent category and business hours"""
+        category = intent_analysis.get('category', self._get_intent_category(intent_analysis['intent']))
+        store_open = self._is_store_open()
         
-        # Check if AI expressed uncertainty in response
-        uncertainty_phrases = [
-            "i'm not sure", "i don't know", "i can't help", 
-            "let me connect you", "speak with someone"
-        ]
-        if any(phrase in ai_response.lower() for phrase in uncertainty_phrases):
-            return {
-                'should_escalate': True,
-                'escalation_reason': 'ai_uncertainty'
-            }
+        # AI_RESOLVABLE intents never escalate - AI handles 24/7
+        if category == 'AI_RESOLVABLE':
+            return {'should_escalate': False}
         
-        # Low confidence threshold - escalate if below 0.5
-        if intent_analysis['confidence'] < 0.5:
-            return {
-                'should_escalate': True,
-                'escalation_reason': 'low_confidence'
-            }
+        # SALES_LEAD intents only escalate during business hours
+        if category == 'SALES_LEAD':
+            # This is handled by lead capture flow, not here
+            return {'should_escalate': False}
+        
+        # HUMAN_REQUIRED intents escalate during hours, offer callback after hours
+        if category == 'HUMAN_REQUIRED':
+            if store_open:
+                return {
+                    'should_escalate': True,
+                    'escalation_reason': f"human_required: {intent_analysis['intent']}"
+                }
+            else:
+                # After hours - don't escalate, handled separately
+                return {'should_escalate': False}
         
         return {'should_escalate': False}
     
@@ -661,13 +900,22 @@ Phone: {self.company_config.get('phone_number', '')}
         }
     
     def _handle_lead_name_response(self, user_speech):
-        """Handle caller providing their name"""
+        """Handle caller providing their name - supports both sales and callback requests"""
         self.lead_data['caller_name'] = user_speech.strip()
         store_open = self.lead_data['call_type'] == 'during_hours'
         
         inquiry = self.lead_data.get('inquiry', '')
         
-        if store_open:
+        # Check if this is a callback request (human-required intent after hours) vs sales lead
+        is_callback_request = self.current_intent == 'callback_request'
+        
+        if is_callback_request:
+            # For callback requests, we already have the inquiry, just confirm callback number
+            caller_phone = self.lead_data.get('caller_phone', '')
+            display_phone = caller_phone[-4:] if caller_phone else 'your number'
+            response_text = f"Thanks {user_speech.strip()}. We'll have someone call you back as soon as we open. Is {display_phone} the best number to reach you?"
+            self.conversation_state = 'confirming_callback'
+        elif store_open:
             response_text = f"And you're looking for {inquiry} - any specific size, color, or other details?"
             self.conversation_state = 'capturing_lead_details'
         else:
