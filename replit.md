@@ -6,11 +6,22 @@ Logos AI is an AI-powered phone system designed for small and medium retail/eCom
 ## Current State (Prototype)
 **Status:** Live and demo-ready for pilot customers
 
-### What Works Today (3 AI Intents)
-- AI order status lookup via CSV upload
+### What Works Today (Intent Detection System)
+**AI-Resolvable Intents (24/7, no escalation):**
+- Order status lookup via CSV upload
 - Store hours responses
-- **Lead capture for purchase inquiries** (during-hours + after-hours flows)
-- Intelligent human handoff/escalation
+- Pickup readiness checks
+
+**Sales Lead Capture:**
+- During hours: Capture lead info → transfer to staff
+- After hours: Capture lead info + callback number → save for next-day follow-up
+
+**Human-Required Intents:**
+- Refunds, returns, complaints, billing issues
+- During hours: Transfer to human agent
+- After hours: Offer callback, capture lead for next-day follow-up
+
+**Additional Features:**
 - Twilio phone integration
 - Real-time analytics dashboard with Listen Mode
 - Pilot customer management with CSV order upload
