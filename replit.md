@@ -116,6 +116,22 @@ The voice AI uses SSML (Speech Synthesis Markup Language) for more natural-sound
 
 To disable SSML for rollback: Set `SSML_ENABLED=false` in environment variables
 
+## Context-Aware Intent Detection
+The AI uses a priority-based intent detection system that analyzes full sentence context:
+
+**Priority Order:**
+1. Explicit human request (speak to agent, etc.)
+2. Human-required intents (refund, return, complaint)
+3. ORDER CONTEXT (my order, tracking, delivery) → order_status
+4. Pickup readiness phrases → pickup_readiness
+5. Store hours phrases → store_hours
+6. PURCHASE INTENT (only if no order context) → purchase_inquiry
+7. Default → general_inquiry
+
+**Key Logic:** The system checks for ORDER CONTEXT first before purchase intent.
+- "I'm looking for my order status" → routes to order_status (not sales)
+- "I'm looking for a red jacket" → routes to purchase_inquiry (sales lead)
+
 ## User Preferences
 - Company name: Logos AI
 - Focus: SMB retail/eCommerce
