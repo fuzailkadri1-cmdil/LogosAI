@@ -1010,7 +1010,7 @@ Phone: {self.company_config.get('phone_number', '')}
             response_text = "Let me connect you with our team. Before I transfer, can I get your name in case we get disconnected?"
         else:
             store_name = self.company_config.get('name', 'our store')
-            response_text = "Our team is tied up at the moment, but I don't want you to miss out. Can I get your name so someone can follow up with you?"
+            response_text = "Thanks so much for calling! We're closed right now but we really appreciate you reaching out. Can I get your name so someone can follow up with you tomorrow?"
 
         self.conversation_state = 'capturing_lead_name'
         self.current_intent = 'purchase_inquiry'
