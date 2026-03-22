@@ -1,57 +1,614 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account — Logos AI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
 
-{% block title %}Create Account - Logos AI{% endblock %}
+        html, body {
+            height: 100%;
+            margin: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #f1f5f9;
+        }
 
-{% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-5">
-            <div class="card">
-                <div class="card-body p-5">
-                    <div class="text-center mb-4">
-                        <h2 class="fw-bold">Get started free</h2>
-                        <p class="text-muted">Create your Logos AI account</p>
-                    </div>
+        /* ── Layout ── */
+        .auth-wrapper {
+            min-height: 100vh;
+            display: flex;
+        }
 
-                    <form method="POST" action="{{ url_for('register') }}">
-                        <div class="mb-3">
-                            <label for="company_name" class="form-label fw-semibold">Store / business name</label>
-                            <input type="text" class="form-control" id="company_name" name="company_name"
-                                   value="{{ request.form.get('company_name', '') }}"
-                                   placeholder="e.g. Maison Boutique" required autofocus>
-                        </div>
-                        <div class="mb-3">
-                            <label for="full_name" class="form-label fw-semibold">Your full name</label>
-                            <input type="text" class="form-control" id="full_name" name="full_name"
-                                   value="{{ request.form.get('full_name', '') }}"
-                                   placeholder="First Last" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="email" class="form-label fw-semibold">Email address</label>
-                            <input type="email" class="form-control" id="email" name="email"
-                                   value="{{ request.form.get('email', '') }}"
-                                   placeholder="you@yourstore.com" required>
-                        </div>
-                        <div class="mb-4">
-                            <label for="password" class="form-label fw-semibold">Password</label>
-                            <input type="password" class="form-control" id="password" name="password"
-                                   placeholder="Minimum 6 characters" required minlength="6">
-                            <div class="form-text">You'll use this to log in each time.</div>
-                        </div>
-                        <div class="d-grid mb-3">
-                            <button type="submit" class="btn btn-primary btn-lg">Create account</button>
-                        </div>
-                    </form>
+        /* ── Left brand panel ── */
+        .brand-panel {
+            width: 42%;
+            background: linear-gradient(150deg, #0f172a 0%, #1e3a8a 45%, #1d4ed8 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 48px 52px;
+            position: relative;
+            overflow: hidden;
+        }
 
-                    <hr class="my-4">
+        .brand-panel::before {
+            content: '';
+            position: absolute;
+            top: -80px; right: -80px;
+            width: 320px; height: 320px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.04);
+        }
+        .brand-panel::after {
+            content: '';
+            position: absolute;
+            bottom: -60px; left: -60px;
+            width: 260px; height: 260px;
+            border-radius: 50%;
+            background: rgba(16,185,129,0.08);
+        }
 
-                    <p class="text-center text-muted mb-0">
-                        Already have an account?
-                        <a href="{{ url_for('login') }}" class="fw-semibold">Sign in</a>
-                    </p>
-                </div>
-            </div>
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            text-decoration: none;
+            z-index: 1;
+        }
+        .brand-logo img { width: 42px; height: 42px; border-radius: 10px; }
+        .brand-logo span {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: -0.3px;
+        }
+
+        .brand-headline {
+            z-index: 1;
+        }
+        .brand-headline h1 {
+            font-size: 2.05rem;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1.2;
+            margin-bottom: 16px;
+            letter-spacing: -0.5px;
+        }
+        .brand-headline h1 span { color: #34d399; }
+        .brand-headline p {
+            color: rgba(255,255,255,0.68);
+            font-size: 0.97rem;
+            line-height: 1.65;
+            max-width: 340px;
+        }
+
+        /* Feature checklist */
+        .brand-features { z-index: 1; }
+        .brand-features ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .brand-features li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: rgba(255,255,255,0.78);
+            font-size: 0.9rem;
+            padding: 7px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+        }
+        .brand-features li:last-child { border-bottom: none; }
+        .check-icon {
+            width: 20px; height: 20px;
+            background: rgba(52,211,153,0.18);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            color: #34d399;
+            font-size: 0.7rem;
+        }
+
+        .brand-note {
+            z-index: 1;
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.35);
+        }
+
+        /* ── Right form panel ── */
+        .form-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 48px 32px;
+            background: #fff;
+        }
+
+        .form-box {
+            width: 100%;
+            max-width: 440px;
+        }
+
+        .form-header { margin-bottom: 30px; }
+        .form-header h2 {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin: 0 0 6px;
+            letter-spacing: -0.4px;
+        }
+        .form-header p {
+            color: #64748b;
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        /* ── Form controls ── */
+        .field-group { margin-bottom: 18px; }
+
+        .field-group label {
+            display: block;
+            font-size: 0.84rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 6px;
+            letter-spacing: 0.1px;
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+        .input-wrap .input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            font-size: 1rem;
+            pointer-events: none;
+        }
+        .input-wrap input {
+            width: 100%;
+            padding: 11px 14px 11px 40px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 9px;
+            font-size: 0.95rem;
+            color: #0f172a;
+            background: #f8fafc;
+            transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+            outline: none;
+        }
+        .input-wrap input:focus {
+            border-color: #1d4ed8;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.1);
+        }
+        .input-wrap input.is-invalid {
+            border-color: #ef4444;
+            background: #fff8f8;
+        }
+        .input-wrap input.is-invalid:focus {
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+        }
+        .input-wrap input.is-valid {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+
+        /* password toggle */
+        .pw-wrap input { padding-right: 44px; }
+        .pw-toggle {
+            position: absolute;
+            right: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            padding: 2px;
+            font-size: 1rem;
+            line-height: 1;
+            transition: color 0.15s;
+        }
+        .pw-toggle:hover { color: #374151; }
+
+        /* inline field error */
+        .field-error {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.8rem;
+            color: #dc2626;
+            margin-top: 6px;
+            font-weight: 500;
+        }
+        .field-error i { font-size: 0.82rem; }
+
+        /* Password strength meter */
+        .strength-bar {
+            margin-top: 8px;
+            height: 4px;
+            border-radius: 2px;
+            background: #e2e8f0;
+            overflow: hidden;
+        }
+        .strength-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.25s, background 0.25s;
+            width: 0%;
+        }
+        .strength-text {
+            font-size: 0.77rem;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        /* ── Flash alerts ── */
+        .flash-block { margin-bottom: 20px; }
+        .flash-alert {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 12px 16px;
+            border-radius: 9px;
+            font-size: 0.88rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        .flash-alert:last-child { margin-bottom: 0; }
+        .flash-alert i { margin-top: 1px; flex-shrink: 0; }
+        .flash-danger  { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+        .flash-success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+        .flash-warning { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
+        .flash-info    { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+
+        /* ── Submit button ── */
+        .btn-auth {
+            width: 100%;
+            padding: 12px;
+            background: #1d4ed8;
+            color: #fff;
+            border: none;
+            border-radius: 9px;
+            font-size: 0.97rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 8px;
+            letter-spacing: 0.1px;
+        }
+        .btn-auth:hover { background: #1e40af; box-shadow: 0 4px 14px rgba(29,78,216,0.3); }
+        .btn-auth:active { transform: translateY(1px); }
+        .btn-auth:disabled { background: #93c5fd; cursor: not-allowed; box-shadow: none; transform: none; }
+
+        .spinner-border-sm { width: 1rem; height: 1rem; border-width: 2px; }
+
+        .terms-note {
+            font-size: 0.78rem;
+            color: #94a3b8;
+            text-align: center;
+            margin-top: 10px;
+            line-height: 1.5;
+        }
+        .terms-note a { color: #64748b; }
+
+        /* ── Footer link ── */
+        .auth-footer {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 0.88rem;
+            color: #64748b;
+        }
+        .auth-footer a {
+            color: #1d4ed8;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .auth-footer a:hover { text-decoration: underline; }
+
+        /* ── Mobile ── */
+        @media (max-width: 767px) {
+            .brand-panel { display: none; }
+            .form-panel { padding: 40px 20px; background: #f1f5f9; }
+            .form-box {
+                background: #fff;
+                border-radius: 16px;
+                padding: 32px 24px;
+                box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            }
+            .mobile-logo {
+                display: flex !important;
+                align-items: center;
+                gap: 10px;
+                justify-content: center;
+                margin-bottom: 24px;
+                text-decoration: none;
+            }
+            .mobile-logo img { width: 36px; height: 36px; border-radius: 8px; }
+            .mobile-logo span { font-size: 1.25rem; font-weight: 700; color: #0f172a; }
+        }
+        @media (min-width: 768px) {
+            .mobile-logo { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="auth-wrapper">
+
+    <!-- ── Left brand panel ── -->
+    <div class="brand-panel">
+        <a href="/" class="brand-logo">
+            <img src="{{ url_for('static', filename='images/logos-ai-logo.png') }}" alt="Logos AI">
+            <span>Logos AI</span>
+        </a>
+
+        <div class="brand-headline">
+            <h1>Set up in minutes.<br><span>Never miss a call again.</span></h1>
+            <p>Join retail businesses in Toronto and Montréal using Logos AI to capture every lead — even at 2am.</p>
+        </div>
+
+        <div class="brand-features">
+            <ul>
+                <li>
+                    <div class="check-icon"><i class="bi bi-check-lg"></i></div>
+                    AI answers calls 24/7, even when you're with customers
+                </li>
+                <li>
+                    <div class="check-icon"><i class="bi bi-check-lg"></i></div>
+                    Captures caller name, inquiry, and callback number
+                </li>
+                <li>
+                    <div class="check-icon"><i class="bi bi-check-lg"></i></div>
+                    Leads dashboard — see every missed opportunity
+                </li>
+                <li>
+                    <div class="check-icon"><i class="bi bi-check-lg"></i></div>
+                    Order status lookup, store hours, and escalations
+                </li>
+                <li>
+                    <div class="check-icon"><i class="bi bi-check-lg"></i></div>
+                    Connects to your existing Twilio number in minutes
+                </li>
+            </ul>
+        </div>
+
+        <div class="brand-note">
+            No credit card required &nbsp;·&nbsp; Setup in under 10 minutes
         </div>
     </div>
+
+    <!-- ── Right form panel ── -->
+    <div class="form-panel">
+        <div class="form-box">
+
+            <!-- Mobile-only logo -->
+            <a href="/" class="mobile-logo">
+                <img src="{{ url_for('static', filename='images/logos-ai-logo.png') }}" alt="Logos AI">
+                <span>Logos AI</span>
+            </a>
+
+            <div class="form-header">
+                <h2>Create your account</h2>
+                <p>Get started — it only takes a minute</p>
+            </div>
+
+            <!-- Flash messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                <div class="flash-block">
+                    {% for category, message in messages %}
+                    <div class="flash-alert flash-{{ category }}">
+                        <i class="bi bi-{% if category == 'danger' %}exclamation-circle-fill{% elif category == 'success' %}check-circle-fill{% elif category == 'warning' %}exclamation-triangle-fill{% else %}info-circle-fill{% endif %}"></i>
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST" action="{{ url_for('register') }}" id="registerForm" novalidate>
+
+                <div class="field-group">
+                    <label for="company_name">Store or business name</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-shop input-icon"></i>
+                        <input type="text" id="company_name" name="company_name"
+                               value="{{ request.form.get('company_name', '') }}"
+                               placeholder="e.g. Maison Boutique"
+                               autocomplete="organization"
+                               autofocus>
+                    </div>
+                    <div class="field-error d-none" id="companyError">
+                        <i class="bi bi-exclamation-circle-fill"></i>
+                        <span>Please enter your business name.</span>
+                    </div>
+                </div>
+
+                <div class="field-group">
+                    <label for="full_name">Your full name</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-person input-icon"></i>
+                        <input type="text" id="full_name" name="full_name"
+                               value="{{ request.form.get('full_name', '') }}"
+                               placeholder="First Last"
+                               autocomplete="name">
+                    </div>
+                    <div class="field-error d-none" id="nameError">
+                        <i class="bi bi-exclamation-circle-fill"></i>
+                        <span>Please enter your full name.</span>
+                    </div>
+                </div>
+
+                <div class="field-group">
+                    <label for="email">Email address</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-envelope input-icon"></i>
+                        <input type="email" id="email" name="email"
+                               value="{{ request.form.get('email', '') }}"
+                               placeholder="you@yourstore.com"
+                               autocomplete="email">
+                    </div>
+                    <div class="field-error d-none" id="emailError">
+                        <i class="bi bi-exclamation-circle-fill"></i>
+                        <span>Please enter a valid email address.</span>
+                    </div>
+                </div>
+
+                <div class="field-group">
+                    <label for="password">Password</label>
+                    <div class="input-wrap pw-wrap">
+                        <i class="bi bi-lock input-icon"></i>
+                        <input type="password" id="password" name="password"
+                               placeholder="Minimum 6 characters"
+                               autocomplete="new-password"
+                               minlength="6">
+                        <button type="button" class="pw-toggle" id="pwToggle" tabindex="-1" aria-label="Show password">
+                            <i class="bi bi-eye" id="pwIcon"></i>
+                        </button>
+                    </div>
+                    <div class="strength-bar">
+                        <div class="strength-fill" id="strengthFill"></div>
+                    </div>
+                    <div class="strength-text" id="strengthText" style="color: #94a3b8;"></div>
+                    <div class="field-error d-none" id="passwordError">
+                        <i class="bi bi-exclamation-circle-fill"></i>
+                        <span id="passwordErrorText">Password must be at least 6 characters.</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-auth" id="submitBtn">
+                    <span id="btnText">Create account</span>
+                    <span id="btnSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                </button>
+
+                <p class="terms-note">
+                    By creating an account you agree to our
+                    <a href="/terms">Terms of Service</a> and <a href="/privacy">Privacy Policy</a>.
+                </p>
+
+            </form>
+
+            <div class="auth-footer">
+                Already have an account? <a href="{{ url_for('login') }}">Sign in →</a>
+            </div>
+
+        </div>
+    </div>
+
 </div>
-{% endblock %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Password show/hide
+    const pwToggle = document.getElementById('pwToggle');
+    const pwField  = document.getElementById('password');
+    const pwIcon   = document.getElementById('pwIcon');
+
+    pwToggle.addEventListener('click', () => {
+        const isHidden = pwField.type === 'password';
+        pwField.type = isHidden ? 'text' : 'password';
+        pwIcon.className = isHidden ? 'bi bi-eye-slash' : 'bi bi-eye';
+    });
+
+    // Password strength meter
+    const strengthFill = document.getElementById('strengthFill');
+    const strengthText = document.getElementById('strengthText');
+
+    function getStrength(pw) {
+        if (!pw) return { score: 0, label: '', color: '' };
+        let score = 0;
+        if (pw.length >= 6)  score++;
+        if (pw.length >= 10) score++;
+        if (/[A-Z]/.test(pw)) score++;
+        if (/[0-9]/.test(pw)) score++;
+        if (/[^A-Za-z0-9]/.test(pw)) score++;
+
+        const levels = [
+            { label: '',          color: '',        pct: '0%'  },
+            { label: 'Weak',      color: '#ef4444', pct: '20%' },
+            { label: 'Fair',      color: '#f59e0b', pct: '40%' },
+            { label: 'Good',      color: '#3b82f6', pct: '65%' },
+            { label: 'Strong',    color: '#10b981', pct: '85%' },
+            { label: 'Very strong', color: '#10b981', pct: '100%' },
+        ];
+        return levels[Math.min(score, 5)];
+    }
+
+    pwField.addEventListener('input', () => {
+        const s = getStrength(pwField.value);
+        strengthFill.style.width    = s.pct;
+        strengthFill.style.background = s.color;
+        strengthText.textContent    = s.label;
+        strengthText.style.color    = s.color || '#94a3b8';
+        clearError(pwField, document.getElementById('passwordError'));
+    });
+
+    // Validation helpers
+    function showError(field, errorEl) {
+        field.classList.add('is-invalid');
+        errorEl.classList.remove('d-none');
+    }
+    function clearError(field, errorEl) {
+        field.classList.remove('is-invalid');
+        errorEl.classList.add('d-none');
+    }
+
+    const fields = {
+        company: { el: document.getElementById('company_name'), err: document.getElementById('companyError') },
+        name:    { el: document.getElementById('full_name'),    err: document.getElementById('nameError')    },
+        email:   { el: document.getElementById('email'),        err: document.getElementById('emailError')   },
+        pw:      { el: pwField,                                  err: document.getElementById('passwordError') },
+    };
+
+    Object.values(fields).forEach(({ el, err }) => {
+        el.addEventListener('input', () => clearError(el, err));
+    });
+
+    // Form submit
+    const form       = document.getElementById('registerForm');
+    const submitBtn  = document.getElementById('submitBtn');
+    const btnText    = document.getElementById('btnText');
+    const btnSpinner = document.getElementById('btnSpinner');
+
+    form.addEventListener('submit', (e) => {
+        let valid = true;
+
+        if (!fields.company.el.value.trim()) {
+            showError(fields.company.el, fields.company.err);
+            valid = false;
+        }
+        if (!fields.name.el.value.trim()) {
+            showError(fields.name.el, fields.name.err);
+            valid = false;
+        }
+        if (!fields.email.el.value || !fields.email.el.validity.valid) {
+            showError(fields.email.el, fields.email.err);
+            valid = false;
+        }
+        if (!fields.pw.el.value || fields.pw.el.value.length < 6) {
+            document.getElementById('passwordErrorText').textContent = 'Password must be at least 6 characters.';
+            showError(fields.pw.el, fields.pw.err);
+            valid = false;
+        }
+
+        if (!valid) { e.preventDefault(); return; }
+
+        submitBtn.disabled = true;
+        btnText.textContent = 'Creating account…';
+        btnSpinner.classList.remove('d-none');
+    });
+</script>
+</body>
+</html>

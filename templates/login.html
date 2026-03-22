@@ -1,50 +1,540 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In — Logos AI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
 
-{% block title %}Login - Logos AI{% endblock %}
+        html, body {
+            height: 100%;
+            margin: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #f1f5f9;
+        }
 
-{% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-5">
-            <div class="card">
-                <div class="card-body p-5">
-                    <div class="text-center mb-4">
-                        <h2 class="fw-bold">Welcome back</h2>
-                        <p class="text-muted">Sign in to your Logos AI account</p>
-                    </div>
+        /* ── Layout ── */
+        .auth-wrapper {
+            min-height: 100vh;
+            display: flex;
+        }
 
-                    <form method="POST" action="{{ url_for('login') }}">
-                        <div class="mb-3">
-                            <label for="email" class="form-label fw-semibold">Email address</label>
-                            <input type="email" class="form-control" id="email" name="email"
-                                   value="{{ request.form.get('email', '') }}"
-                                   placeholder="you@yourstore.com" required autofocus>
-                        </div>
-                        <div class="mb-4">
-                            <label for="password" class="form-label fw-semibold">Password</label>
-                            <input type="password" class="form-control" id="password" name="password"
-                                   placeholder="••••••••" required>
-                        </div>
-                        <div class="d-grid mb-3">
-                            <button type="submit" class="btn btn-primary btn-lg">Sign in</button>
-                        </div>
-                    </form>
+        /* ── Left brand panel ── */
+        .brand-panel {
+            width: 42%;
+            background: linear-gradient(150deg, #0f172a 0%, #1e3a8a 45%, #1d4ed8 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 48px 52px;
+            position: relative;
+            overflow: hidden;
+        }
 
-                    <hr class="my-4">
+        .brand-panel::before {
+            content: '';
+            position: absolute;
+            top: -80px; right: -80px;
+            width: 320px; height: 320px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.04);
+        }
+        .brand-panel::after {
+            content: '';
+            position: absolute;
+            bottom: -60px; left: -60px;
+            width: 260px; height: 260px;
+            border-radius: 50%;
+            background: rgba(16,185,129,0.08);
+        }
 
-                    <p class="text-center text-muted mb-3">
-                        Don't have an account?
-                        <a href="{{ url_for('register') }}" class="fw-semibold">Create one free</a>
-                    </p>
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            text-decoration: none;
+            z-index: 1;
+        }
+        .brand-logo img { width: 42px; height: 42px; border-radius: 10px; }
+        .brand-logo span {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: -0.3px;
+        }
 
-                    <div class="alert alert-info mb-0" style="font-size: 0.875rem;">
-                        <strong>Demo account</strong><br>
-                        Email: <code>demo@example.com</code><br>
-                        Password: <code>demo123</code>
-                    </div>
-                </div>
+        .brand-headline {
+            z-index: 1;
+        }
+        .brand-headline h1 {
+            font-size: 2.15rem;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1.2;
+            margin-bottom: 16px;
+            letter-spacing: -0.5px;
+        }
+        .brand-headline h1 span { color: #34d399; }
+        .brand-headline p {
+            color: rgba(255,255,255,0.68);
+            font-size: 1rem;
+            line-height: 1.6;
+            max-width: 340px;
+        }
+
+        .brand-stats {
+            display: flex;
+            gap: 28px;
+            z-index: 1;
+        }
+        .stat-item { }
+        .stat-number {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #34d399;
+            line-height: 1;
+        }
+        .stat-label {
+            font-size: 0.78rem;
+            color: rgba(255,255,255,0.55);
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .brand-quote {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-left: 3px solid #34d399;
+            border-radius: 10px;
+            padding: 20px 24px;
+            z-index: 1;
+        }
+        .brand-quote p {
+            color: rgba(255,255,255,0.82);
+            font-size: 0.92rem;
+            line-height: 1.6;
+            margin: 0 0 10px;
+            font-style: italic;
+        }
+        .brand-quote .attribution {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.45);
+            font-style: normal;
+        }
+
+        /* ── Right form panel ── */
+        .form-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 48px 32px;
+            background: #fff;
+        }
+
+        .form-box {
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .form-header { margin-bottom: 36px; }
+        .form-header h2 {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin: 0 0 6px;
+            letter-spacing: -0.4px;
+        }
+        .form-header p {
+            color: #64748b;
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        /* ── Form controls ── */
+        .field-group { margin-bottom: 20px; }
+
+        .field-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 7px;
+            letter-spacing: 0.1px;
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+        .input-wrap .input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            font-size: 1rem;
+            pointer-events: none;
+        }
+        .input-wrap input {
+            width: 100%;
+            padding: 11px 14px 11px 40px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 9px;
+            font-size: 0.95rem;
+            color: #0f172a;
+            background: #f8fafc;
+            transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+            outline: none;
+        }
+        .input-wrap input:focus {
+            border-color: #1d4ed8;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.1);
+        }
+        .input-wrap input.is-invalid {
+            border-color: #ef4444;
+            background: #fff8f8;
+        }
+        .input-wrap input.is-invalid:focus {
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+        }
+
+        /* password toggle */
+        .pw-wrap input { padding-right: 44px; }
+        .pw-toggle {
+            position: absolute;
+            right: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            padding: 2px;
+            font-size: 1rem;
+            line-height: 1;
+            transition: color 0.15s;
+        }
+        .pw-toggle:hover { color: #374151; }
+
+        /* inline field error */
+        .field-error {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.82rem;
+            color: #dc2626;
+            margin-top: 6px;
+            font-weight: 500;
+        }
+        .field-error i { font-size: 0.85rem; }
+
+        /* ── Flash alerts ── */
+        .flash-block { margin-bottom: 22px; }
+        .flash-alert {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 12px 16px;
+            border-radius: 9px;
+            font-size: 0.88rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        .flash-alert:last-child { margin-bottom: 0; }
+        .flash-alert i { margin-top: 1px; flex-shrink: 0; }
+        .flash-danger  { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+        .flash-success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+        .flash-warning { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
+        .flash-info    { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+
+        /* ── Submit button ── */
+        .btn-auth {
+            width: 100%;
+            padding: 12px;
+            background: #1d4ed8;
+            color: #fff;
+            border: none;
+            border-radius: 9px;
+            font-size: 0.97rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 6px;
+            letter-spacing: 0.1px;
+        }
+        .btn-auth:hover { background: #1e40af; box-shadow: 0 4px 14px rgba(29,78,216,0.3); }
+        .btn-auth:active { transform: translateY(1px); }
+        .btn-auth:disabled { background: #93c5fd; cursor: not-allowed; box-shadow: none; transform: none; }
+
+        .spinner-border-sm { width: 1rem; height: 1rem; border-width: 2px; }
+
+        /* ── Divider ── */
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 24px 0;
+            color: #cbd5e1;
+            font-size: 0.8rem;
+        }
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #e2e8f0;
+        }
+
+        /* ── Demo box ── */
+        .demo-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 14px 18px;
+            font-size: 0.83rem;
+            color: #475569;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .demo-box i { color: #3b82f6; font-size: 1rem; margin-top: 1px; flex-shrink: 0; }
+        .demo-box code {
+            background: #e0e7ff;
+            color: #3730a3;
+            padding: 1px 5px;
+            border-radius: 4px;
+            font-size: 0.82rem;
+        }
+
+        /* ── Footer link ── */
+        .auth-footer {
+            text-align: center;
+            margin-top: 28px;
+            font-size: 0.88rem;
+            color: #64748b;
+        }
+        .auth-footer a {
+            color: #1d4ed8;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .auth-footer a:hover { text-decoration: underline; }
+
+        /* ── Mobile ── */
+        @media (max-width: 767px) {
+            .brand-panel { display: none; }
+            .form-panel { padding: 40px 20px; background: #f1f5f9; }
+            .form-box {
+                background: #fff;
+                border-radius: 16px;
+                padding: 36px 28px;
+                box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            }
+            .mobile-logo {
+                display: flex !important;
+                align-items: center;
+                gap: 10px;
+                justify-content: center;
+                margin-bottom: 28px;
+                text-decoration: none;
+            }
+            .mobile-logo img { width: 36px; height: 36px; border-radius: 8px; }
+            .mobile-logo span { font-size: 1.25rem; font-weight: 700; color: #0f172a; }
+        }
+        @media (min-width: 768px) {
+            .mobile-logo { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="auth-wrapper">
+
+    <!-- ── Left brand panel ── -->
+    <div class="brand-panel">
+        <a href="/" class="brand-logo">
+            <img src="{{ url_for('static', filename='images/logos-ai-logo.png') }}" alt="Logos AI">
+            <span>Logos AI</span>
+        </a>
+
+        <div class="brand-headline">
+            <h1>Every call answered.<br><span>Every lead captured.</span></h1>
+            <p>Your AI receptionist picks up 24/7 — so no customer ever hits voicemail again.</p>
+        </div>
+
+        <div class="brand-quote">
+            <p>"We used to miss 8–10 calls a week after hours. Now Logos AI answers every one and we wake up to a list of leads to call back."</p>
+            <div class="attribution">— Marco R., La Bella Trattoria, Montréal</div>
+        </div>
+
+        <div class="brand-stats">
+            <div class="stat-item">
+                <div class="stat-number">24/7</div>
+                <div class="stat-label">Always on</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">&lt;1s</div>
+                <div class="stat-label">Response time</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">$0</div>
+                <div class="stat-label">Missed calls</div>
             </div>
         </div>
     </div>
+
+    <!-- ── Right form panel ── -->
+    <div class="form-panel">
+        <div class="form-box">
+
+            <!-- Mobile-only logo -->
+            <a href="/" class="mobile-logo">
+                <img src="{{ url_for('static', filename='images/logos-ai-logo.png') }}" alt="Logos AI">
+                <span>Logos AI</span>
+            </a>
+
+            <div class="form-header">
+                <h2>Welcome back</h2>
+                <p>Sign in to your account to continue</p>
+            </div>
+
+            <!-- Flash messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                <div class="flash-block">
+                    {% for category, message in messages %}
+                    <div class="flash-alert flash-{{ category }}">
+                        <i class="bi bi-{% if category == 'danger' %}exclamation-circle-fill{% elif category == 'success' %}check-circle-fill{% elif category == 'warning' %}exclamation-triangle-fill{% else %}info-circle-fill{% endif %}"></i>
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST" action="{{ url_for('login') }}" id="loginForm" novalidate>
+
+                <div class="field-group">
+                    <label for="email">Email address</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-envelope input-icon"></i>
+                        <input type="email" id="email" name="email"
+                               value="{{ request.form.get('email', '') }}"
+                               placeholder="you@yourstore.com"
+                               autocomplete="email"
+                               {% if request.form.get('email') and not get_flashed_messages() %}autofocus{% else %}autofocus{% endif %}>
+                    </div>
+                    <div class="field-error d-none" id="emailError">
+                        <i class="bi bi-exclamation-circle-fill"></i>
+                        <span>Please enter a valid email address.</span>
+                    </div>
+                </div>
+
+                <div class="field-group">
+                    <label for="password">Password</label>
+                    <div class="input-wrap pw-wrap">
+                        <i class="bi bi-lock input-icon"></i>
+                        <input type="password" id="password" name="password"
+                               placeholder="••••••••"
+                               autocomplete="current-password">
+                        <button type="button" class="pw-toggle" id="pwToggle" tabindex="-1" aria-label="Show password">
+                            <i class="bi bi-eye" id="pwIcon"></i>
+                        </button>
+                    </div>
+                    <div class="field-error d-none" id="passwordError">
+                        <i class="bi bi-exclamation-circle-fill"></i>
+                        <span>Please enter your password.</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-auth" id="submitBtn">
+                    <span id="btnText">Sign in</span>
+                    <span id="btnSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                </button>
+
+            </form>
+
+            <div class="divider">or</div>
+
+            <div class="demo-box">
+                <i class="bi bi-lightbulb-fill"></i>
+                <div>
+                    <strong>Try the demo</strong> &nbsp;
+                    <code>demo@example.com</code> / <code>demo123</code>
+                </div>
+            </div>
+
+            <div class="auth-footer">
+                Don't have an account? <a href="{{ url_for('register') }}">Create one free →</a>
+            </div>
+
+        </div>
+    </div>
+
 </div>
-{% endblock %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Password show/hide toggle
+    const pwToggle = document.getElementById('pwToggle');
+    const pwField  = document.getElementById('password');
+    const pwIcon   = document.getElementById('pwIcon');
+
+    pwToggle.addEventListener('click', () => {
+        const isHidden = pwField.type === 'password';
+        pwField.type = isHidden ? 'text' : 'password';
+        pwIcon.className = isHidden ? 'bi bi-eye-slash' : 'bi bi-eye';
+    });
+
+    // Client-side validation + loading spinner
+    const form       = document.getElementById('loginForm');
+    const submitBtn  = document.getElementById('submitBtn');
+    const btnText    = document.getElementById('btnText');
+    const btnSpinner = document.getElementById('btnSpinner');
+    const emailField = document.getElementById('email');
+    const emailError = document.getElementById('emailError');
+    const passError  = document.getElementById('passwordError');
+
+    function showError(field, errorEl) {
+        field.classList.add('is-invalid');
+        errorEl.classList.remove('d-none');
+    }
+    function clearError(field, errorEl) {
+        field.classList.remove('is-invalid');
+        errorEl.classList.add('d-none');
+    }
+
+    emailField.addEventListener('input', () => clearError(emailField, emailError));
+    pwField.addEventListener('input',    () => clearError(pwField, passError));
+
+    form.addEventListener('submit', (e) => {
+        let valid = true;
+
+        if (!emailField.value || !emailField.validity.valid) {
+            showError(emailField, emailError);
+            valid = false;
+        }
+        if (!pwField.value) {
+            showError(pwField, passError);
+            valid = false;
+        }
+
+        if (!valid) { e.preventDefault(); return; }
+
+        // Show spinner
+        submitBtn.disabled = true;
+        btnText.textContent = 'Signing in…';
+        btnSpinner.classList.remove('d-none');
+    });
+</script>
+</body>
+</html>
