@@ -1,239 +1,724 @@
-{% extends "base.html" %}
-
-{% block title %}Onboarding - Call Center Automation{% endblock %}
-
-{% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-10">
-            <h2 class="mb-4"><i class="bi bi-rocket"></i> Welcome, {{ company.name }}!</h2>
-            
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h5 class="card-title">Setup Your Telephony Provider</h5>
-                    <p class="card-text">Connect your telephony provider to start receiving and handling calls.</p>
-                    
-                    {% if integrations %}
-                        <div class="alert alert-success">
-                            <i class="bi bi-check-circle"></i> You have {{ integrations|length }} integration(s) configured.
-                        </div>
-                        
-                        <div class="table-responsive">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Provider</th>
-                                        <th>Type</th>
-                                        <th>Status</th>
-                                        <th>Last Tested</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for integration in integrations %}
-                                    <tr>
-                                        <td>{{ integration.provider_name }}</td>
-                                        <td><span class="badge bg-primary">{{ integration.provider_type }}</span></td>
-                                        <td>
-                                            {% if integration.is_active %}
-                                                <span class="badge bg-success">Active</span>
-                                            {% else %}
-                                                <span class="badge bg-secondary">Inactive</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            {% if integration.last_tested %}
-                                                {{ integration.last_tested.strftime('%Y-%m-%d %H:%M') }}
-                                            {% else %}
-                                                Not tested
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            <button class="btn btn-sm btn-outline-primary test-integration" data-integration-id="{{ integration.id }}">
-                                                <i class="bi bi-play-circle"></i> Test
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-danger delete-integration" data-integration-id="{{ integration.id }}" data-provider-name="{{ integration.provider_name }}">
-                                                <i class="bi bi-trash"></i> Delete
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    {% endif %}
-                    
-                    <button class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#providerForm">
-                        <i class="bi bi-plus-circle"></i> Add New Provider
-                    </button>
-                </div>
-            </div>
-            
-            <div class="collapse" id="providerForm">
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <h5 class="card-title">Configure Telephony Provider</h5>
-                        <form method="POST" action="{{ url_for('setup_provider') }}" id="providerSetupForm">
-                            <div class="mb-3">
-                                <label class="form-label">Select Provider Type</label>
-                                <select class="form-select" name="provider_type" id="providerType" required>
-                                    <option value="">Choose...</option>
-                                    <option value="twilio">Twilio</option>
-                                    <option value="cisco">Cisco Webex</option>
-                                    <option value="sip">SIP/VoIP</option>
-                                </select>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label">Provider Name</label>
-                                <input type="text" class="form-control" name="provider_name" placeholder="e.g., My Twilio Account" required>
-                            </div>
-                            
-                            <div id="twilioFields" class="provider-fields d-none">
-                                <div class="mb-3">
-                                    <label class="form-label">Account SID</label>
-                                    <input type="text" class="form-control" name="account_sid" placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Auth Token</label>
-                                    <input type="password" class="form-control" name="auth_token">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Twilio Phone Number</label>
-                                    <input type="text" class="form-control" name="phone_number" placeholder="+1234567890">
-                                </div>
-                            </div>
-                            
-                            <div id="ciscoFields" class="provider-fields d-none">
-                                <div class="mb-3">
-                                    <label class="form-label">API URL</label>
-                                    <input type="url" class="form-control" name="api_url" placeholder="https://api.cisco.com">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">API Key</label>
-                                    <input type="password" class="form-control" name="api_key">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Phone Number</label>
-                                    <input type="text" class="form-control" name="phone_number" placeholder="+1234567890">
-                                </div>
-                            </div>
-                            
-                            <div id="sipFields" class="provider-fields d-none">
-                                <div class="mb-3">
-                                    <label class="form-label">SIP Server</label>
-                                    <input type="text" class="form-control" name="sip_server" placeholder="sip.example.com">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Username</label>
-                                    <input type="text" class="form-control" name="username">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Password</label>
-                                    <input type="password" class="form-control" name="password">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Phone Number</label>
-                                    <input type="text" class="form-control" name="phone_number" placeholder="+1234567890">
-                                </div>
-                            </div>
-                            
-                            <button type="submit" class="btn btn-primary">Save Integration</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Next Steps</h5>
-                    <ul>
-                        <li>Configure your telephony provider above</li>
-                        <li>Set up your call flow and menu options in <a href="{{ url_for('settings') }}">Settings</a></li>
-                        <li>Test your integration using the simulation endpoint</li>
-                        <li>Monitor calls in your <a href="{{ url_for('dashboard') }}">Dashboard</a></li>
-                    </ul>
-                    <a href="{{ url_for('dashboard') }}" class="btn btn-success">
-                        <i class="bi bi-arrow-right"></i> Go to Dashboard
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-document.getElementById('providerType').addEventListener('change', function() {
-    document.querySelectorAll('.provider-fields').forEach(el => el.classList.add('d-none'));
-    
-    const type = this.value;
-    if (type === 'twilio') {
-        document.getElementById('twilioFields').classList.remove('d-none');
-    } else if (type === 'cisco') {
-        document.getElementById('ciscoFields').classList.remove('d-none');
-    } else if (type === 'sip') {
-        document.getElementById('sipFields').classList.remove('d-none');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Get Started — Logos AI</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+  <style>
+    :root {
+      --brand: #2C3E8C;
+      --brand-dark: #1a2660;
+      --accent: #3ECF8E;
+      --step-size: 38px;
     }
-});
 
-document.querySelectorAll('.test-integration').forEach(button => {
-    button.addEventListener('click', function() {
-        const integrationId = this.dataset.integrationId;
-        this.disabled = true;
-        this.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Testing...';
-        
-        fetch(`/test_integration/${integrationId}`, { method: 'POST' })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Integration test successful!');
-                    location.reload();
-                } else {
-                    alert('Integration test failed: ' + data.error);
-                    this.disabled = false;
-                    this.innerHTML = '<i class="bi bi-play-circle"></i> Test';
-                }
-            })
-            .catch(error => {
-                alert('Error testing integration');
-                this.disabled = false;
-                this.innerHTML = '<i class="bi bi-play-circle"></i> Test';
-            });
-    });
-});
+    * { box-sizing: border-box; }
 
-document.querySelectorAll('.delete-integration').forEach(button => {
-    button.addEventListener('click', function() {
-        const integrationId = this.dataset.integrationId;
-        const providerName = this.dataset.providerName;
-        
-        if (!confirm(`Are you sure you want to delete the "${providerName}" integration? This action cannot be undone.`)) {
-            return;
+    body {
+      min-height: 100vh;
+      background: #f4f6fb;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 16px 60px;
+    }
+
+    /* ── Top bar ─────────────────────────────────────────────────────── */
+    .top-bar {
+      width: 100%;
+      max-width: 760px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 0 32px;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: var(--brand);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .logo-icon img { width: 22px; filter: brightness(0) invert(1); }
+    .logo-name {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--brand);
+      letter-spacing: -0.3px;
+    }
+    .skip-link {
+      font-size: 0.82rem;
+      color: #888;
+      text-decoration: none;
+    }
+    .skip-link:hover { color: var(--brand); }
+
+    /* ── Progress tracker ────────────────────────────────────────────── */
+    .progress-track {
+      width: 100%;
+      max-width: 760px;
+      margin-bottom: 36px;
+    }
+    .progress-steps {
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+    .step-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      position: relative;
+    }
+    .step-item:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      top: calc(var(--step-size) / 2);
+      left: calc(50% + var(--step-size) / 2);
+      width: calc(100% - var(--step-size));
+      height: 2px;
+      background: #dde1f0;
+      transition: background 0.4s;
+      z-index: 0;
+    }
+    .step-item.done:not(:last-child)::after,
+    .step-item.active:not(:last-child)::after {
+      background: var(--accent);
+    }
+    .step-circle {
+      width: var(--step-size);
+      height: var(--step-size);
+      border-radius: 50%;
+      border: 2px solid #dde1f0;
+      background: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: #aab2cc;
+      transition: all 0.3s;
+      position: relative;
+      z-index: 1;
+    }
+    .step-item.done .step-circle {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    .step-item.active .step-circle {
+      background: var(--brand);
+      border-color: var(--brand);
+      color: #fff;
+      box-shadow: 0 0 0 4px rgba(44,62,140,.15);
+    }
+    .step-label {
+      margin-top: 8px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #aab2cc;
+      text-align: center;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+    }
+    .step-item.active .step-label { color: var(--brand); }
+    .step-item.done .step-label  { color: var(--accent); }
+
+    /* ── Card ─────────────────────────────────────────────────────────── */
+    .wizard-card {
+      width: 100%;
+      max-width: 760px;
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 4px 32px rgba(44,62,140,.10);
+      overflow: hidden;
+    }
+    .wizard-header {
+      background: linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%);
+      padding: 28px 36px 24px;
+      color: #fff;
+    }
+    .wizard-header .step-badge {
+      display: inline-block;
+      background: rgba(255,255,255,.18);
+      border-radius: 20px;
+      padding: 3px 12px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .wizard-header h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin: 0 0 4px;
+    }
+    .wizard-header p {
+      margin: 0;
+      opacity: .78;
+      font-size: 0.92rem;
+    }
+    .wizard-body { padding: 32px 36px; }
+
+    /* ── Form controls ────────────────────────────────────────────────── */
+    .form-label {
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: #3a3f5c;
+      margin-bottom: 6px;
+    }
+    .form-control, .form-select {
+      border: 1.5px solid #e2e5f1;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 0.93rem;
+      color: #2d3150;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-control:focus, .form-select:focus {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px rgba(44,62,140,.12);
+      outline: none;
+    }
+    .form-control.is-invalid, .form-select.is-invalid {
+      border-color: #e55;
+      box-shadow: 0 0 0 3px rgba(220,53,69,.10);
+    }
+    .invalid-feedback { font-size: 0.8rem; margin-top: 4px; }
+    .input-hint {
+      font-size: 0.78rem;
+      color: #8a90ad;
+      margin-top: 5px;
+    }
+    .input-icon-wrap { position: relative; }
+    .input-icon-wrap .bi {
+      position: absolute;
+      left: 12px; top: 50%;
+      transform: translateY(-50%);
+      color: #aab2cc;
+      font-size: 1rem;
+    }
+    .input-icon-wrap .form-control,
+    .input-icon-wrap .form-select { padding-left: 38px; }
+
+    /* ── Hours grid ───────────────────────────────────────────────────── */
+    .hours-row {
+      display: grid;
+      grid-template-columns: 110px 1fr auto 1fr;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .hours-day-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #555;
+    }
+    .hours-sep { font-size: 0.82rem; color: #aab2cc; text-align: center; }
+    .closed-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .closed-toggle label { font-size: 0.8rem; color: #888; margin: 0; cursor: pointer; }
+
+    /* ── Info callout ─────────────────────────────────────────────────── */
+    .info-box {
+      background: #f0f4ff;
+      border: 1.5px solid #d0d9f8;
+      border-radius: 10px;
+      padding: 14px 16px;
+      font-size: 0.84rem;
+      color: #3a4070;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .info-box .bi { color: var(--brand); font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+
+    /* ── Menu items ───────────────────────────────────────────────────── */
+    .menu-item-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .menu-key {
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      background: #eef1fc;
+      color: var(--brand);
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.88rem;
+      flex-shrink: 0;
+    }
+
+    /* ── Footer buttons ───────────────────────────────────────────────── */
+    .wizard-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 36px 28px;
+      border-top: 1.5px solid #f0f2fa;
+    }
+    .btn-back {
+      background: none;
+      border: 1.5px solid #dde1f0;
+      color: #666;
+      border-radius: 10px;
+      padding: 10px 22px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-back:hover { border-color: var(--brand); color: var(--brand); }
+    .btn-next {
+      background: var(--brand);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 11px 28px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .btn-next:hover  { background: var(--brand-dark); }
+    .btn-next:active { transform: scale(.98); }
+    .btn-finish {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 11px 28px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.2s;
+    }
+    .btn-finish:hover { background: #2fb87a; }
+
+    .spinner-border-sm { width: 1rem; height: 1rem; }
+
+    /* ── Flash messages ───────────────────────────────────────────────── */
+    .flash-area { width: 100%; max-width: 760px; margin-bottom: 16px; }
+    .alert { border-radius: 12px; font-size: 0.88rem; padding: 12px 18px; }
+
+    @media (max-width: 600px) {
+      .wizard-header, .wizard-body, .wizard-footer { padding-left: 20px; padding-right: 20px; }
+      .hours-row { grid-template-columns: 90px 1fr auto 1fr; gap: 6px; }
+      .step-label { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top bar -->
+  <div class="top-bar">
+    <a class="logo" href="/">
+      <div class="logo-icon">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logos AI" onerror="this.style.display='none';this.parentElement.innerHTML='<span style=\'color:#fff;font-weight:700;font-size:1rem\'>L</span>'">
+      </div>
+      <span class="logo-name">Logos AI</span>
+    </a>
+    <a href="{{ url_for('dashboard') }}" class="skip-link">Skip setup &rarr;</a>
+  </div>
+
+  <!-- Flash messages -->
+  <div class="flash-area">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+          <i class="bi bi-{{ 'exclamation-triangle' if category in ('danger','error') else 'check-circle' }} me-2"></i>
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      {% endfor %}
+    {% endwith %}
+  </div>
+
+  <!-- Step progress tracker -->
+  <div class="progress-track">
+    <div class="progress-steps">
+      <div class="step-item active" id="track-1">
+        <div class="step-circle" id="circle-1">1</div>
+        <div class="step-label">Company</div>
+      </div>
+      <div class="step-item" id="track-2">
+        <div class="step-circle" id="circle-2">2</div>
+        <div class="step-label">Phone Setup</div>
+      </div>
+      <div class="step-item" id="track-3">
+        <div class="step-circle" id="circle-3">3</div>
+        <div class="step-label">AI Greeting</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Wizard card with all 3 steps in one form -->
+  <form method="POST" action="{{ url_for('onboarding') }}" id="onboardingForm" novalidate>
+    <div class="wizard-card">
+
+      <!-- ══════════════════════════════ STEP 1 ══════════════════════════ -->
+      <div id="step-1">
+        <div class="wizard-header">
+          <div class="step-badge">Step 1 of 3</div>
+          <h2>Tell us about your store</h2>
+          <p>This is what the AI receptionist will use when callers ask about your business.</p>
+        </div>
+        <div class="wizard-body">
+
+          <div class="mb-4">
+            <label class="form-label">Store or business name</label>
+            <div class="input-icon-wrap">
+              <i class="bi bi-shop"></i>
+              <input type="text" class="form-control" name="company_name"
+                     value="{{ company.name or '' }}"
+                     placeholder="e.g. Maison Boutique Montréal" required>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label">Store phone number <span class="fw-normal text-muted">(optional)</span></label>
+            <div class="input-icon-wrap">
+              <i class="bi bi-telephone"></i>
+              <input type="tel" class="form-control" name="company_phone"
+                     value="{{ company.phone_number or '' }}"
+                     placeholder="+1 (514) 555-0100">
+            </div>
+            <div class="input-hint">Your existing store number — not your Twilio number.</div>
+          </div>
+
+          <div class="mb-2">
+            <label class="form-label">Business hours</label>
+          </div>
+
+          <!-- Weekdays -->
+          <div class="hours-row">
+            <div class="hours-day-label">Mon – Fri</div>
+            <div>
+              <select class="form-select form-select-sm" name="weekday_open" id="weekday_open">
+                <option value="7am">7:00 AM</option>
+                <option value="8am">8:00 AM</option>
+                <option value="9am" selected>9:00 AM</option>
+                <option value="10am">10:00 AM</option>
+                <option value="11am">11:00 AM</option>
+                <option value="12pm">12:00 PM</option>
+              </select>
+            </div>
+            <div class="hours-sep">to</div>
+            <div>
+              <select class="form-select form-select-sm" name="weekday_close" id="weekday_close">
+                <option value="4pm">4:00 PM</option>
+                <option value="5pm">5:00 PM</option>
+                <option value="6pm" selected>6:00 PM</option>
+                <option value="7pm">7:00 PM</option>
+                <option value="8pm">8:00 PM</option>
+                <option value="9pm">9:00 PM</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Saturday -->
+          <div class="hours-row" id="sat-row">
+            <div class="hours-day-label">Saturday</div>
+            <div>
+              <select class="form-select form-select-sm" name="sat_open" id="sat_open">
+                <option value="">Closed</option>
+                <option value="9am">9:00 AM</option>
+                <option value="10am" selected>10:00 AM</option>
+                <option value="11am">11:00 AM</option>
+                <option value="12pm">12:00 PM</option>
+              </select>
+            </div>
+            <div class="hours-sep">to</div>
+            <div>
+              <select class="form-select form-select-sm" name="sat_close" id="sat_close">
+                <option value="">Closed</option>
+                <option value="3pm">3:00 PM</option>
+                <option value="4pm">4:00 PM</option>
+                <option value="5pm" selected>5:00 PM</option>
+                <option value="6pm">6:00 PM</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Sunday -->
+          <div class="hours-row">
+            <div class="hours-day-label">Sunday</div>
+            <div>
+              <select class="form-select form-select-sm" name="sun_open" id="sun_open">
+                <option value="" selected>Closed</option>
+                <option value="10am">10:00 AM</option>
+                <option value="11am">11:00 AM</option>
+                <option value="12pm">12:00 PM</option>
+              </select>
+            </div>
+            <div class="hours-sep">to</div>
+            <div>
+              <select class="form-select form-select-sm" name="sun_close" id="sun_close">
+                <option value="" selected>Closed</option>
+                <option value="3pm">3:00 PM</option>
+                <option value="4pm">4:00 PM</option>
+                <option value="5pm">5:00 PM</option>
+              </select>
+            </div>
+          </div>
+
+        </div><!-- /wizard-body -->
+        <div class="wizard-footer">
+          <span></span>
+          <button type="button" class="btn-next" onclick="goToStep(2)">
+            Continue <i class="bi bi-arrow-right"></i>
+          </button>
+        </div>
+      </div><!-- /step-1 -->
+
+
+      <!-- ══════════════════════════════ STEP 2 ══════════════════════════ -->
+      <div id="step-2" style="display:none;">
+        <div class="wizard-header">
+          <div class="step-badge">Step 2 of 3</div>
+          <h2>Connect your Twilio number</h2>
+          <p>The AI answers calls that come into this number — 24/7, even when you're with a customer.</p>
+        </div>
+        <div class="wizard-body">
+
+          <div class="info-box mb-4">
+            <i class="bi bi-info-circle-fill"></i>
+            <div>
+              Find your credentials at <strong>console.twilio.com</strong> → Account → API keys & tokens.
+              Your Account SID starts with <code>AC…</code> and your Auth Token is the string below it.
+              Don't have Twilio yet? <a href="https://www.twilio.com/try-twilio" target="_blank" rel="noopener">Sign up free</a> — takes 2 minutes.
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label">Twilio phone number</label>
+            <div class="input-icon-wrap">
+              <i class="bi bi-telephone-inbound"></i>
+              <input type="text" class="form-control" name="twilio_number"
+                     value="{{ twilio_config.get('phone_number', '') }}"
+                     placeholder="+1 (514) 555-0199">
+            </div>
+            <div class="input-hint">The number callers will dial — must be in your Twilio console.</div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label">Account SID</label>
+            <div class="input-icon-wrap">
+              <i class="bi bi-key"></i>
+              <input type="text" class="form-control font-monospace" name="account_sid"
+                     value="{{ twilio_config.get('account_sid', '') }}"
+                     placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                     autocomplete="off" spellcheck="false">
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Auth Token</label>
+            <div class="input-icon-wrap">
+              <i class="bi bi-lock"></i>
+              <input type="password" class="form-control font-monospace" name="auth_token"
+                     value="{{ twilio_config.get('auth_token', '') }}"
+                     placeholder="••••••••••••••••••••••••••••••••"
+                     autocomplete="new-password">
+            </div>
+          </div>
+
+          <div class="input-hint mt-1">
+            <i class="bi bi-shield-check text-success"></i>
+            Credentials are stored encrypted and never shared.
+          </div>
+
+        </div>
+        <div class="wizard-footer">
+          <button type="button" class="btn-back" onclick="goToStep(1)">
+            <i class="bi bi-arrow-left"></i> Back
+          </button>
+          <button type="button" class="btn-next" onclick="goToStep(3)">
+            Continue <i class="bi bi-arrow-right"></i>
+          </button>
+        </div>
+      </div><!-- /step-2 -->
+
+
+      <!-- ══════════════════════════════ STEP 3 ══════════════════════════ -->
+      <div id="step-3" style="display:none;">
+        <div class="wizard-header">
+          <div class="step-badge">Step 3 of 3</div>
+          <h2>Set your AI greeting &amp; menu</h2>
+          <p>Callers hear this greeting the moment the AI picks up. Keep it warm and under 15 seconds.</p>
+        </div>
+        <div class="wizard-body">
+
+          <div class="mb-4">
+            <label class="form-label">Opening greeting</label>
+            <textarea class="form-control" name="greeting_message" rows="3"
+                      placeholder="Hi, thanks for calling {{ company.name }}! How can I help you today?">{{ company.greeting_message or "Hi, thanks for calling! How can I help you today?" }}</textarea>
+            <div class="input-hint">The AI reads this word-for-word when a call connects.</div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label">Transfer / escalation number <span class="fw-normal text-muted">(optional)</span></label>
+            <div class="input-icon-wrap">
+              <i class="bi bi-person-lines-fill"></i>
+              <input type="tel" class="form-control" name="escalation_number"
+                     value="{{ company.escalation_number or '' }}"
+                     placeholder="+1 (514) 555-0100">
+            </div>
+            <div class="input-hint">When a caller asks to speak to a person, the AI transfers them here.</div>
+          </div>
+
+          <div class="mb-2">
+            <label class="form-label">What the AI can handle</label>
+            <div class="input-hint mb-2">These are the intents your AI already knows — no configuration needed.</div>
+          </div>
+
+          <div class="menu-item-row">
+            <div class="menu-key"><i class="bi bi-bag-check"></i></div>
+            <div>
+              <div style="font-size:.88rem;font-weight:600;color:#2d3150">Order status</div>
+              <div class="input-hint">"Where is my order?" → looks up order by name or number</div>
+            </div>
+          </div>
+          <div class="menu-item-row">
+            <div class="menu-key"><i class="bi bi-clock"></i></div>
+            <div>
+              <div style="font-size:.88rem;font-weight:600;color:#2d3150">Store hours</div>
+              <div class="input-hint">"Are you open on Saturday?" → answers from your hours above</div>
+            </div>
+          </div>
+          <div class="menu-item-row">
+            <div class="menu-key"><i class="bi bi-tag"></i></div>
+            <div>
+              <div style="font-size:.88rem;font-weight:600;color:#2d3150">Purchase inquiries</div>
+              <div class="input-hint">"Do you carry X?" → captures caller info for staff follow-up</div>
+            </div>
+          </div>
+          <div class="menu-item-row">
+            <div class="menu-key"><i class="bi bi-headset"></i></div>
+            <div>
+              <div style="font-size:.88rem;font-weight:600;color:#2d3150">Human transfer</div>
+              <div class="input-hint">"Let me speak to someone" → transfers to your escalation number</div>
+            </div>
+          </div>
+
+        </div>
+        <div class="wizard-footer">
+          <button type="button" class="btn-back" onclick="goToStep(2)">
+            <i class="bi bi-arrow-left"></i> Back
+          </button>
+          <button type="submit" class="btn-finish" id="finishBtn">
+            <i class="bi bi-check-lg"></i> Finish setup
+          </button>
+        </div>
+      </div><!-- /step-3 -->
+
+    </div><!-- /wizard-card -->
+  </form>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    let currentStep = 1;
+
+    const STEP_HEADERS = {
+      1: { badge: 'Step 1 of 3', title: 'Tell us about your store',   desc: 'This is what the AI receptionist will use when callers ask about your business.' },
+      2: { badge: 'Step 2 of 3', title: 'Connect your Twilio number', desc: 'The AI answers calls that come into this number — 24/7, even when you\'re with a customer.' },
+      3: { badge: 'Step 3 of 3', title: 'Set your AI greeting &amp; menu', desc: 'Callers hear this greeting the moment the AI picks up.' },
+    };
+
+    function goToStep(n) {
+      // Validate current step before advancing
+      if (n > currentStep && !validateStep(currentStep)) return;
+
+      document.getElementById(`step-${currentStep}`).style.display = 'none';
+      document.getElementById(`step-${n}`).style.display = '';
+
+      // Update tracker
+      for (let i = 1; i <= 3; i++) {
+        const track  = document.getElementById(`track-${i}`);
+        const circle = document.getElementById(`circle-${i}`);
+        track.classList.remove('active', 'done');
+        if (i < n) {
+          track.classList.add('done');
+          circle.innerHTML = '<i class="bi bi-check-lg" style="font-size:.9rem"></i>';
+        } else if (i === n) {
+          track.classList.add('active');
+          circle.textContent = i;
+        } else {
+          circle.textContent = i;
         }
-        
-        this.disabled = true;
-        this.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Deleting...';
-        
-        fetch(`/delete_integration/${integrationId}`, { method: 'POST' })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Integration deleted successfully!');
-                    location.reload();
-                } else {
-                    alert('Failed to delete integration: ' + data.error);
-                    this.disabled = false;
-                    this.innerHTML = '<i class="bi bi-trash"></i> Delete';
-                }
-            })
-            .catch(error => {
-                alert('Error deleting integration');
-                this.disabled = false;
-                this.innerHTML = '<i class="bi bi-trash"></i> Delete';
-            });
+      }
+
+      currentStep = n;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function validateStep(step) {
+      let valid = true;
+
+      if (step === 1) {
+        const name = document.querySelector('[name=company_name]');
+        if (!name.value.trim()) {
+          name.classList.add('is-invalid');
+          if (!name.nextElementSibling || !name.nextElementSibling.classList.contains('invalid-feedback')) {
+            const err = document.createElement('div');
+            err.className = 'invalid-feedback';
+            err.textContent = 'Please enter your store name.';
+            name.parentElement.after(err);
+          }
+          valid = false;
+        } else {
+          name.classList.remove('is-invalid');
+          const err = name.parentElement.nextElementSibling;
+          if (err && err.classList.contains('invalid-feedback')) err.remove();
+        }
+      }
+
+      return valid;
+    }
+
+    // Remove validation state on input
+    document.querySelectorAll('.form-control, .form-select').forEach(el => {
+      el.addEventListener('input', () => {
+        el.classList.remove('is-invalid');
+        const nxt = el.parentElement.nextElementSibling;
+        if (nxt && nxt.classList.contains('invalid-feedback')) nxt.remove();
+      });
     });
-});
-</script>
-{% endblock %}
+
+    // Sync Saturday open/close — if open is cleared, clear close too
+    document.getElementById('sat_open').addEventListener('change', function () {
+      if (!this.value) document.getElementById('sat_close').value = '';
+    });
+    document.getElementById('sun_open').addEventListener('change', function () {
+      if (!this.value) document.getElementById('sun_close').value = '';
+    });
+
+    // Spinner on final submit
+    document.getElementById('onboardingForm').addEventListener('submit', function () {
+      const btn = document.getElementById('finishBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Saving…';
+    });
+  </script>
+</body>
+</html>

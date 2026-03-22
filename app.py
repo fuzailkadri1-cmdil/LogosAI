@@ -170,14 +170,85 @@ def register():
 
     return render_template('register.html')
 
-@app.route('/onboarding')
+@app.route('/onboarding', methods=['GET', 'POST'])
 @login_required
 def onboarding():
-    user = current_user
     company = db.session.get(Company, current_user.company_id)
+
+    if request.method == 'POST':
+        # ── Step 1: Company info ──────────────────────────────────────────
+        company_name = request.form.get('company_name', '').strip()
+        company_phone = request.form.get('company_phone', '').strip()
+
+        weekday_open  = request.form.get('weekday_open',  '9am')
+        weekday_close = request.form.get('weekday_close', '6pm')
+        sat_open      = request.form.get('sat_open',      '')
+        sat_close     = request.form.get('sat_close',     '')
+        sun_open      = request.form.get('sun_open',      '')
+        sun_close     = request.form.get('sun_close',     '')
+
+        business_hours = {'monday-friday': f'{weekday_open}-{weekday_close}'}
+        if sat_open and sat_close:
+            business_hours['saturday'] = f'{sat_open}-{sat_close}'
+        else:
+            business_hours['saturday'] = 'closed'
+        if sun_open and sun_close:
+            business_hours['sunday'] = f'{sun_open}-{sun_close}'
+        else:
+            business_hours['sunday'] = 'closed'
+
+        if company_name:
+            company.name = company_name
+        if company_phone:
+            company.phone_number = company_phone
+        company.business_hours = json.dumps(business_hours)
+
+        # ── Step 2: Twilio credentials ────────────────────────────────────
+        account_sid    = request.form.get('account_sid', '').strip()
+        auth_token     = request.form.get('auth_token', '').strip()
+        twilio_number  = request.form.get('twilio_number', '').strip()
+
+        if account_sid and auth_token and twilio_number:
+            config = {
+                'account_sid': account_sid,
+                'auth_token': auth_token,
+                'phone_number': twilio_number,
+            }
+            existing = Integration.query.filter_by(
+                company_id=company.id, provider_type='twilio'
+            ).first()
+            if existing:
+                existing.config = json.dumps(config)
+                existing.is_active = True
+            else:
+                db.session.add(Integration(
+                    company_id=company.id,
+                    provider_type='twilio',
+                    provider_name='Twilio Voice',
+                    config=json.dumps(config),
+                    is_active=True,
+                ))
+            if not company.phone_number:
+                company.phone_number = twilio_number
+
+        # ── Step 3: Greeting & menu ───────────────────────────────────────
+        greeting           = request.form.get('greeting_message', '').strip()
+        escalation_number  = request.form.get('escalation_number', '').strip()
+
+        if greeting:
+            company.greeting_message = greeting
+        if escalation_number:
+            company.escalation_number = escalation_number
+
+        db.session.commit()
+        flash(f'Welcome to Logos AI, {current_user.first_name}! Your account is ready.', 'success')
+        return redirect(url_for('dashboard'))
+
     integrations = Integration.query.filter_by(company_id=company.id).all()
-    
-    return render_template('onboarding.html', company=company, integrations=integrations)
+    twilio = next((i for i in integrations if i.provider_type == 'twilio'), None)
+    twilio_config = twilio.get_config() if twilio else {}
+    return render_template('onboarding.html', company=company,
+                           twilio_config=twilio_config)
 
 @app.route('/onboarding/provider', methods=['POST'])
 @login_required
