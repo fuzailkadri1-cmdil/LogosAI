@@ -256,10 +256,11 @@ class AIVoiceAgent:
 
     def _is_store_open(self):
         """Check if store is currently open based on business hours"""
+        import logging as _log
         from datetime import datetime
         business_hours = self.company_config.get('business_hours', {})
         result = is_store_open(business_hours)
-        logging.info(f"HOURS CHECK: utc={datetime.utcnow().strftime('%a %H:%M')} biz_hours={business_hours} → is_open={result['is_open']}")
+        _log.info(f"HOURS CHECK: utc={datetime.utcnow().strftime('%a %H:%M')} biz_hours={business_hours} → is_open={result['is_open']}")
         return result['is_open']
 
     def _lookup_pilot_order(self, order_num):
