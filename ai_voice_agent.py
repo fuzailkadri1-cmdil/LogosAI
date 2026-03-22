@@ -256,8 +256,10 @@ class AIVoiceAgent:
 
     def _is_store_open(self):
         """Check if store is currently open based on business hours"""
+        from datetime import datetime
         business_hours = self.company_config.get('business_hours', {})
         result = is_store_open(business_hours)
+        logging.info(f"HOURS CHECK: utc={datetime.utcnow().strftime('%a %H:%M')} biz_hours={business_hours} → is_open={result['is_open']}")
         return result['is_open']
 
     def _lookup_pilot_order(self, order_num):
@@ -1037,25 +1039,39 @@ Phone: {self.company_config.get('phone_number', '')}
         """Strip intro phrases and return just the caller's name"""
         import re
         text = user_speech.strip()
-        # Remove filler words + common name-intro phrases (order matters — longest first)
-        patterns = [
-            r"^(oh\s+)?(yes\s+)?my name is\s+",
-            r"^(oh\s+)?this is\s+",
-            r"^(oh\s+)?it'?s?\s+",
-            r"^(oh\s+)?i'?m\s+",
-            r"^(oh\s+)?hi,?\s+(my name is\s+|i'?m\s+)?",
-            r"^(oh\s+)?hey,?\s+(my name is\s+|i'?m\s+)?",
-            r"^(oh\s+)?(sure,?\s+)?(the name is\s+|name'?s?\s+)",
-            r"^(oh\s+)?yes,?\s+",
-            r"^oh\s+",
+
+        # Strip any leading filler words/phrases — applied repeatedly until stable
+        # Each pattern matches common ways people introduce their name
+        intro_patterns = [
+            r"^(oh\s*[,.]?\s*)?(yes\s*[,.]?\s*)?(sure\s*[,.]?\s*)?my name is\s+",
+            r"^(oh\s*[,.]?\s*)?(yes\s*[,.]?\s*)?this is\s+",
+            r"^(oh\s*[,.]?\s*)?(yes\s*[,.]?\s*)?the name'?s?\s+",
+            r"^(oh\s*[,.]?\s*)?(yes\s*[,.]?\s*)?name'?s?\s+",
+            r"^(oh\s*[,.]?\s*)?(yes\s*[,.]?\s*)?i'?m\s+",
+            r"^(oh\s*[,.]?\s*)?(yes\s*[,.]?\s*)?it'?s?\s+",
+            r"^(oh\s*[,.]?\s*)?(yes\s*[,.]?\s*)?hi[,.]?\s+",
+            r"^(oh\s*[,.]?\s*)?(yes\s*[,.]?\s*)?hey[,.]?\s+",
+            r"^yes\s*[,.]?\s+",
+            r"^sure\s*[,.]?\s+",
+            r"^oh\s*[,.]?\s+",
         ]
-        for pattern in patterns:
-            cleaned = re.sub(pattern, '', text, flags=re.IGNORECASE).strip()
-            if cleaned and cleaned != text:
-                text = cleaned
-                break
-        # Capitalize first letter of each word, strip punctuation at end
+
+        changed = True
+        while changed:
+            changed = False
+            for pattern in intro_patterns:
+                cleaned = re.sub(pattern, '', text, flags=re.IGNORECASE).strip()
+                if cleaned and cleaned.lower() != text.lower():
+                    text = cleaned
+                    changed = True
+                    break
+
+        # Strip trailing punctuation and title-case
         text = re.sub(r'[.,!?]+$', '', text).strip()
+        # Only take the first 1-2 words (people rarely say more than first+last name)
+        words = text.split()
+        if len(words) > 3:
+            text = ' '.join(words[:2])
         return text.title() if text else user_speech.strip()
 
     def _handle_lead_name_response(self, user_speech):
