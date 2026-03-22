@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "SmTc54C8cVFEGVkROZX4m"
+uri = "file://myapp.zip"
+type = "unspecified"
+title = "Logos AI — Full Project Archive"
