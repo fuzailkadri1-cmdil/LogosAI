@@ -161,6 +161,10 @@ def dashboard():
         .limit(10)\
         .all()
     
+    recent_call = CallLog.query.filter_by(company_id=company.id)\
+        .order_by(CallLog.created_at.desc())\
+        .first()
+    
     voicemails = Voicemail.query.filter_by(company_id=company.id, is_listened=False).count()
     
     return render_template('dashboard.html', 
@@ -168,6 +172,7 @@ def dashboard():
                          total_calls=total_calls,
                          ai_handled=ai_handled,
                          recent_calls=recent_calls,
+                         recent_call=recent_call,
                          voicemails=voicemails,
                          user=user)
 

@@ -160,6 +160,40 @@
                     </div>
                 </div>
             </div>
+
+            {% if recent_call %}
+            <div class="row mt-3">
+                <div class="col-12">
+                    <div class="card" style="border-left: 4px solid #0d6efd;">
+                        <div class="card-body py-2 px-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-primary">Last Call</span>
+                                <span class="fw-semibold text-muted small">
+                                    📞 ***{{ recent_call.caller_number[-4:] if recent_call.caller_number and recent_call.caller_number|length >= 4 else recent_call.caller_number or 'Unknown' }}
+                                </span>
+                            </div>
+                            <div class="d-flex align-items-center gap-3 flex-wrap">
+                                <span class="small">
+                                    <span class="text-muted">Intent:</span>
+                                    <strong>{{ (recent_call.intent or 'unknown') | replace('_', ' ') | title }}</strong>
+                                </span>
+                                <span class="small">
+                                    <span class="text-muted">Outcome:</span>
+                                    {% if recent_call.was_escalated %}
+                                        <span class="badge bg-warning text-dark">Transferred</span>
+                                    {% else %}
+                                        <span class="badge bg-success">Resolved</span>
+                                    {% endif %}
+                                </span>
+                                <span class="small text-muted" id="last-call-time" data-timestamp="{{ recent_call.created_at.isoformat() }}">
+                                    just now
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
             
             <div class="row mt-4">
                 <div class="col-md-6">
@@ -368,5 +402,19 @@ fetch('/api/stats')
             }
         });
     });
+
+    // Update "last call" time display
+    function updateLastCallTime() {
+        const el = document.getElementById('last-call-time');
+        if (!el) return;
+        const ts = el.dataset.timestamp;
+        if (!ts) return;
+        const seconds = Math.floor((Date.now() - new Date(ts).getTime()) / 1000);
+        if (seconds < 60) el.textContent = seconds + 's ago';
+        else if (seconds < 3600) el.textContent = Math.floor(seconds / 60) + 'm ago';
+        else el.textContent = Math.floor(seconds / 3600) + 'h ago';
+    }
+    updateLastCallTime();
+    setInterval(updateLastCallTime, 5000);
 </script>
 {% endblock %}
