@@ -6,7 +6,7 @@ import re
 import os
 
 # Global config flag for easy rollback
-SSML_ENABLED = False
+SSML_ENABLED = True
 
 def build_ssml(text, rate="medium", pitch="medium"):
     """
@@ -60,19 +60,9 @@ def add_natural_pauses(text):
 
 def add_emphasis(text):
     """
-    Add emphasis to key words for more natural speech.
+    Emphasis tags are NOT supported by Amazon Polly Neural voices.
+    Returns text unchanged to avoid TTS errors.
     """
-    # Emphasize important action words
-    emphasis_words = ['order', 'delivered', 'shipped', 'ready', 'available', 'help', 'sorry']
-    for word in emphasis_words:
-        # Match word boundaries, case insensitive replacement
-        text = re.sub(
-            rf'\b({word})\b', 
-            r'<emphasis level="moderate">\1</emphasis>', 
-            text, 
-            flags=re.IGNORECASE
-        )
-    
     return text
 
 def conversational_response(text):
@@ -118,23 +108,23 @@ def empathetic_response(text):
 # Pre-built SSML responses for cached messages (fastest path)
 # Note: No <speak> wrapper - Twilio's <Say> is the container
 SSML_CACHED_RESPONSES = {
-    'store_hours': '<prosody rate="95%">We\'re open Monday through Friday,<break time="150ms"/> 9 to 5!<break time="300ms"/> Anything else I can <emphasis level="moderate">help</emphasis> with?</prosody>',
+    'store_hours': '<prosody rate="95%">We\'re open Monday through Friday,<break time="150ms"/> 9 to 5!<break time="300ms"/> Anything else I can help with?</prosody>',
     
-    'greeting': 'Hi there!<break time="200ms"/> What can I <emphasis level="moderate">help</emphasis> you with today?',
+    'greeting': 'Hi there!<break time="200ms"/> What can I help you with today?',
     
-    'ask_order_number': 'Sure thing!<break time="150ms"/> What\'s your <emphasis level="moderate">order</emphasis> number?',
+    'ask_order_number': 'Sure thing!<break time="150ms"/> What\'s your order number?',
     
-    'order_not_found': '<prosody rate="90%">Hmm,<break time="200ms"/> I\'m not finding that one.<break time="300ms"/> Let me get you to someone who can dig a bit deeper.</prosody>',
+    'order_not_found': '<prosody rate="90%">Hmm,<break time="200ms"/> I\'m not finding that one.<break time="300ms"/> Let me get you to someone who can help with that.</prosody>',
     
     'goodbye': 'Thanks so much for calling!<break time="200ms"/> Take care!',
     
-    'escalate': '<prosody rate="90%">Absolutely,<break time="150ms"/> let me get you to someone who can <emphasis level="moderate">help</emphasis> with that right away.</prosody>',
+    'escalate': '<prosody rate="90%">Absolutely,<break time="150ms"/> let me get you to someone who can help with that right away.</prosody>',
     
-    'anything_else': 'Anything else I can <emphasis level="moderate">help</emphasis> with?',
+    'anything_else': 'Anything else I can help with?',
     
-    'didnt_catch': '<prosody rate="90%"><emphasis level="moderate">Sorry</emphasis>,<break time="150ms"/> I didn\'t quite catch that.<break time="200ms"/> What was your <emphasis level="moderate">order</emphasis> number again?</prosody>',
+    'didnt_catch': '<prosody rate="90%">Sorry,<break time="150ms"/> I didn\'t quite catch that.<break time="200ms"/> Could you repeat that for me?</prosody>',
     
-    'transfer_hold': '<prosody rate="90%">Please hold<break time="200ms"/> while we transfer your call.</prosody>',
+    'transfer_hold': '<prosody rate="90%">Sure thing,<break time="200ms"/> just one moment while I connect you.</prosody>',
     
     'no_input': 'We didn\'t receive any input.<break time="200ms"/> Please try again.'
 }

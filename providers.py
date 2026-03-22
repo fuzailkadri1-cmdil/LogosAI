@@ -48,11 +48,7 @@ class TwilioProvider(TelephonyProvider):
         if use_ssml and SSML_ENABLED and not message.startswith('<speak>'):
             message = conversational_response(message)
         
-        # Use SSML-aware say method
-        if message.startswith('<speak>'):
-            response.say(message, voice='Polly.Joanna', language='en-US')
-        else:
-            response.say(message, voice='Polly.Joanna', language='en-US')
+        response.say(message, voice='Polly.Joanna-Neural', language='en-US')
         
         if next_action:
             response.redirect(next_action)
@@ -90,13 +86,11 @@ class TwilioProvider(TelephonyProvider):
         if use_ssml and SSML_ENABLED and not message.startswith('<speak>'):
             message = conversational_response(message)
         
-        # Use Polly.Joanna for more natural voice
-        gather.say(message, voice='Polly.Joanna', language='en-US')
+        gather.say(message, voice='Polly.Joanna-Neural', language='en-US')
         response.append(gather)
         
-        # Use cached SSML for no-input message
         no_input_msg = get_cached_ssml('no_input')
-        response.say(no_input_msg, voice='Polly.Joanna', language='en-US')
+        response.say(no_input_msg, voice='Polly.Joanna-Neural', language='en-US')
         response.redirect(action_url)
         
         return str(response)
@@ -108,7 +102,7 @@ class TwilioProvider(TelephonyProvider):
         if use_ssml and SSML_ENABLED and not message.startswith('<speak>'):
             message = conversational_response(message)
         
-        response.say(message, voice='Polly.Joanna', language='en-US')
+        response.say(message, voice='Polly.Joanna-Neural', language='en-US')
         response.record(
             action=action_url,
             method='POST',
@@ -123,7 +117,7 @@ class TwilioProvider(TelephonyProvider):
         response = VoiceResponse()
         # Use cached SSML for transfer message
         transfer_msg = get_cached_ssml('transfer_hold')
-        response.say(transfer_msg, voice='Polly.Joanna', language='en-US')
+        response.say(transfer_msg, voice='Polly.Joanna-Neural', language='en-US')
         dial = Dial()
         dial.number(phone_number)
         response.append(dial)
