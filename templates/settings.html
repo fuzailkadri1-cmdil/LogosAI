@@ -67,19 +67,29 @@
                         </div>
                         
                         <div class="mb-3">
-                            <label class="form-label">Business Hours</label>
+                            <label class="form-label d-flex align-items-center gap-2">
+                                Business Hours
+                                {% if hours_status.is_open %}
+                                    <span class="badge bg-success">🟢 AI sees store as OPEN right now</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">🔴 AI sees store as CLOSED right now — leads will be captured, not escalated</span>
+                                {% endif %}
+                            </label>
                             <div class="row">
                                 <div class="col-md-6 mb-2">
-                                    <label for="hours_monday-friday" class="form-label small">Monday - Friday</label>
+                                    <label for="hours_monday-friday" class="form-label small">Monday – Friday</label>
                                     <input type="text" class="form-control" id="hours_monday-friday" name="hours_monday-friday" 
-                                           value="{{ company.get_business_hours().get('monday-friday', '9am-9pm') }}">
+                                           value="{{ company.get_business_hours().get('monday-friday', '9am-9pm') }}"
+                                           placeholder="e.g. 9am-6pm">
                                 </div>
                                 <div class="col-md-6 mb-2">
-                                    <label for="hours_saturday-sunday" class="form-label small">Saturday - Sunday</label>
+                                    <label for="hours_saturday-sunday" class="form-label small">Saturday – Sunday</label>
                                     <input type="text" class="form-control" id="hours_saturday-sunday" name="hours_saturday-sunday" 
-                                           value="{{ company.get_business_hours().get('saturday-sunday', '10am-6pm') }}">
+                                           value="{{ company.get_business_hours().get('saturday-sunday', '10am-6pm') }}"
+                                           placeholder="e.g. 10am-5pm or closed">
                                 </div>
                             </div>
+                            <div class="form-text">These hours control call routing. During hours: calls escalate to staff. After hours: AI captures leads and promises a callback. Use <code>closed</code> for days you're not open.</div>
                         </div>
                         
                         <div class="mb-3">

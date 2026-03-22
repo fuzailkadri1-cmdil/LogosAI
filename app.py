@@ -206,8 +206,11 @@ def settings():
         return redirect(url_for('settings'))
     
     integrations = Integration.query.filter_by(company_id=company.id).all()
-    
-    return render_template('settings.html', company=company, integrations=integrations)
+
+    from business_hours import is_store_open
+    hours_status = is_store_open(company.get_business_hours())
+
+    return render_template('settings.html', company=company, integrations=integrations, hours_status=hours_status)
 
 @app.route('/calls')
 @login_required
