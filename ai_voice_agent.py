@@ -1067,12 +1067,19 @@ Phone: {self.company_config.get('phone_number', '')}
                     changed = True
                     break
 
-        # Strip trailing punctuation and title-case
+        # Stop at the first sentence boundary — "David. And what time..." → "David"
+        # Also stop at conjunctions that signal a new thought
+        fragments = re.split(r'(?<=[a-zA-Z])[.!?]|\s+and\s+|\s*,\s+and\s+', text, maxsplit=1, flags=re.IGNORECASE)
+        text = fragments[0].strip() if fragments else text
+
+        # Strip any remaining trailing punctuation
         text = re.sub(r'[.,!?]+$', '', text).strip()
-        # Only take the first 1-2 words (people rarely say more than first+last name)
+
+        # Keep first 1-2 words only (first + last name at most)
         words = text.split()
-        if len(words) > 3:
+        if len(words) > 2:
             text = ' '.join(words[:2])
+
         return text.title() if text else user_speech.strip()
 
     def _handle_lead_name_response(self, user_speech):
@@ -1085,18 +1092,18 @@ Phone: {self.company_config.get('phone_number', '')}
         # Check if this is a callback request (human-required intent after hours) vs sales lead
         is_callback_request = self.current_intent == 'callback_request'
 
+        caller_name = self.lead_data['caller_name']
+
         if is_callback_request:
-            # For callback requests, we already have the inquiry, just confirm callback number
             caller_phone = self.lead_data.get('caller_phone', '')
             display_phone = caller_phone[-4:] if caller_phone else 'your number'
-            caller_name = self.lead_data['caller_name']
-            response_text = f"Thanks {caller_name}. We'll have someone call you back as soon as we open. Is {display_phone} the best number to reach you?"
+            response_text = f"Nice to meet you, {caller_name}! We'll make sure someone reaches out as soon as possible. Is the number ending in {display_phone} still the best way to reach you?"
             self.conversation_state = 'confirming_callback'
         elif store_open:
-            response_text = f"And you're looking for {inquiry} - any specific size, color, or other details?"
+            response_text = f"Nice to meet you, {caller_name}! You mentioned {inquiry} — any details on style, size, or color so our team can be ready for you?"
             self.conversation_state = 'capturing_lead_details'
         else:
-            response_text = "And what are you looking for today?"
+            response_text = f"Nice to meet you, {caller_name}! What are you looking for — feel free to share any details like style, size, or color and we'll make sure our team is ready."
             self.conversation_state = 'capturing_lead_details'
 
         if self.use_ssml:
@@ -1158,7 +1165,9 @@ Phone: {self.company_config.get('phone_number', '')}
         else:
             caller_phone = self.lead_data.get('caller_phone', '')
             display_phone = caller_phone[-4:] if caller_phone else 'your number'
-            response_text = f"Perfect, {caller_name}. Someone from our team will call you back when we open. Is {display_phone} the best number to reach you?"
+            inquiry = self.lead_data.get('inquiry', '')
+            inquiry_note = f" — we'll let them know you're looking for {inquiry}" if inquiry else ""
+            response_text = f"Got it{inquiry_note}. Our team will give you a call back first thing. Is the number ending in {display_phone} the best one to reach you on?"
             self.conversation_state = 'confirming_callback'
 
             if self.use_ssml:
@@ -1194,8 +1203,8 @@ Phone: {self.company_config.get('phone_number', '')}
         self.lead_data['captured'] = True
         store_name = self.company_config.get('name', 'our store')
         caller_name = self.lead_data.get('caller_name', '')
-
-        response_text = f"Great, expect a call from us soon! Thanks for calling {store_name}. Talk to you soon!"
+        name_part = f", {caller_name}" if caller_name else ""
+        response_text = f"You're all set{name_part}! Someone from {store_name} will be in touch soon. Thanks so much for calling — have a great evening!"
 
         if self.use_ssml:
             response_text = conversational_response(response_text)
