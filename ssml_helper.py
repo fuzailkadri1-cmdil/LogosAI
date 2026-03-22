@@ -6,7 +6,7 @@ import re
 import os
 
 # Global config flag for easy rollback
-SSML_ENABLED = os.environ.get('SSML_ENABLED', 'true').lower() == 'true'
+SSML_ENABLED = False
 
 def build_ssml(text, rate="medium", pitch="medium"):
     """
