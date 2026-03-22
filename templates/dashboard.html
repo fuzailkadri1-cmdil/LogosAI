@@ -218,6 +218,68 @@
                 </div>
             </div>
             
+            <!-- ROI Calculator -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card" style="border-top: 3px solid #0d6efd;">
+                        <div class="card-header d-flex align-items-center justify-content-between">
+                            <h5 class="mb-0">💰 Revenue Recovery Calculator</h5>
+                            <small class="text-muted">Show prospects what they're losing</small>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3 align-items-end">
+                                <div class="col-md-3">
+                                    <label class="form-label small fw-semibold">Calls per day</label>
+                                    <input type="number" class="form-control" id="roi-cpd" value="30" min="1">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label small fw-semibold">Missed call rate (%)</label>
+                                    <input type="number" class="form-control" id="roi-mr" value="40" min="1" max="100">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label small fw-semibold">Avg order value ($)</label>
+                                    <input type="number" class="form-control" id="roi-ao" value="85" min="1">
+                                </div>
+                                <div class="col-md-3">
+                                    <button class="btn btn-primary w-100" id="roi-calc-btn">Calculate ROI</button>
+                                </div>
+                            </div>
+                            <div id="roi-result" class="mt-3" style="display:none;">
+                                <div class="row g-3 text-center">
+                                    <div class="col-md-3">
+                                        <div class="p-3 rounded" style="background:#e8f0fe;">
+                                            <div class="small text-muted">Monthly Recovered</div>
+                                            <div class="fs-4 fw-bold text-primary">$<span id="roi-monthly">0</span></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="p-3 rounded" style="background:#e6f4ea;">
+                                            <div class="small text-muted">Annual Recovered</div>
+                                            <div class="fs-4 fw-bold text-success">$<span id="roi-annual">0</span></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="p-3 rounded" style="background:#fef9e7;">
+                                            <div class="small text-muted">Orders Captured/mo</div>
+                                            <div class="fs-4 fw-bold text-warning"><span id="roi-orders">0</span></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="p-3 rounded" style="background:#fce8e6;">
+                                            <div class="small text-muted">Breakeven orders</div>
+                                            <div class="fs-4 fw-bold text-danger"><span id="roi-breakeven">0</span>/mo</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="alert alert-success mt-3 mb-0">
+                                    <strong>At $299/mo,</strong> Logos AI pays for itself with just <strong><span id="roi-breakeven2">0</span> recovered orders</strong> per month — the rest is pure profit.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="row mt-4">
                 <div class="col-12">
                     <div class="card">
@@ -401,6 +463,24 @@ fetch('/api/stats')
                 }
             }
         });
+    });
+
+    // ROI Calculator
+    document.getElementById('roi-calc-btn').addEventListener('click', function() {
+        const cpd = parseFloat(document.getElementById('roi-cpd').value);
+        const mr  = parseFloat(document.getElementById('roi-mr').value);
+        const ao  = parseFloat(document.getElementById('roi-ao').value);
+        if (!cpd || !mr || !ao) return;
+        const monthly   = Math.round(cpd * 30 * (mr / 100) * ao * 0.3);
+        const annual    = monthly * 12;
+        const orders    = Math.round(cpd * 30 * mr / 100 * 0.3);
+        const breakeven = orders > 0 ? (299 / (monthly / orders)).toFixed(1) : 'N/A';
+        document.getElementById('roi-monthly').textContent   = monthly.toLocaleString();
+        document.getElementById('roi-annual').textContent    = annual.toLocaleString();
+        document.getElementById('roi-orders').textContent    = orders.toLocaleString();
+        document.getElementById('roi-breakeven').textContent  = breakeven;
+        document.getElementById('roi-breakeven2').textContent = breakeven;
+        document.getElementById('roi-result').style.display  = 'block';
     });
 
     // Update "last call" time display
