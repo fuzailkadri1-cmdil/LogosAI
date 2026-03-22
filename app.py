@@ -402,7 +402,7 @@ def voice_webhook():
             greeting,
             url_for('voice_ai_conversation', _external=True),
             input_type='speech',
-            speech_timeout=3,
+            speech_timeout=5,
             speech_model='experimental_conversations'
         )
         
@@ -589,7 +589,7 @@ def voice_ai_conversation():
                 ai_result['response'],
                 url_for('voice_ai_conversation', _external=True),
                 input_type='speech',
-                speech_timeout=3,
+                speech_timeout=5,
                 speech_model='experimental_conversations'
             )
         
