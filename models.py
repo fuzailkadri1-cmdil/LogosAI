@@ -19,7 +19,7 @@ class Company(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     is_active = db.Column(db.Boolean, default=True)
     
-    greeting_message = db.Column(db.Text, default="Welcome to our call center.")
+    greeting_message = db.Column(db.Text, default="Hi, thanks for calling! How can I help you today?")
     menu_options = db.Column(db.Text, default='{"1": "Order Status", "2": "Store Hours", "3": "Speak to Agent"}')
     business_hours = db.Column(db.Text, default='{"monday-friday": "9am-9pm", "saturday-sunday": "10am-6pm"}')
     escalation_number = db.Column(db.String(20), nullable=True)

@@ -399,12 +399,11 @@ def voice_webhook():
         
         call_log = engine.log_call(from_number, call_sid, None, 'in_progress')
         
+        store_name = company.name or "us"
         if not company.greeting_message or not company.greeting_message.strip():
-            default_message = "Thank you for calling. Please configure your company greeting message in the settings to enable full voice automation features. Goodbye."
-            response = provider.create_call_response(default_message)
-            return response, 200, {'Content-Type': 'text/xml' if provider_type != 'sip' else 'application/json'}
-        
-        greeting = company.greeting_message
+            greeting = f"Hi, thanks for calling {store_name}! How can I help you today?"
+        else:
+            greeting = company.greeting_message
         
         response = provider.create_gather_response(
             greeting,

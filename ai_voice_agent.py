@@ -631,14 +631,40 @@ class AIVoiceAgent:
             'escalation_reason': None
         }
 
+    def _format_hours_for_speech(self, hours_config):
+        """Convert business hours dict to natural speech string"""
+        if not hours_config:
+            return "Monday through Friday, 9 AM to 5 PM"
+        if isinstance(hours_config, str):
+            return hours_config
+        parts = []
+        day_labels = {
+            'monday-friday': 'Monday through Friday',
+            'mon-fri': 'Monday through Friday',
+            'saturday-sunday': 'Saturday and Sunday',
+            'sat-sun': 'Saturday and Sunday',
+            'weekend': 'weekends',
+            'monday': 'Monday', 'tuesday': 'Tuesday', 'wednesday': 'Wednesday',
+            'thursday': 'Thursday', 'friday': 'Friday',
+            'saturday': 'Saturday', 'sunday': 'Sunday',
+        }
+        for key, val in hours_config.items():
+            label = day_labels.get(key.lower().strip(), key)
+            if val.lower().strip() == 'closed':
+                parts.append(f"closed on {label}")
+            else:
+                parts.append(f"{label} {val}")
+        return ', and '.join(parts) if parts else "Monday through Friday, 9 AM to 5 PM"
+
     def _handle_store_hours_inquiry(self, user_speech):
         """Handle store hours inquiry - AI resolves 24/7"""
-        hours = self.company_config.get('business_hours', 'Monday through Friday, 9 AM to 5 PM')
+        hours_config = self.company_config.get('business_hours', {})
+        hours_text = self._format_hours_for_speech(hours_config)
 
         if self.use_ssml:
-            response_text = conversational_response(f"Our business hours are {hours}.")
+            response_text = conversational_response(f"We're open {hours_text}.")
         else:
-            response_text = f"Our business hours are {hours}."
+            response_text = f"We're open {hours_text}."
 
         response_text += " " + get_response('anything_else')
         self.conversation_state = 'offering_more_help'
@@ -1204,7 +1230,16 @@ Phone: {self.company_config.get('phone_number', '')}
         store_name = self.company_config.get('name', 'our store')
         caller_name = self.lead_data.get('caller_name', '')
         name_part = f", {caller_name}" if caller_name else ""
-        response_text = f"You're all set{name_part}! Someone from {store_name} will be in touch soon. Thanks so much for calling — have a great evening!"
+
+        # Tell them when to expect the call based on hours
+        hours_config = self.company_config.get('business_hours', {})
+        hours_result = is_store_open(hours_config)
+        if hours_result['next_open'] and hours_result['next_open'] not in ('None', None):
+            timing = f"first thing when we open"
+        else:
+            timing = "as soon as possible"
+
+        response_text = f"You're all set{name_part}! Someone from {store_name} will give you a call back {timing}. Thanks so much for calling — have a great evening!"
 
         if self.use_ssml:
             response_text = conversational_response(response_text)
