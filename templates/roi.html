@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}ROI Calculator — Logos AI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="display-5 fw-bold">How Much Are Missed Calls Costing You?</h1>
+        <p class="lead text-muted">See how much revenue Logos AI can recover for your store</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="card shadow-sm">
+                <div class="card-body p-4 p-md-5">
+                    <div class="row g-4">
+
+                        <!-- Input form -->
+                        <div class="col-md-5">
+                            <h5 class="fw-semibold mb-4">Your Store Numbers</h5>
+
+                            <div class="mb-3">
+                                <label class="form-label">Calls per day</label>
+                                <input type="number" class="form-control form-control-lg" id="calls_per_day"
+                                       value="{{ calls_per_day or '' }}" placeholder="e.g. 30" min="1">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Missed call rate (%)</label>
+                                <input type="number" class="form-control form-control-lg" id="missed_rate"
+                                       value="{{ missed_rate or '' }}" placeholder="e.g. 40" min="1" max="100">
+                                <small class="text-muted">Calls that go unanswered after hours</small>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label">Average order value ($)</label>
+                                <input type="number" class="form-control form-control-lg" id="avg_order"
+                                       value="{{ avg_order or '' }}" placeholder="e.g. 85" min="1">
+                            </div>
+
+                            <button class="btn btn-primary btn-lg w-100" id="calc-btn">
+                                Calculate My ROI
+                            </button>
+                        </div>
+
+                        <!-- Results -->
+                        <div class="col-md-7">
+                            <h5 class="fw-semibold mb-4">Your Revenue Recovery Estimate</h5>
+
+                            <div id="results-panel" style="display: {% if result %}block{% else %}none{% endif %};">
+
+                                <div class="card text-white mb-3" style="background: linear-gradient(135deg, #1d4ed8, #2563eb);">
+                                    <div class="card-body text-center py-4">
+                                        <p class="mb-1 opacity-75">Monthly Revenue Recovered</p>
+                                        <h1 class="display-4 fw-bold mb-0">$<span id="monthly-result">{% if result %}{{ "{:,}".format(result.monthly) }}{% endif %}</span></h1>
+                                    </div>
+                                </div>
+
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between py-2 border-bottom">
+                                            <span class="text-muted">Annual revenue recovered</span>
+                                            <strong class="text-success fs-5">$<span id="annual-result">{% if result %}{{ "{:,}".format(result.annual) }}{% endif %}</span></strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between py-2 border-bottom">
+                                            <span class="text-muted">Missed calls per month</span>
+                                            <strong id="missed-calls-result">{% if result %}{{ ((result.calls_per_day * 30 * result.missed_rate / 100) | round | int) | string }}{% endif %}</strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between py-2">
+                                            <span class="text-muted">Logos AI captures ~30% as sales</span>
+                                            <strong id="captured-result">{% if result %}{{ ((result.calls_per_day * 30 * result.missed_rate / 100 * 0.3) | round | int) | string }} orders{% endif %}</strong>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="alert alert-success mb-3">
+                                    <strong>🚀 At $299/mo,</strong> Logos AI pays for itself with just
+                                    <strong id="breakeven-result">{% if result %}{{ (299 / (result.monthly / (result.calls_per_day * 30 * result.missed_rate / 100 * 0.3)) | round(1)) if (result.calls_per_day * 30 * result.missed_rate / 100 * 0.3) > 0 else '&lt;1' %}{% endif %}</strong>
+                                    recovered orders per month.
+                                </div>
+
+                                <a href="https://calendly.com" class="btn btn-success btn-lg w-100" target="_blank">
+                                    Book a 15-Minute Demo →
+                                </a>
+                            </div>
+
+                            <div id="placeholder-panel" class="text-center py-5" style="display: {% if result %}none{% else %}block{% endif %};">
+                                <div style="font-size: 3rem;">💰</div>
+                                <p class="lead text-muted mt-3">Enter your numbers to see your ROI</p>
+                                <p class="text-muted small">Most stores recover $800–$3,000/month</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <p class="text-center text-muted small mt-3">
+                Formula: calls/day × 30 days × missed rate × avg order × 30% capture rate
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function calculate() {
+    const cpd = parseFloat(document.getElementById('calls_per_day').value);
+    const mr  = parseFloat(document.getElementById('missed_rate').value);
+    const ao  = parseFloat(document.getElementById('avg_order').value);
+
+    if (!cpd || !mr || !ao) return;
+
+    const monthly     = Math.round(cpd * 30 * (mr / 100) * ao * 0.3);
+    const annual      = monthly * 12;
+    const missedMonth = Math.round(cpd * 30 * mr / 100);
+    const captured    = Math.round(missedMonth * 0.3);
+    const breakeven   = captured > 0 ? (299 / (monthly / captured)).toFixed(1) : '<1';
+
+    document.getElementById('monthly-result').textContent = monthly.toLocaleString();
+    document.getElementById('annual-result').textContent  = annual.toLocaleString();
+    document.getElementById('missed-calls-result').textContent = missedMonth.toLocaleString();
+    document.getElementById('captured-result').textContent = captured.toLocaleString() + ' orders';
+    document.getElementById('breakeven-result').innerHTML = breakeven;
+
+    document.getElementById('placeholder-panel').style.display = 'none';
+    document.getElementById('results-panel').style.display = 'block';
+}
+
+document.getElementById('calc-btn').addEventListener('click', calculate);
+
+// Auto-calculate if all params pre-filled from URL
+{% if result %}
+// Already calculated server-side — results shown
+{% elif calls_per_day and missed_rate and avg_order %}
+window.addEventListener('DOMContentLoaded', calculate);
+{% endif %}
+</script>
+{% endblock %}

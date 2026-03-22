@@ -826,6 +826,36 @@ def listen_mode():
                          recommendations=intent_recommendations,
                          recent_transcripts=recent_transcripts)
 
+@app.route('/roi')
+def roi():
+    calls_per_day = request.args.get('calls_per_day', '', type=str)
+    missed_rate   = request.args.get('missed_rate', '', type=str)
+    avg_order     = request.args.get('avg_order', '', type=str)
+
+    result = None
+    if calls_per_day and missed_rate and avg_order:
+        try:
+            cpd = float(calls_per_day)
+            mr  = float(missed_rate)
+            ao  = float(avg_order)
+            monthly = cpd * 30 * (mr / 100) * ao * 0.3
+            annual  = monthly * 12
+            result = {
+                'monthly': round(monthly),
+                'annual':  round(annual),
+                'calls_per_day': cpd,
+                'missed_rate':   mr,
+                'avg_order':     ao
+            }
+        except (ValueError, ZeroDivisionError):
+            pass
+
+    return render_template('roi.html',
+                           calls_per_day=calls_per_day,
+                           missed_rate=missed_rate,
+                           avg_order=avg_order,
+                           result=result)
+
 @app.route('/roi-calculator')
 def roi_calculator():
     return render_template('roi_calculator.html')
