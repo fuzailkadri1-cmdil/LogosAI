@@ -231,4 +231,12 @@ document.querySelectorAll('.status-select').forEach(select => {
     });
 });
 </script>
+
+<script>
+  // Auto-refresh leads page every 6 seconds during live demos
+  // so new leads appear in real-time without manual refresh
+  setTimeout(function() {
+    window.location.reload();
+  }, 6000);
+</script>
 {% endblock %}
