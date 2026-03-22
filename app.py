@@ -490,10 +490,9 @@ def voice_ai_conversation():
                 ai_agent.lead_data = session[session_key]['lead_data']
         
         if not speech_result or speech_result.strip() == '':
-            # First time or no speech detected - provide welcome and gather
-            welcome_message = "Hello! How can I help you today? You can ask about order status, store hours, or speak with an agent."
+            # First time or no speech detected - listen silently
             response = provider.create_gather_response(
-                welcome_message,
+                "",
                 url_for('voice_ai_conversation', _external=True),
                 input_type='speech',
                 speech_timeout=5,
