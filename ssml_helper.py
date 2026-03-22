@@ -6,7 +6,7 @@ import re
 import os
 
 # Global config flag for easy rollback
-SSML_ENABLED = True
+SSML_ENABLED = False
 
 def build_ssml(text, rate="medium", pitch="medium"):
     """
@@ -128,6 +128,14 @@ SSML_CACHED_RESPONSES = {
     
     'no_input': 'We didn\'t receive any input.<break time="200ms"/> Please try again.'
 }
+
+def strip_ssml(text):
+    """
+    Remove all SSML/XML tags from text so nothing is ever spoken literally.
+    Used as a safety net before passing any text to Twilio's Say verb.
+    """
+    return re.sub(r'<[^>]+>', '', text).strip()
+
 
 def get_cached_ssml(key):
     """

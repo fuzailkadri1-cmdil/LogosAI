@@ -3,7 +3,7 @@ from twilio.rest import Client
 from twilio.twiml.voice_response import VoiceResponse, Gather, Say, Record, Dial
 import os
 from typing import Any
-from ssml_helper import conversational_response, get_cached_ssml, SSML_ENABLED
+from ssml_helper import conversational_response, get_cached_ssml, strip_ssml, SSML_ENABLED
 
 class TelephonyProvider(ABC):
     
@@ -44,11 +44,10 @@ class TwilioProvider(TelephonyProvider):
     def create_call_response(self, message, next_action=None, use_ssml=True):
         response = VoiceResponse()
         
-        # Apply SSML if enabled and requested
         if use_ssml and SSML_ENABLED and not message.startswith('<speak>'):
             message = conversational_response(message)
         
-        response.say(message, voice='Polly.Joanna-Neural', language='en-US')
+        response.say(strip_ssml(message), voice='Polly.Joanna-Neural', language='en-US')
         
         if next_action:
             response.redirect(next_action)
@@ -86,10 +85,10 @@ class TwilioProvider(TelephonyProvider):
         if use_ssml and SSML_ENABLED and not message.startswith('<speak>'):
             message = conversational_response(message)
         
-        gather.say(message, voice='Polly.Joanna-Neural', language='en-US')
+        gather.say(strip_ssml(message), voice='Polly.Joanna-Neural', language='en-US')
         response.append(gather)
         
-        no_input_msg = get_cached_ssml('no_input')
+        no_input_msg = strip_ssml(get_cached_ssml('no_input'))
         response.say(no_input_msg, voice='Polly.Joanna-Neural', language='en-US')
         response.redirect(action_url)
         
@@ -102,7 +101,7 @@ class TwilioProvider(TelephonyProvider):
         if use_ssml and SSML_ENABLED and not message.startswith('<speak>'):
             message = conversational_response(message)
         
-        response.say(message, voice='Polly.Joanna-Neural', language='en-US')
+        response.say(strip_ssml(message), voice='Polly.Joanna-Neural', language='en-US')
         response.record(
             action=action_url,
             method='POST',
@@ -116,7 +115,7 @@ class TwilioProvider(TelephonyProvider):
     def transfer_call(self, phone_number):
         response = VoiceResponse()
         # Use cached SSML for transfer message
-        transfer_msg = get_cached_ssml('transfer_hold')
+        transfer_msg = strip_ssml(get_cached_ssml('transfer_hold'))
         response.say(transfer_msg, voice='Polly.Joanna-Neural', language='en-US')
         dial = Dial()
         dial.number(phone_number)
