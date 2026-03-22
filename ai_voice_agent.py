@@ -1069,15 +1069,26 @@ Phone: {self.company_config.get('phone_number', '')}
 
         # Strip any leading filler words/phrases — applied repeatedly until stable
         # Each pattern matches common ways people introduce their name
+        # Words that are definitely not names — if extraction produces one of these, keep looking
+        NON_NAME_WORDS = {
+            'yes', 'no', 'yeah', 'yep', 'nope', 'sure', 'ok', 'okay', 'alright',
+            'it', 'is', 'its', 'it\'s', 'this', 'that', 'the', 'a', 'an',
+            'and', 'or', 'but', 'so', 'well', 'um', 'uh', 'oh',
+            'i', 'me', 'my', 'we', 'you', 'he', 'she', 'they',
+            'am', 'are', 'was', 'were', 'be', 'been',
+        }
+
         intro_patterns = [
             r"^(oh\s*[,.]?\s*)?(yes\s*[,.]?\s*)?(sure\s*[,.]?\s*)?my name is\s+",
             r"^(oh\s*[,.]?\s*)?(yes\s*[,.]?\s*)?this is\s+",
             r"^(oh\s*[,.]?\s*)?(yes\s*[,.]?\s*)?the name'?s?\s+",
             r"^(oh\s*[,.]?\s*)?(yes\s*[,.]?\s*)?name'?s?\s+",
             r"^(oh\s*[,.]?\s*)?(yes\s*[,.]?\s*)?i'?m\s+",
-            r"^(oh\s*[,.]?\s*)?(yes\s*[,.]?\s*)?it'?s?\s+",
+            r"^(oh\s*[,.]?\s*)?(yes\s*[,.]?\s*)?it is\s+",
+            r"^(oh\s*[,.]?\s*)?(yes\s*[,.]?\s*)?it'?s\s+",
             r"^(oh\s*[,.]?\s*)?(yes\s*[,.]?\s*)?hi[,.]?\s+",
             r"^(oh\s*[,.]?\s*)?(yes\s*[,.]?\s*)?hey[,.]?\s+",
+            r"^yes\s*[,.]?\s*it\s+is[,.]?\s*",
             r"^yes\s*[,.]?\s+",
             r"^sure\s*[,.]?\s+",
             r"^oh\s*[,.]?\s+",
@@ -1093,19 +1104,33 @@ Phone: {self.company_config.get('phone_number', '')}
                     changed = True
                     break
 
-        # Stop at the first sentence boundary — "David. And what time..." → "David"
-        # Also stop at conjunctions that signal a new thought
-        fragments = re.split(r'(?<=[a-zA-Z])[.!?]|\s+and\s+|\s*,\s+and\s+', text, maxsplit=1, flags=re.IGNORECASE)
-        text = fragments[0].strip() if fragments else text
+        # Split at sentence boundaries — try each fragment until we find something name-like
+        all_fragments = re.split(r'(?<=[a-zA-Z])[.!?]|\s+and\s+|\s*,\s+and\s+', text, flags=re.IGNORECASE)
 
-        # Strip any remaining trailing punctuation
-        text = re.sub(r'[.,!?]+$', '', text).strip()
+        candidate = None
+        for fragment in all_fragments:
+            fragment = fragment.strip()
+            fragment = re.sub(r'[.,!?]+$', '', fragment).strip()
+            words = fragment.split()
+            # Take first 1-2 words
+            short = ' '.join(words[:2]) if words else ''
+            # Strip punctuation before checking — "yes," → "yes"
+            first_word_clean = re.sub(r'[^a-z]', '', short.split()[0].lower()) if short else ''
+            # Accept if the first word is not a known non-name filler
+            if short and first_word_clean not in NON_NAME_WORDS:
+                candidate = short
+                break
 
-        # Keep first 1-2 words only (first + last name at most)
-        words = text.split()
-        if len(words) > 2:
-            text = ' '.join(words[:2])
+        if not candidate:
+            # Last resort — scan the whole original speech for any capitalized word
+            cap_words = re.findall(r'\b([A-Z][a-z]+)\b', user_speech)
+            # Skip common sentence-start caps by requiring it not be a non-name word
+            for w in cap_words:
+                if w.lower() not in NON_NAME_WORDS:
+                    candidate = w
+                    break
 
+        text = candidate if candidate else text.split()[0] if text.split() else user_speech.strip()
         return text.title() if text else user_speech.strip()
 
     def _handle_lead_name_response(self, user_speech):
