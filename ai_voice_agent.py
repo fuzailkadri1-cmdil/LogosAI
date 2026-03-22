@@ -1119,17 +1119,28 @@ Phone: {self.company_config.get('phone_number', '')}
         is_callback_request = self.current_intent == 'callback_request'
 
         caller_name = self.lead_data['caller_name']
+        caller_phone = self.lead_data.get('caller_phone', '')
+        display_phone = caller_phone[-4:] if caller_phone else 'your number'
+
+        # Detect whether the caller already gave enough detail in their initial query
+        detail_keywords = ['style', 'color', 'colour', 'size', 'black', 'white', 'red', 'blue',
+                           'green', 'brown', 'grey', 'gray', 'large', 'small', 'medium', 'casual',
+                           'sport', 'formal', 'men', 'women', 'xl', 'xs', 'leather', 'fabric']
+        inquiry_lower = inquiry.lower()
+        already_detailed = len(inquiry) > 40 or any(kw in inquiry_lower for kw in detail_keywords)
 
         if is_callback_request:
-            caller_phone = self.lead_data.get('caller_phone', '')
-            display_phone = caller_phone[-4:] if caller_phone else 'your number'
             response_text = f"Nice to meet you, {caller_name}! We'll make sure someone reaches out as soon as possible. Is the number ending in {display_phone} still the best way to reach you?"
             self.conversation_state = 'confirming_callback'
+        elif already_detailed:
+            # They already gave us everything we need — skip details step, go to callback
+            response_text = f"Perfect, {caller_name}! I've got all the details. Is the number ending in {display_phone} the best one for our team to reach you on?"
+            self.conversation_state = 'confirming_callback'
         elif store_open:
-            response_text = f"Nice to meet you, {caller_name}! You mentioned {inquiry} — any details on style, size, or color so our team can be ready for you?"
+            response_text = f"Nice to meet you, {caller_name}! What are you looking for — any details on style or color would be helpful so our team is ready for you."
             self.conversation_state = 'capturing_lead_details'
         else:
-            response_text = f"Nice to meet you, {caller_name}! What are you looking for — feel free to share any details like style, size, or color and we'll make sure our team is ready."
+            response_text = f"Nice to meet you, {caller_name}! What are you looking for? Any details you can share will help our team when they call you back."
             self.conversation_state = 'capturing_lead_details'
 
         if self.use_ssml:
