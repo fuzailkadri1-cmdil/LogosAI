@@ -475,6 +475,8 @@ def voice_ai_conversation():
             ai_agent = AIVoiceAgent(company_config, pilot_id=pilot_id, caller_phone=from_number)
             session[session_key] = {
                 'conversation_history': [],
+                'conversation_state': 'initial',
+                'current_intent': None,
                 'turn_count': 0,
                 'pilot_id': pilot_id
             }
@@ -486,6 +488,8 @@ def voice_ai_conversation():
             }
             ai_agent = AIVoiceAgent(company_config, pilot_id=session[session_key].get('pilot_id'), caller_phone=from_number)
             ai_agent.conversation_history = session[session_key]['conversation_history']
+            ai_agent.conversation_state = session[session_key].get('conversation_state', 'initial')
+            ai_agent.current_intent = session[session_key].get('current_intent', None)
             if 'lead_data' in session[session_key]:
                 ai_agent.lead_data = session[session_key]['lead_data']
         
@@ -503,6 +507,8 @@ def voice_ai_conversation():
         ai_result = ai_agent.process_speech(speech_result)
         
         session[session_key]['conversation_history'] = ai_agent.conversation_history
+        session[session_key]['conversation_state'] = ai_agent.conversation_state
+        session[session_key]['current_intent'] = ai_agent.current_intent
         session[session_key]['turn_count'] += 1
         session[session_key]['lead_data'] = ai_agent.lead_data
         
