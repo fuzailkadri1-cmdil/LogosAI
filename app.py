@@ -9,10 +9,12 @@ from datetime import datetime, timedelta
 from functools import wraps
 from twilio.twiml.voice_response import VoiceResponse
 from werkzeug.middleware.proxy_fix import ProxyFix
-from flask_login import current_user
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import current_user, login_user, logout_user
 import os
 import json
 import logging
+import uuid
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -44,7 +46,7 @@ if database_url:
     except Exception as e:
         logging.error(f"Failed to initialize database: {e}")
 
-from replit_auth import init_auth, require_login, require_admin
+from auth import init_auth, require_login, require_admin
 init_auth(app)
 
 @app.before_request
@@ -75,21 +77,97 @@ def index():
         return redirect(url_for('dashboard'))
     return render_template('index.html')
 
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('dashboard'))
-    return redirect(url_for('replit_auth.login'))
+
+    if request.method == 'POST':
+        email = request.form.get('email', '').strip().lower()
+        password = request.form.get('password', '')
+
+        user = User.query.filter_by(email=email, is_active=True).first()
+        if user and user.password_hash and check_password_hash(user.password_hash, password):
+            login_user(user)
+            session['company_id'] = user.company_id
+            next_url = session.pop('next_url', None)
+            flash(f'Welcome back, {user.full_name}!', 'success')
+            return redirect(next_url or url_for('dashboard'))
+        else:
+            flash('Invalid email or password. Please try again.', 'danger')
+
+    return render_template('login.html')
+
 
 @app.route('/logout')
 def logout():
-    return redirect(url_for('replit_auth.logout'))
+    logout_user()
+    session.clear()
+    flash('You have been logged out.', 'info')
+    return redirect(url_for('index'))
 
-@app.route('/register')
+
+@app.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('dashboard'))
-    return redirect(url_for('replit_auth.login'))
+
+    if request.method == 'POST':
+        company_name = request.form.get('company_name', '').strip()
+        full_name = request.form.get('full_name', '').strip()
+        email = request.form.get('email', '').strip().lower()
+        password = request.form.get('password', '')
+
+        # Basic validation
+        if not all([company_name, full_name, email, password]):
+            flash('All fields are required.', 'danger')
+            return render_template('register.html')
+
+        if len(password) < 6:
+            flash('Password must be at least 6 characters.', 'danger')
+            return render_template('register.html')
+
+        if User.query.filter_by(email=email).first():
+            flash('An account with that email address already exists.', 'danger')
+            return render_template('register.html')
+
+        # Split "First Last" into separate fields
+        name_parts = full_name.split(' ', 1)
+        first_name = name_parts[0]
+        last_name = name_parts[1] if len(name_parts) > 1 else ''
+
+        try:
+            # Create the company first
+            company = Company(name=company_name, is_active=True)
+            db.session.add(company)
+            db.session.flush()  # get company.id before committing
+
+            # Create the user as admin of their company
+            user = User(
+                id=str(uuid.uuid4()),
+                email=email,
+                first_name=first_name,
+                last_name=last_name,
+                password_hash=generate_password_hash(password),
+                company_id=company.id,
+                is_admin=True,
+                role='admin',
+                is_active=True,
+            )
+            db.session.add(user)
+            db.session.commit()
+
+            login_user(user)
+            session['company_id'] = company.id
+            flash(f'Welcome to Logos AI, {first_name}! Let\'s get you set up.', 'success')
+            return redirect(url_for('onboarding'))
+
+        except Exception as e:
+            db.session.rollback()
+            logging.error(f"Registration error: {e}")
+            flash('Something went wrong during registration. Please try again.', 'danger')
+
+    return render_template('register.html')
 
 @app.route('/onboarding')
 @login_required

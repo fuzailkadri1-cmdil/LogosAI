@@ -94,8 +94,8 @@ class User(UserMixin, db.Model):
     """
     An authenticated user, linked to a Company.
 
-    Users log in via Replit Auth (OAuth). The id field is the Replit user ID
-    (a string), not an auto-incrementing integer.
+    Users authenticate with email and password. The id field is a UUID string
+    generated at registration time.
     """
 
     __tablename__ = 'users'
@@ -105,6 +105,10 @@ class User(UserMixin, db.Model):
     first_name = db.Column(db.String(100), nullable=True)
     last_name = db.Column(db.String(100), nullable=True)
     profile_image_url = db.Column(db.String(500), nullable=True)
+
+    # Hashed password — stored with Werkzeug's generate_password_hash().
+    # Nullable so that any rows created before this column was added still load.
+    password_hash = db.Column(db.String(256), nullable=True)
 
     company_id = db.Column(db.Integer, db.ForeignKey('companies.id'), nullable=True)
     is_admin = db.Column(db.Boolean, default=False)

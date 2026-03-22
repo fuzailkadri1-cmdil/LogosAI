@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Login - Call Center Automation{% endblock %}
+{% block title %}Login - Logos AI{% endblock %}
 
 {% block content %}
 <div class="container py-5">
@@ -8,28 +8,39 @@
         <div class="col-md-6 col-lg-5">
             <div class="card">
                 <div class="card-body p-5">
-                    <h2 class="text-center mb-4">Login</h2>
-                    <form method="POST">
+                    <div class="text-center mb-4">
+                        <h2 class="fw-bold">Welcome back</h2>
+                        <p class="text-muted">Sign in to your Logos AI account</p>
+                    </div>
+
+                    <form method="POST" action="{{ url_for('login') }}">
                         <div class="mb-3">
-                            <label for="email" class="form-label">Email Address</label>
-                            <input type="email" class="form-control" id="email" name="email" required>
+                            <label for="email" class="form-label fw-semibold">Email address</label>
+                            <input type="email" class="form-control" id="email" name="email"
+                                   value="{{ request.form.get('email', '') }}"
+                                   placeholder="you@yourstore.com" required autofocus>
                         </div>
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="password" name="password" required>
+                        <div class="mb-4">
+                            <label for="password" class="form-label fw-semibold">Password</label>
+                            <input type="password" class="form-control" id="password" name="password"
+                                   placeholder="••••••••" required>
                         </div>
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary">Login</button>
+                        <div class="d-grid mb-3">
+                            <button type="submit" class="btn btn-primary btn-lg">Sign in</button>
                         </div>
                     </form>
+
                     <hr class="my-4">
-                    <p class="text-center text-muted">
-                        Don't have an account? <a href="{{ url_for('register') }}">Register here</a>
+
+                    <p class="text-center text-muted mb-3">
+                        Don't have an account?
+                        <a href="{{ url_for('register') }}" class="fw-semibold">Create one free</a>
                     </p>
-                    <div class="alert alert-info mt-3">
-                        <strong>Demo Account:</strong><br>
-                        Email: demo@example.com<br>
-                        Password: demo123
+
+                    <div class="alert alert-info mb-0" style="font-size: 0.875rem;">
+                        <strong>Demo account</strong><br>
+                        Email: <code>demo@example.com</code><br>
+                        Password: <code>demo123</code>
                     </div>
                 </div>
             </div>

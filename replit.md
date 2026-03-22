@@ -49,16 +49,19 @@ Logos AI is an AI-powered phone system designed for small and medium retail/eCom
 - **AI:** OpenAI GPT-4o-mini
 - **Telephony:** Twilio
 - **Frontend:** Bootstrap 5, Chart.js
+- **Auth:** Flask-Login with email/password (Werkzeug password hashing, UUID user IDs)
 
 ### Key Files
 - `app.py` - Main Flask application with all routes
-- `models.py` - SQLAlchemy database models (includes Lead model)
+- `auth.py` - Email/password authentication (Flask-Login, require_login, require_admin decorators)
+- `models.py` - SQLAlchemy database models (includes Lead model, password_hash on User)
 - `ai_voice_agent.py` - OpenAI-powered voice AI agent with lead capture flow
 - `business_hours.py` - Business hours checking utility
 - `call_engine.py` - Call flow logic and intent routing
 - `providers.py` - Telephony provider abstraction
 - `ssml_helper.py` - SSML voice optimization (breaks, prosody, emphasis)
 - `latency_logger.py` - Voice pipeline latency measurement
+- `replit_auth.py` - DEPRECATED: old Replit OAuth auth (no longer imported, safe to delete)
 
 ### Templates
 - `templates/index.html` - Landing page (investor-focused)

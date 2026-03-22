@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Register - Call Center Automation{% endblock %}
+{% block title %}Create Account - Logos AI{% endblock %}
 
 {% block content %}
 <div class="container py-5">
@@ -8,32 +8,46 @@
         <div class="col-md-6 col-lg-5">
             <div class="card">
                 <div class="card-body p-5">
-                    <h2 class="text-center mb-4">Create Account</h2>
-                    <form method="POST">
+                    <div class="text-center mb-4">
+                        <h2 class="fw-bold">Get started free</h2>
+                        <p class="text-muted">Create your Logos AI account</p>
+                    </div>
+
+                    <form method="POST" action="{{ url_for('register') }}">
                         <div class="mb-3">
-                            <label for="company_name" class="form-label">Company Name</label>
-                            <input type="text" class="form-control" id="company_name" name="company_name" required>
+                            <label for="company_name" class="form-label fw-semibold">Store / business name</label>
+                            <input type="text" class="form-control" id="company_name" name="company_name"
+                                   value="{{ request.form.get('company_name', '') }}"
+                                   placeholder="e.g. Maison Boutique" required autofocus>
                         </div>
                         <div class="mb-3">
-                            <label for="full_name" class="form-label">Full Name</label>
-                            <input type="text" class="form-control" id="full_name" name="full_name" required>
+                            <label for="full_name" class="form-label fw-semibold">Your full name</label>
+                            <input type="text" class="form-control" id="full_name" name="full_name"
+                                   value="{{ request.form.get('full_name', '') }}"
+                                   placeholder="First Last" required>
                         </div>
                         <div class="mb-3">
-                            <label for="email" class="form-label">Email Address</label>
-                            <input type="email" class="form-control" id="email" name="email" required>
+                            <label for="email" class="form-label fw-semibold">Email address</label>
+                            <input type="email" class="form-control" id="email" name="email"
+                                   value="{{ request.form.get('email', '') }}"
+                                   placeholder="you@yourstore.com" required>
                         </div>
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="password" name="password" required minlength="6">
-                            <div class="form-text">Minimum 6 characters</div>
+                        <div class="mb-4">
+                            <label for="password" class="form-label fw-semibold">Password</label>
+                            <input type="password" class="form-control" id="password" name="password"
+                                   placeholder="Minimum 6 characters" required minlength="6">
+                            <div class="form-text">You'll use this to log in each time.</div>
                         </div>
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary">Create Account</button>
+                        <div class="d-grid mb-3">
+                            <button type="submit" class="btn btn-primary btn-lg">Create account</button>
                         </div>
                     </form>
+
                     <hr class="my-4">
-                    <p class="text-center text-muted">
-                        Already have an account? <a href="{{ url_for('login') }}">Login here</a>
+
+                    <p class="text-center text-muted mb-0">
+                        Already have an account?
+                        <a href="{{ url_for('login') }}" class="fw-semibold">Sign in</a>
                     </p>
                 </div>
             </div>
