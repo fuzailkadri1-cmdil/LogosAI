@@ -28,7 +28,7 @@ CACHED_RESPONSES = {
     'escalate': "Absolutely, let me get you to someone who can help with that right away.",
     'anything_else': "Anything else I can help with?",
     'didnt_catch': "Sorry, I didn't quite catch that. What was your order number again?",
-    'after_hours_human_needed': "We're currently closed, but I'd love to have someone call you back. Can I get your name?",
+    'after_hours_human_needed': "Our team is with other customers right now, but I want to make sure you get help. Can I get your name so someone can call you back?",
     'pickup_ready': "Great news! Your order is ready for pickup.",
     'pickup_not_ready': "Your order is still being prepared. We'll let you know as soon as it's ready!"
 }
@@ -878,7 +878,7 @@ Phone: {self.company_config.get('phone_number', '')}
         self.lead_data['call_type'] = 'after_hours'
 
         store_name = self.company_config.get('name', 'our store')
-        response_text = f"We're currently closed at {store_name}, but I want to make sure you get the help you need. Can I get your name so someone can call you back first thing?"
+        response_text = f"Our team at {store_name} is unavailable right now, but I want to make sure you get the help you need. Can I get your name so someone can call you back?"
 
         self.conversation_state = 'capturing_lead_name'
         self.current_intent = 'callback_request'
@@ -1009,7 +1009,7 @@ Phone: {self.company_config.get('phone_number', '')}
             response_text = "Let me connect you with our team. Before I transfer, can I get your name in case we get disconnected?"
         else:
             store_name = self.company_config.get('name', 'our store')
-            response_text = f"Thanks for calling {store_name}! We're currently closed, but I'd love to make sure someone helps you first thing. Can I get your name?"
+            response_text = "Our team is tied up at the moment, but I don't want you to miss out. Can I get your name so someone can follow up with you?"
 
         self.conversation_state = 'capturing_lead_name'
         self.current_intent = 'purchase_inquiry'
