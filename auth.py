@@ -155,3 +155,12 @@ def require_admin(f):
             return redirect(url_for('dashboard'))
         return f(*args, **kwargs)
     return decorated
+
+
+
+
+
+
+
+
+

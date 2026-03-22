@@ -370,3 +370,7 @@ class Lead(db.Model):
 
     def __repr__(self):
         return f'<Lead {self.id} - {self.caller_name or self.caller_phone}>'
+
+
+
+
