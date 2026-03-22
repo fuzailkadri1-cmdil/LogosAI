@@ -838,11 +838,17 @@ def roi():
             cpd = float(calls_per_day)
             mr  = float(missed_rate)
             ao  = float(avg_order)
-            monthly = cpd * 30 * (mr / 100) * ao * 0.3
-            annual  = monthly * 12
+            monthly      = cpd * 30 * (mr / 100) * ao * 0.3
+            annual       = monthly * 12
+            missed_month = round(cpd * 30 * mr / 100)
+            captured     = round(missed_month * 0.3)
+            breakeven    = round(299 / (monthly / captured), 1) if captured > 0 else 0
             result = {
-                'monthly': round(monthly),
-                'annual':  round(annual),
+                'monthly':      round(monthly),
+                'annual':       round(annual),
+                'missed_month': missed_month,
+                'captured':     captured,
+                'breakeven':    breakeven,
                 'calls_per_day': cpd,
                 'missed_rate':   mr,
                 'avg_order':     ao
