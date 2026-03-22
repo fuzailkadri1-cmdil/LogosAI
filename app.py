@@ -496,6 +496,13 @@ def api_stats():
         ).count()
         daily_calls.append(count)
     
+    total_leads   = Lead.query.filter_by(company_id=company.id).count()
+    contacted     = Lead.query.filter(
+        Lead.company_id == company.id,
+        Lead.status.in_(['contacted', 'closed'])
+    ).count()
+    converted     = Lead.query.filter_by(company_id=company.id, status='closed').count()
+
     return jsonify({
         'automation_rate': {
             'ai_handled': ai_handled,
@@ -511,8 +518,55 @@ def api_stats():
         'daily_calls': {
             'labels': last_7_days,
             'data': daily_calls
+        },
+        'leads_funnel': {
+            'total': total_leads,
+            'contacted': contacted,
+            'converted': converted
         }
     })
+
+
+@app.route('/api/activity')
+@login_required
+def api_activity():
+    """Return the last 5 calls for the live activity feed (polled every 30 s)."""
+    company = db.session.get(Company, current_user.company_id)
+    recent  = (CallLog.query
+               .filter_by(company_id=company.id)
+               .order_by(CallLog.created_at.desc())
+               .limit(5).all())
+
+    now   = datetime.utcnow()
+    calls = []
+    for c in recent:
+        delta = now - c.created_at
+        secs  = int(delta.total_seconds())
+        if secs < 60:
+            time_str = f'{secs}s ago'
+        elif secs < 3600:
+            time_str = f'{secs // 60}m ago'
+        elif secs < 86400:
+            time_str = f'{secs // 3600}h ago'
+        else:
+            time_str = c.created_at.strftime('%b %d')
+
+        caller = c.caller_phone or 'Unknown'
+        if len(caller) >= 4:
+            caller = f'***{caller[-4:]}'
+
+        calls.append({
+            'id':           c.id,
+            'caller':       caller,
+            'intent':       c.intent or 'general_inquiry',
+            'outcome':      c.outcome or 'unknown',
+            'handled_by_ai': c.handled_by_ai,
+            'duration':     c.duration_seconds or 0,
+            'time':         time_str,
+            'timestamp':    c.created_at.isoformat(),
+        })
+
+    return jsonify({'calls': calls})
 
 @app.route('/voice/webhook', methods=['GET', 'POST'])
 def voice_webhook():

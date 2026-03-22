@@ -191,24 +191,36 @@
             </div>
             {% endif %}
             
-            <div class="row mt-4">
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="mb-0">Automation Rate</h5>
+            <!-- ── Charts row: line + donut ─────────────────────────── -->
+            <div class="row mt-4 g-3">
+                <div class="col-lg-8">
+                    <div class="card h-100 shadow-sm border-0">
+                        <div class="card-header bg-white border-bottom-0 pb-0 pt-3 px-4">
+                            <h5 class="mb-0 fw-semibold" style="font-size:.97rem;">
+                                <i class="bi bi-graph-up me-2 text-primary"></i>Call Volume — Last 7 Days
+                            </h5>
                         </div>
-                        <div class="card-body">
-                            <canvas id="automationChart"></canvas>
+                        <div class="card-body px-4 pt-2 pb-3">
+                            <canvas id="volumeLineChart"></canvas>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="mb-0">Call Intents</h5>
+                <div class="col-lg-4">
+                    <div class="card h-100 shadow-sm border-0">
+                        <div class="card-header bg-white border-bottom-0 pb-0 pt-3 px-4">
+                            <h5 class="mb-0 fw-semibold" style="font-size:.97rem;">
+                                <i class="bi bi-pie-chart me-2 text-primary"></i>Intent Breakdown
+                            </h5>
                         </div>
-                        <div class="card-body">
-                            <canvas id="intentChart"></canvas>
+                        <div class="card-body px-4 d-flex flex-column align-items-center justify-content-center">
+                            <div style="position:relative;width:170px;height:170px;">
+                                <canvas id="intentDonutChart" width="170" height="170"></canvas>
+                                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;">
+                                    <div id="donutTotal" style="font-size:1.65rem;font-weight:700;color:#1e2350;line-height:1.1;">0</div>
+                                    <div style="font-size:0.65rem;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:.6px;">calls</div>
+                                </div>
+                            </div>
+                            <div id="intentLegend" class="mt-3 w-100" style="font-size:0.82rem;"></div>
                         </div>
                     </div>
                 </div>
@@ -276,108 +288,39 @@
                 </div>
             </div>
 
-            <div class="row mt-4">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="mb-0">Daily Call Volume (Last 7 Days)</h5>
+            <!-- ── Leads funnel + Live activity feed ─────────────────── -->
+            <div class="row mt-4 g-3">
+                <div class="col-lg-5">
+                    <div class="card h-100 shadow-sm border-0">
+                        <div class="card-header bg-white border-bottom-0 pt-3 pb-0 px-4">
+                            <h5 class="mb-0 fw-semibold" style="font-size:.97rem;">
+                                <i class="bi bi-funnel me-2 text-primary"></i>Leads Conversion Funnel
+                            </h5>
                         </div>
-                        <div class="card-body">
-                            <canvas id="dailyCallsChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row mt-4">
-                <div class="col-12">
-                    <div class="card" style="border: 2px dashed #6366f1;">
-                        <div class="card-header d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #f5f3ff, #ede9fe);">
-                            <h5 class="mb-0"><i class="bi bi-bar-chart-line"></i> Advanced Analytics</h5>
-                            <span class="future-badge">Future Feature</span>
-                        </div>
-                        <div class="card-body text-center py-4" style="opacity: 0.7;">
-                            <div class="row">
-                                <div class="col-md-3">
-                                    <i class="bi bi-emoji-smile display-4 text-muted"></i>
-                                    <p class="text-muted mb-0">Sentiment Analysis</p>
-                                    <small class="text-muted">Q2 2025</small>
-                                </div>
-                                <div class="col-md-3">
-                                    <i class="bi bi-graph-up-arrow display-4 text-muted"></i>
-                                    <p class="text-muted mb-0">Trend Predictions</p>
-                                    <small class="text-muted">Q2 2025</small>
-                                </div>
-                                <div class="col-md-3">
-                                    <i class="bi bi-file-earmark-pdf display-4 text-muted"></i>
-                                    <p class="text-muted mb-0">Custom Reports</p>
-                                    <small class="text-muted">Q2 2025</small>
-                                </div>
-                                <div class="col-md-3">
-                                    <i class="bi bi-bell display-4 text-muted"></i>
-                                    <p class="text-muted mb-0">Alert System</p>
-                                    <small class="text-muted">Q2 2025</small>
-                                </div>
+                        <div class="card-body px-4 pt-3" id="leadsFunnel">
+                            <div class="text-center text-muted py-4">
+                                <span class="spinner-border spinner-border-sm opacity-50"></span>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            
-            <div class="card mt-4">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Recent Calls</h5>
-                    <a href="{{ url_for('calls') }}" class="btn btn-sm btn-primary">View All</a>
-                </div>
-                <div class="card-body">
-                    {% if recent_calls %}
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Time</th>
-                                        <th>Caller</th>
-                                        <th>Intent</th>
-                                        <th>Outcome</th>
-                                        <th>Duration</th>
-                                        <th>Handled By</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for call in recent_calls %}
-                                    <tr>
-                                        <td>{{ call.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
-                                        <td>{{ call.caller_phone }}</td>
-                                        <td>
-                                            <span class="badge bg-info">{{ call.intent or 'Unknown' }}</span>
-                                        </td>
-                                        <td>
-                                            {% if call.outcome == 'resolved' %}
-                                                <span class="badge bg-success">Resolved</span>
-                                            {% elif call.outcome == 'transferred' %}
-                                                <span class="badge bg-warning">Transferred</span>
-                                            {% elif call.outcome == 'voicemail' %}
-                                                <span class="badge bg-info">Voicemail</span>
-                                            {% else %}
-                                                <span class="badge bg-secondary">{{ call.outcome }}</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>{{ call.duration_seconds }}s</td>
-                                        <td>
-                                            {% if call.handled_by_ai %}
-                                                <i class="bi bi-robot text-success"></i> AI
-                                            {% else %}
-                                                <i class="bi bi-person text-primary"></i> Agent
-                                            {% endif %}
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
+                <div class="col-lg-7">
+                    <div class="card h-100 shadow-sm border-0">
+                        <div class="card-header bg-white border-bottom-0 pt-3 pb-0 px-4 d-flex align-items-center justify-content-between">
+                            <h5 class="mb-0 fw-semibold d-flex align-items-center gap-2" style="font-size:.97rem;">
+                                <span class="live-dot"></span>Live Activity
+                            </h5>
+                            <div class="d-flex align-items-center gap-3">
+                                <span id="feedUpdated" class="text-muted" style="font-size:0.73rem;"></span>
+                                <a href="{{ url_for('calls') }}" class="btn btn-sm btn-outline-secondary" style="font-size:0.75rem;padding:3px 10px;">View all</a>
+                            </div>
                         </div>
-                    {% else %}
-                        <p class="text-muted mb-0">No calls yet. <a href="{{ url_for('simulate_call') }}?intent=OrderStatus">Simulate a call</a> to get started.</p>
-                    {% endif %}
+                        <div id="activityFeed" style="overflow-y:auto;max-height:320px;min-height:240px;">
+                            <div class="text-center text-muted py-5">
+                                <span class="spinner-border spinner-border-sm opacity-50"></span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -385,112 +328,324 @@
 </div>
 {% endblock %}
 
+{% block extra_css %}
+<style>
+  .live-dot {
+    display: inline-block;
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 0 0 rgba(34,197,94,.6);
+    animation: livePulse 1.8s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+  @keyframes livePulse {
+    0%   { box-shadow: 0 0 0 0 rgba(34,197,94,.6); }
+    70%  { box-shadow: 0 0 0 7px rgba(34,197,94,0); }
+    100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+  }
+  @keyframes feedFlash {
+    0%   { background: #f0f7ff; }
+    100% { background: #fff; }
+  }
+  .feed-flash { animation: feedFlash .6s ease-out; }
+  .activity-row { transition: background .15s; }
+  .activity-row:hover { background: #f9fafc; }
+</style>
+{% endblock %}
+
 {% block extra_js %}
 <script>
-fetch('/api/stats')
-    .then(response => response.json())
-    .then(data => {
-        if (data.ai_metrics) {
-            document.getElementById('ai-confidence').textContent = data.ai_metrics.avg_confidence;
-            document.getElementById('avg-turns').textContent = data.ai_metrics.avg_conversation_turns;
-            document.getElementById('escalated-calls').textContent = data.ai_metrics.ai_escalated_calls;
-            document.getElementById('escalation-rate').textContent = data.ai_metrics.escalation_rate;
-            
-            const aiHandled = data.automation_rate.ai_handled;
-            const aiEscalated = data.ai_metrics.ai_escalated_calls;
-            const aiResolved = aiHandled - aiEscalated;
-            const aiResolutionRate = aiHandled > 0 ? Math.max(0, Math.round((aiResolved / aiHandled) * 100)) : 0;
-            document.getElementById('ai-resolution').textContent = aiResolutionRate;
+// ── Constants ──────────────────────────────────────────────────────────────
+const BRAND  = '#2C3E8C';
+const ACCENT = '#3ECF8E';
+
+const INTENT_META = {
+  order_status:     { icon: 'bi-bag-check',           color: '#3b82f6', label: 'Order Status' },
+  pickup_readiness: { icon: 'bi-box-seam',             color: '#6366f1', label: 'Pickup Ready' },
+  purchase_inquiry: { icon: 'bi-tag',                  color: '#f59e0b', label: 'Purchase Inquiry' },
+  store_hours:      { icon: 'bi-clock',                color: '#10b981', label: 'Store Hours' },
+  general_inquiry:  { icon: 'bi-chat-dots',            color: '#8b5cf6', label: 'General' },
+  human_requested:  { icon: 'bi-headset',              color: '#ef4444', label: 'Transfer Request' },
+  human_required:   { icon: 'bi-person-exclamation',   color: '#dc2626', label: 'Escalated' },
+  refund:           { icon: 'bi-arrow-return-left',    color: '#dc2626', label: 'Refund' },
+  complaint:        { icon: 'bi-exclamation-triangle', color: '#dc2626', label: 'Complaint' },
+};
+
+const ORDER_INTENTS   = ['order_status', 'pickup_readiness'];
+const INQUIRY_INTENTS = ['purchase_inquiry', 'store_hours', 'general_inquiry'];
+
+// ── 1. Line chart: call volume 7 days ─────────────────────────────────────
+let volumeChart = null;
+function buildVolumeChart(labels, dataPoints) {
+  const ctx  = document.getElementById('volumeLineChart').getContext('2d');
+  const grad = ctx.createLinearGradient(0, 0, 0, 220);
+  grad.addColorStop(0,   'rgba(44,62,140,.22)');
+  grad.addColorStop(1,   'rgba(44,62,140,.01)');
+
+  const months = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const shortLabels = labels.map(d => {
+    const parts = d.split('-');
+    return months[+parts[1]] + ' ' + +parts[2];
+  });
+
+  if (volumeChart) volumeChart.destroy();
+  volumeChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: shortLabels,
+      datasets: [{
+        label: 'Calls',
+        data: dataPoints,
+        borderColor: BRAND,
+        borderWidth: 2.5,
+        backgroundColor: grad,
+        tension: 0.42,
+        fill: true,
+        pointBackgroundColor: BRAND,
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2,
+        pointRadius: 5,
+        pointHoverRadius: 7,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#fff',
+          borderColor: '#e2e5f1',
+          borderWidth: 1,
+          titleColor: '#1e2350',
+          bodyColor: BRAND,
+          padding: 10,
+          callbacks: { label: c => '  ' + c.parsed.y + ' call' + (c.parsed.y !== 1 ? 's' : '') }
         }
-        
-        const automationCtx = document.getElementById('automationChart').getContext('2d');
-        new Chart(automationCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['AI Handled', 'Agent Handled'],
-                datasets: [{
-                    data: [data.automation_rate.ai_handled, data.automation_rate.agent_handled],
-                    backgroundColor: ['#28a745', '#007bff']
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true
-            }
-        });
-        
-        const intentLabels = Object.keys(data.intents);
-        const intentData = Object.values(data.intents);
-        
-        const intentCtx = document.getElementById('intentChart').getContext('2d');
-        new Chart(intentCtx, {
-            type: 'pie',
-            data: {
-                labels: intentLabels,
-                datasets: [{
-                    data: intentData,
-                    backgroundColor: ['#007bff', '#28a745', '#ffc107', '#dc3545', '#17a2b8']
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true
-            }
-        });
-        
-        const dailyCtx = document.getElementById('dailyCallsChart').getContext('2d');
-        new Chart(dailyCtx, {
-            type: 'bar',
-            data: {
-                labels: data.daily_calls.labels,
-                datasets: [{
-                    label: 'Calls',
-                    data: data.daily_calls.data,
-                    backgroundColor: '#007bff'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-    });
-
-    // ROI Calculator
-    document.getElementById('roi-calc-btn').addEventListener('click', function() {
-        const cpd = parseFloat(document.getElementById('roi-cpd').value);
-        const mr  = parseFloat(document.getElementById('roi-mr').value);
-        const ao  = parseFloat(document.getElementById('roi-ao').value);
-        if (!cpd || !mr || !ao) return;
-        const monthly   = Math.round(cpd * 30 * (mr / 100) * ao * 0.3);
-        const annual    = monthly * 12;
-        const orders    = Math.round(cpd * 30 * mr / 100 * 0.3);
-        const breakeven = orders > 0 ? (299 / (monthly / orders)).toFixed(1) : 'N/A';
-        document.getElementById('roi-monthly').textContent   = monthly.toLocaleString();
-        document.getElementById('roi-annual').textContent    = annual.toLocaleString();
-        document.getElementById('roi-orders').textContent    = orders.toLocaleString();
-        document.getElementById('roi-breakeven').textContent  = breakeven;
-        document.getElementById('roi-breakeven2').textContent = breakeven;
-        document.getElementById('roi-result').style.display  = 'block';
-    });
-
-    // Update "last call" time display
-    function updateLastCallTime() {
-        const el = document.getElementById('last-call-time');
-        if (!el) return;
-        const ts = el.dataset.timestamp;
-        if (!ts) return;
-        const seconds = Math.floor((Date.now() - new Date(ts).getTime()) / 1000);
-        if (seconds < 60) el.textContent = seconds + 's ago';
-        else if (seconds < 3600) el.textContent = Math.floor(seconds / 60) + 'm ago';
-        else el.textContent = Math.floor(seconds / 3600) + 'h ago';
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#9ca3af' } },
+        y: {
+          beginAtZero: true,
+          ticks: { stepSize: 1, font: { size: 11 }, color: '#9ca3af', precision: 0 },
+          grid: { color: '#f0f2fa' }
+        }
+      }
     }
-    updateLastCallTime();
-    setInterval(updateLastCallTime, 5000);
+  });
+}
+
+// ── 2. Donut chart: intent breakdown ──────────────────────────────────────
+let donutChart = null;
+function buildDonutChart(intents) {
+  const grouped = { orders: 0, inquiries: 0, escalations: 0 };
+  for (const [intent, count] of Object.entries(intents)) {
+    if (ORDER_INTENTS.includes(intent))   grouped.orders      += count;
+    else if (INQUIRY_INTENTS.includes(intent)) grouped.inquiries  += count;
+    else                                       grouped.escalations += count;
+  }
+
+  const total  = grouped.orders + grouped.inquiries + grouped.escalations;
+  const labels = ['Orders', 'Inquiries', 'Escalations'];
+  const values = [grouped.orders, grouped.inquiries, grouped.escalations];
+  const colors = ['#3b82f6', '#f59e0b', '#ef4444'];
+
+  document.getElementById('donutTotal').textContent = total;
+
+  const ctx = document.getElementById('intentDonutChart').getContext('2d');
+  if (donutChart) donutChart.destroy();
+  donutChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [{
+        data: values,
+        backgroundColor: colors,
+        borderWidth: 3,
+        borderColor: '#fff',
+        hoverBorderWidth: 4,
+        hoverOffset: 6,
+      }]
+    },
+    options: {
+      cutout: '68%',
+      responsive: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: c => ` ${c.label}: ${c.parsed} (${total > 0 ? Math.round(c.parsed / total * 100) : 0}%)`
+          }
+        }
+      }
+    }
+  });
+
+  document.getElementById('intentLegend').innerHTML = labels.map((l, i) => {
+    const pct = total > 0 ? Math.round(values[i] / total * 100) : 0;
+    return `<div class="d-flex align-items-center justify-content-between mb-2">
+      <div class="d-flex align-items-center gap-2">
+        <span style="width:10px;height:10px;border-radius:50%;background:${colors[i]};flex-shrink:0;display:inline-block;"></span>
+        <span style="color:#4b5563;">${l}</span>
+      </div>
+      <span class="fw-semibold" style="color:#1e2350;">${values[i]}
+        <span class="fw-normal" style="color:#9ca3af;">(${pct}%)</span>
+      </span>
+    </div>`;
+  }).join('');
+}
+
+// ── 3. Leads conversion funnel ────────────────────────────────────────────
+function buildFunnel(funnel) {
+  const { total, contacted, converted } = funnel;
+  const container = document.getElementById('leadsFunnel');
+
+  if (!total) {
+    container.innerHTML = `<div class="text-center text-muted py-4">
+      <i class="bi bi-funnel display-5 d-block mb-2" style="opacity:.2;"></i>
+      <div style="font-size:.88rem;">No leads yet.</div>
+      <div style="font-size:.8rem;color:#aaa;">Leads are captured when callers leave purchase inquiries.</div>
+    </div>`;
+    return;
+  }
+
+  const stages = [
+    { label: 'Total Leads',  icon: 'bi-people',        value: total,     pct: 100,                                           color: BRAND   },
+    { label: 'Contacted',    icon: 'bi-telephone-check',value: contacted, pct: total > 0 ? Math.round(contacted/total*100) : 0, color: '#3b82f6' },
+    { label: 'Converted',    icon: 'bi-check-circle',   value: converted, pct: total > 0 ? Math.round(converted/total*100) : 0, color: ACCENT  },
+  ];
+
+  container.innerHTML = stages.map((s, i) => `
+    <div class="mb-3">
+      <div class="d-flex justify-content-between align-items-center mb-1">
+        <span class="d-flex align-items-center gap-2" style="font-size:.86rem;font-weight:600;color:#374151;">
+          <i class="bi ${s.icon}" style="color:${s.color};"></i> ${s.label}
+        </span>
+        <span style="font-size:.83rem;color:#6b7280;">${s.value} <span style="color:#d1d5db;">(${s.pct}%)</span></span>
+      </div>
+      <div style="background:#f3f4f6;border-radius:8px;height:26px;overflow:hidden;">
+        <div style="width:${s.pct}%;height:100%;background:${s.color};border-radius:8px;
+                    display:flex;align-items:center;justify-content:flex-end;
+                    padding-right:10px;transition:width .8s ease;">
+          ${s.pct > 12 ? `<span style="color:#fff;font-size:.73rem;font-weight:700;">${s.pct}%</span>` : ''}
+        </div>
+      </div>
+      ${i < stages.length - 1 ? '<div style="text-align:center;color:#d1d5db;font-size:.75rem;margin-top:3px;">▼</div>' : ''}
+    </div>
+  `).join('');
+}
+
+// ── 4. Live activity feed ─────────────────────────────────────────────────
+let lastTopId = null;
+
+function renderFeed(calls) {
+  const feed    = document.getElementById('activityFeed');
+  const updated = document.getElementById('feedUpdated');
+  updated.textContent = 'Updated ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+  if (!calls.length) {
+    feed.innerHTML = `<div class="text-center text-muted py-5">
+      <i class="bi bi-telephone-x display-5 d-block mb-2" style="opacity:.2;"></i>
+      <div style="font-size:.88rem;">No calls yet.</div>
+    </div>`;
+    return;
+  }
+
+  const topId = calls[0].id;
+  if (lastTopId !== null && topId !== lastTopId) {
+    feed.classList.add('feed-flash');
+    setTimeout(() => feed.classList.remove('feed-flash'), 700);
+  }
+  lastTopId = topId;
+
+  const OUTCOME_STYLE = {
+    resolved:    { bg: '#dcfce7', color: '#166534', label: 'Resolved' },
+    transferred: { bg: '#fef9c3', color: '#854d0e', label: 'Transferred' },
+    voicemail:   { bg: '#dbeafe', color: '#1e40af', label: 'Voicemail' },
+  };
+
+  feed.innerHTML = calls.map(c => {
+    const meta  = INTENT_META[c.intent] || { icon: 'bi-chat-dots', color: '#8b5cf6', label: c.intent };
+    const out   = OUTCOME_STYLE[c.outcome] || { bg: '#f3f4f6', color: '#374151', label: c.outcome };
+    const aiTag = c.handled_by_ai
+      ? `<span style="font-size:.7rem;color:#16a34a;"><i class="bi bi-robot"></i> AI</span>`
+      : `<span style="font-size:.7rem;color:#2563eb;"><i class="bi bi-person"></i> Agent</span>`;
+
+    return `<div class="activity-row d-flex align-items-center gap-3 px-4 py-3 border-bottom">
+      <div style="width:36px;height:36px;border-radius:10px;background:${meta.color}18;
+                  display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i class="bi ${meta.icon}" style="color:${meta.color};font-size:1rem;"></i>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <div class="fw-semibold text-truncate" style="font-size:.88rem;color:#111827;">${c.caller}</div>
+        <div style="font-size:.77rem;color:#9ca3af;">${meta.label} · ${aiTag}</div>
+      </div>
+      <div class="text-end" style="flex-shrink:0;">
+        <div><span style="background:${out.bg};color:${out.color};border-radius:20px;
+                          padding:2px 10px;font-size:.73rem;font-weight:600;">${out.label}</span></div>
+        <div style="font-size:.73rem;color:#9ca3af;margin-top:3px;">${c.time} · ${c.duration}s</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function fetchActivity() {
+  fetch('/api/activity')
+    .then(r => r.json())
+    .then(d => renderFeed(d.calls || []))
+    .catch(() => {});
+}
+
+// ── Bootstrap ─────────────────────────────────────────────────────────────
+fetch('/api/stats')
+  .then(r => r.json())
+  .then(data => {
+    if (data.ai_metrics) {
+      document.getElementById('ai-confidence').textContent   = data.ai_metrics.avg_confidence;
+      document.getElementById('avg-turns').textContent       = data.ai_metrics.avg_conversation_turns;
+      document.getElementById('escalated-calls').textContent = data.ai_metrics.ai_escalated_calls;
+      document.getElementById('escalation-rate').textContent = data.ai_metrics.escalation_rate;
+      const aiHandled  = data.automation_rate.ai_handled;
+      const aiResolved = aiHandled - data.ai_metrics.ai_escalated_calls;
+      document.getElementById('ai-resolution').textContent   =
+        aiHandled > 0 ? Math.max(0, Math.round(aiResolved / aiHandled * 100)) : 0;
+    }
+    buildVolumeChart(data.daily_calls.labels, data.daily_calls.data);
+    buildDonutChart(data.intents);
+    if (data.leads_funnel) buildFunnel(data.leads_funnel);
+  });
+
+fetchActivity();
+setInterval(fetchActivity, 30000);
+
+// ── ROI Calculator ────────────────────────────────────────────────────────
+document.getElementById('roi-calc-btn').addEventListener('click', function () {
+  const cpd = parseFloat(document.getElementById('roi-cpd').value);
+  const mr  = parseFloat(document.getElementById('roi-mr').value);
+  const ao  = parseFloat(document.getElementById('roi-ao').value);
+  if (!cpd || !mr || !ao) return;
+  const monthly   = Math.round(cpd * 30 * (mr / 100) * ao * 0.3);
+  const annual    = monthly * 12;
+  const orders    = Math.round(cpd * 30 * mr / 100 * 0.3);
+  const breakeven = orders > 0 ? (299 / (monthly / orders)).toFixed(1) : 'N/A';
+  document.getElementById('roi-monthly').textContent    = monthly.toLocaleString();
+  document.getElementById('roi-annual').textContent     = annual.toLocaleString();
+  document.getElementById('roi-orders').textContent     = orders.toLocaleString();
+  document.getElementById('roi-breakeven').textContent  = breakeven;
+  document.getElementById('roi-breakeven2').textContent = breakeven;
+  document.getElementById('roi-result').style.display   = 'block';
+});
+
+// ── Last-call time ticker ─────────────────────────────────────────────────
+function updateLastCallTime() {
+  const el = document.getElementById('last-call-time');
+  if (!el) return;
+  const secs = Math.floor((Date.now() - new Date(el.dataset.timestamp).getTime()) / 1000);
+  if (secs < 60)    el.textContent = secs + 's ago';
+  else if (secs < 3600)  el.textContent = Math.floor(secs / 60) + 'm ago';
+  else                   el.textContent = Math.floor(secs / 3600) + 'h ago';
+}
+updateLastCallTime();
+setInterval(updateLastCallTime, 5000);
 </script>
 {% endblock %}
