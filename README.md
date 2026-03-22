@@ -233,3 +233,7 @@ Local retail stores in Montreal and Toronto:
 ## License
 
 Proprietary — Logos AI. All rights reserved.
+
+
+
+
