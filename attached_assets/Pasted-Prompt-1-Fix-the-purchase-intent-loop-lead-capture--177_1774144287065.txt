@@ -1,0 +1,112 @@
+Prompt 1 — Fix the purchase intent loop + lead capture                                                                                                                                                             
+                                                                                                                                                                                                                     
+  In ai_voice_agent.py, I need you to make the following changes to fix a bug where purchase inquiries loop forever instead of capturing leads:
+                                                                                                                                                                                                                     
+  1. Find the PURCHASE_INTENT_PHRASES list and replace the entire list with this:                                                                                                                                    
+  PURCHASE_INTENT_PHRASES = [                                                                                                                                                                                        
+      'do you have', 'do you carry', 'do you sell', 'do you stock',                                                                                                                                                  
+      'got any', 'have any',                                                                                                                                                                                         
+      'looking for a', 'looking for an', 'looking for some',                                                                                                                                                         
+      "i'm looking for a", "i'm looking for an", "i'm looking for some",                                                                                                                                             
+      'i am looking for a', 'i am looking for an',                                                                                                                                                                   
+      'looking to order', 'looking to buy', 'looking to get', 'looking to purchase',
+      "i'm looking to order", "i'm looking to buy",                                                                                                                                                                  
+      'i want to buy', 'i want to order', 'i want to get', 'i want to purchase',                                                                                                                                     
+      'want to buy', 'want to order', 'want to get',                                                                                                                                                                 
+      'i wanna buy', 'i wanna order', 'wanna buy', 'wanna order',                                                                                                                                                    
+      'i would like to order', 'i would like to buy',       
+      "i'd like to order", "i'd like to buy",                                                                                                                                                                        
+      'like to order', 'like to buy',                       
+      'can i order', 'can i buy', 'can i get', 'can i purchase',                                                                                                                                                     
+      'i need a', 'i need an', 'i need some', 'i need to buy', 'i need to order',                                                                                                                                    
+      'is this in stock', 'in stock', 'available', 'availability',                                                                                                                                                   
+      'do you still have',                                                                                                                                                                                           
+      'price of', 'how much is', 'how much does', 'how much for',                                                                                                                                                    
+      'what does it cost', 'cost of',                                                                                                                                                                                
+      'purchase', 'interested in', 'interested in buying',  
+      'want to get', 'can you get',                                                                                                                                                                                  
+      'place an order', 'make an order', 'put in an order',                                                                                                                                                          
+      'to order a', 'to buy a', 'to get a'                                                                                                                                                                           
+  ]                                                                                                                                                                                                                  
+                                                                                                                                                                                                                     
+  2. After the PURCHASE_INTENT_PHRASES list, add this new list:                                                                                                                                                      
+  ORDER_CONTEXT_WORDS = [                                   
+      'my order', 'my package', 'my delivery', 'my shipment', 'my tracking',                                                                                                                                         
+      'my purchase', 'my item', 'my stuff',
+      'the order', 'the package', 'the delivery', 'the shipment',                                                                                                                                                    
+      'order status', 'order number', 'order info', 'order information',
+      'tracking number', 'tracking info', 'tracking status',                                                                                                                                                         
+      'delivery status', 'delivery date', 'delivery time',                                                                                                                                                           
+      'shipment status', 'shipment info',                                                                                                                                                                            
+      'where is my', 'when will my', 'has my', 'did my', 'is my order',                                                                                                                                              
+      'check on my', 'update on my', 'status of my', 'info on my',                                                                                                                                                   
+      "where's my", "when's my",                                                                                                                                                                                     
+      'placed an order', 'made an order', 'placed order', 'made order',                                                                                                                                              
+      'ordered something', 'ordered from', 'i ordered',                                                                                                                                                              
+      'confirmation number', 'receipt', 'order confirmation',                                                                                                                                                        
+      'reference number', 'order id'                                                                                                                                                                                 
+  ]                                                                                                                                                                                                                  
+                                                                                                                                                                                                                     
+  3. Inside the AIVoiceAgent class, add these two new methods right before the _analyze_intent method:                                                                                                               
+                                                            
+      def _has_order_context(self, user_lower):                                                                                                                                                                      
+          for phrase in ORDER_CONTEXT_WORDS:                
+              if phrase in user_lower:                                                                                                                                                                               
+                  return True                               
+          return False                                                                                                                                                                                               
+                                                            
+      def _is_purchase_intent(self, user_lower):
+          if self._has_order_context(user_lower):
+              return False
+          for phrase in PURCHASE_INTENT_PHRASES:                                                                                                                                                                     
+              if phrase in user_lower:                                                                                                                                                                               
+                  return True                                                                                                                                                                                        
+          return False                                                                                                                                                                                               
+                                                                                                                                                                                                                     
+  4. Replace the entire _analyze_intent method with this:
+                                                                                                                                                                                                                     
+      def _analyze_intent(self, user_speech):                                                                                                                                                                        
+          user_lower = user_speech.lower()
+          for phrase in EXPLICIT_HUMAN_REQUEST:                                                                                                                                                                      
+              if phrase in user_lower:                                                                                                                                                                               
+                  return {'intent': 'speak_to_human', 'confidence': 1.0, 'category': 'HUMAN_REQUIRED'}                                                                                                               
+          for intent, keywords in HUMAN_REQUIRED_KEYWORDS.items():                                                                                                                                                   
+              for keyword in keywords:                                                                                                                                                                               
+                  if keyword in user_lower:                                                                                                                                                                          
+                      return {'intent': intent, 'confidence': 0.9, 'category': 'HUMAN_REQUIRED'}                                                                                                                     
+          if self._has_order_context(user_lower):                                                                                                                                                                    
+              return {'intent': 'order_status', 'confidence': 0.95, 'category': 'AI_RESOLVABLE'}                                                                                                                     
+          for phrase in PICKUP_READINESS_PHRASES:                                                                                                                                                                    
+              if phrase in user_lower:                                                                                                                                                                               
+                  return {'intent': 'pickup_readiness', 'confidence': 0.9, 'category': 'AI_RESOLVABLE'}                                                                                                              
+          for phrase in STORE_HOURS_PHRASES:                                                                                                                                                                         
+              if phrase in user_lower:                                                                                                                                                                               
+                  return {'intent': 'store_hours', 'confidence': 0.9, 'category': 'AI_RESOLVABLE'}                                                                                                                   
+          if self._is_purchase_intent(user_lower):                                                                                                                                                                   
+              return {'intent': 'purchase_inquiry', 'confidence': 0.9, 'category': 'SALES_LEAD'}                                                                                                                     
+          return {'intent': 'general_inquiry', 'confidence': 0.7, 'category': 'AI_RESOLVABLE'}                                                                                                                       
+                                                                                                                                                                                                                     
+  5. Add this new method to the AIVoiceAgent class (after _analyze_intent):                                                                                                                                          
+                                                                                                                                                                                                                     
+      def _handle_purchase_intent(self, user_speech):                                                                                                                                                                
+          store_open = self._is_store_open()                
+          self.lead_data['inquiry'] = user_speech.strip()                                                                                                                                                            
+          self.lead_data['call_type'] = 'during_hours' if store_open else 'after_hours'                                                                                                                              
+          if store_open:                                                                                                                                                                                             
+              response_text = "Let me connect you with our team. Before I transfer, can I get your name in case we get disconnected?"                                                                                
+          else:                                                                                                                                                                                                      
+              store_name = self.company_config.get('name', 'our store')                                                                                                                                              
+              response_text = f"Thanks for calling {store_name}! We're currently closed, but I'd love to make sure someone helps you first thing. Can I get your name?"                                              
+          self.conversation_state = 'capturing_lead_name'                                                                                                                                                            
+          self.current_intent = 'purchase_inquiry'                                                                                                                                                                   
+          self.conversation_history.append({'role': 'assistant', 'content': response_text})                                                                                                                          
+          return {                                                                                                                                                                                                   
+              'response': response_text,                                                                                                                                                                             
+              'should_escalate': False,                                                                                                                                                                              
+              'should_end_call': False,                                                                                                                                                                              
+              'intent': 'purchase_inquiry',                 
+              'confidence': 0.9,
+              'escalation_reason': None                                                                                                                                                                              
+          }
+                                                                                                                                                                                                                     
+  Save the file when done.                                  
