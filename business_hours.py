@@ -65,7 +65,12 @@ def is_store_open(business_hours_config, current_time=None):
             business_hours_config = {}
     
     if not business_hours_config:
-        return {'is_open': True, 'hours_today': 'Open', 'next_open': None}
+        # No hours configured — default to standard 9-5 Mon-Fri
+        day_of_week = current_time.weekday()
+        current_hour = current_time.hour
+        if day_of_week < 5 and 9 <= current_hour < 17:
+            return {'is_open': True, 'hours_today': '9am-5pm', 'next_open': None}
+        return {'is_open': False, 'hours_today': 'Closed', 'next_open': 'next business day'}
     
     day_of_week = current_time.weekday()
     current_hour = current_time.hour

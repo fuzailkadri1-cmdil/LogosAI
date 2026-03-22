@@ -1033,9 +1033,34 @@ Phone: {self.company_config.get('phone_number', '')}
             'escalation_reason': None
         }
 
+    def _extract_name(self, user_speech):
+        """Strip intro phrases and return just the caller's name"""
+        import re
+        text = user_speech.strip()
+        # Remove filler words + common name-intro phrases (order matters — longest first)
+        patterns = [
+            r"^(oh\s+)?(yes\s+)?my name is\s+",
+            r"^(oh\s+)?this is\s+",
+            r"^(oh\s+)?it'?s?\s+",
+            r"^(oh\s+)?i'?m\s+",
+            r"^(oh\s+)?hi,?\s+(my name is\s+|i'?m\s+)?",
+            r"^(oh\s+)?hey,?\s+(my name is\s+|i'?m\s+)?",
+            r"^(oh\s+)?(sure,?\s+)?(the name is\s+|name'?s?\s+)",
+            r"^(oh\s+)?yes,?\s+",
+            r"^oh\s+",
+        ]
+        for pattern in patterns:
+            cleaned = re.sub(pattern, '', text, flags=re.IGNORECASE).strip()
+            if cleaned and cleaned != text:
+                text = cleaned
+                break
+        # Capitalize first letter of each word, strip punctuation at end
+        text = re.sub(r'[.,!?]+$', '', text).strip()
+        return text.title() if text else user_speech.strip()
+
     def _handle_lead_name_response(self, user_speech):
         """Handle caller providing their name - supports both sales and callback requests"""
-        self.lead_data['caller_name'] = user_speech.strip()
+        self.lead_data['caller_name'] = self._extract_name(user_speech)
         store_open = self.lead_data['call_type'] == 'during_hours'
 
         inquiry = self.lead_data.get('inquiry', '')
@@ -1047,7 +1072,8 @@ Phone: {self.company_config.get('phone_number', '')}
             # For callback requests, we already have the inquiry, just confirm callback number
             caller_phone = self.lead_data.get('caller_phone', '')
             display_phone = caller_phone[-4:] if caller_phone else 'your number'
-            response_text = f"Thanks {user_speech.strip()}. We'll have someone call you back as soon as we open. Is {display_phone} the best number to reach you?"
+            caller_name = self.lead_data['caller_name']
+            response_text = f"Thanks {caller_name}. We'll have someone call you back as soon as we open. Is {display_phone} the best number to reach you?"
             self.conversation_state = 'confirming_callback'
         elif store_open:
             response_text = f"And you're looking for {inquiry} - any specific size, color, or other details?"
