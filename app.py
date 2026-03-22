@@ -1209,5 +1209,9 @@ def pilot_results(pilot_id):
                           automation_rate=automation_rate, avg_confidence=avg_confidence,
                           avg_turns=avg_turns, intent_distribution=intent_distribution)
 
+@app.route('/ping')
+def ping():
+    return 'ok', 200
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
