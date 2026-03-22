@@ -2,54 +2,9 @@
 
 {% block title %}Pilot Customers - Logos AI{% endblock %}
 
+
+{% block page_title %}Pilot Customers{% endblock %}
 {% block content %}
-<div class="container-fluid py-4">
-    <div class="row">
-        <div class="col-md-3">
-            <div class="sidebar">
-                <div class="p-3">
-                    <img src="{{ url_for('static', filename='images/logos-ai-logo.png') }}" alt="Logos AI" style="height: 40px; margin-bottom: 10px;">
-                    <h6 class="text-white-50">{{ company.name }}</h6>
-                    <hr class="bg-white">
-                </div>
-                <a href="{{ url_for('dashboard') }}">
-                    <i class="bi bi-speedometer2"></i> Dashboard
-                </a>
-                <a href="{{ url_for('listen_mode') }}">
-                    <i class="bi bi-ear"></i> Listen Mode
-                </a>
-                <a href="{{ url_for('calls') }}">
-                    <i class="bi bi-telephone"></i> Call Logs
-                </a>
-                <a href="{{ url_for('settings') }}">
-                    <i class="bi bi-gear"></i> Settings
-                </a>
-                {% if current_user.is_admin %}
-                <hr class="bg-white">
-                <div class="p-3">
-                    <h6 class="text-white-50">Pilot Management</h6>
-                </div>
-                <a href="{{ url_for('pilots') }}" class="active">
-                    <i class="bi bi-people"></i> Pilot Customers
-                </a>
-                <hr class="bg-white">
-                <div class="p-3">
-                    <h6 class="text-white-50">Investor Tools</h6>
-                </div>
-                <a href="{{ url_for('roadmap') }}">
-                    <i class="bi bi-map"></i> Product Roadmap
-                </a>
-                <a href="{{ url_for('investor_dashboard') }}">
-                    <i class="bi bi-graph-up-arrow"></i> Investor Metrics
-                </a>
-                <a href="{{ url_for('demo_script') }}">
-                    <i class="bi bi-mic"></i> Demo Script
-                </a>
-                {% endif %}
-            </div>
-        </div>
-        
-        <div class="col-md-9">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
                     <h2><i class="bi bi-people"></i> Pilot Customers</h2>
@@ -347,7 +302,4 @@
                     <button type="submit" class="btn btn-primary">Add Pilot</button>
                 </div>
             </form>
-        </div>
-    </div>
-</div>
 {% endblock %}

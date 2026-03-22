@@ -2,35 +2,9 @@
 
 {% block title %}Demo Script - Logos AI{% endblock %}
 
+
+{% block page_title %}Demo Script{% endblock %}
 {% block content %}
-<div class="container-fluid py-4">
-    <div class="row">
-        <div class="col-md-3">
-            <div class="sidebar">
-                <div class="p-3">
-                    <img src="{{ url_for('static', filename='images/logos-ai-logo.png') }}" alt="Logos AI" style="height: 40px; margin-bottom: 10px;">
-                    <h6 class="text-white-50">Logos AI</h6>
-                    <hr class="bg-white">
-                </div>
-                <a href="{{ url_for('dashboard') }}">
-                    <i class="bi bi-speedometer2"></i> Dashboard
-                </a>
-                <a href="{{ url_for('roadmap') }}">
-                    <i class="bi bi-map"></i> Roadmap
-                </a>
-                <a href="{{ url_for('investor_dashboard') }}">
-                    <i class="bi bi-graph-up-arrow"></i> Investor Metrics
-                </a>
-                <a href="{{ url_for('demo_script') }}" class="active">
-                    <i class="bi bi-mic"></i> Demo Script
-                </a>
-                <a href="{{ url_for('pilots') }}">
-                    <i class="bi bi-people"></i> Pilot Customers
-                </a>
-            </div>
-        </div>
-        
-        <div class="col-md-9">
             <div class="card mb-4">
                 <div class="card-header" style="background: linear-gradient(135deg, #1e40af 0%, #10b981 100%); color: white;">
                     <h4><i class="bi bi-mic-fill"></i> Logos AI - Investor Demo Script</h4>
@@ -233,9 +207,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
 
 <style>
     @media print {

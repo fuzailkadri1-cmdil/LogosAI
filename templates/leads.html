@@ -2,81 +2,9 @@
 
 {% block title %}Leads - {{ company.name }}{% endblock %}
 
+
+{% block page_title %}Leads{% endblock %}
 {% block content %}
-<div class="container-fluid py-4">
-    <div class="row">
-        <div class="col-md-3">
-            <div class="sidebar">
-                <div class="p-3">
-                    <img src="{{ url_for('static', filename='images/logos-ai-logo.png') }}" alt="Logos AI" style="height: 40px; margin-bottom: 10px;">
-                    <h6 class="text-white-50">{{ company.name }}</h6>
-                    <hr class="bg-white">
-                </div>
-                <a href="{{ url_for('dashboard') }}">
-                    <i class="bi bi-speedometer2"></i> Dashboard
-                </a>
-                <a href="{{ url_for('listen_mode') }}">
-                    <i class="bi bi-ear"></i> Listen Mode
-                </a>
-                <a href="{{ url_for('conversation_preview') }}">
-                    <i class="bi bi-chat-dots"></i> Test AI
-                </a>
-                <a href="{{ url_for('leads') }}" class="active">
-                    <i class="bi bi-person-plus"></i> Leads
-                    {% if new_leads_count > 0 %}
-                        <span class="badge bg-success">{{ new_leads_count }}</span>
-                    {% endif %}
-                </a>
-                <a href="{{ url_for('calls') }}">
-                    <i class="bi bi-telephone"></i> Call Logs
-                </a>
-                <a href="{{ url_for('voicemails') }}">
-                    <i class="bi bi-voicemail"></i> Voicemails
-                </a>
-                <a href="{{ url_for('industry_templates') }}">
-                    <i class="bi bi-lightning"></i> Templates
-                </a>
-                <a href="{{ url_for('settings') }}">
-                    <i class="bi bi-gear"></i> Settings
-                </a>
-                <a href="{{ url_for('onboarding') }}">
-                    <i class="bi bi-rocket"></i> Integrations
-                </a>
-                {% if current_user.is_admin %}
-                <hr class="bg-white">
-                <div class="p-3">
-                    <h6 class="text-white-50">Admin & Investor Tools</h6>
-                </div>
-                <a href="{{ url_for('pilots') }}">
-                    <i class="bi bi-people"></i> Pilot Customers
-                </a>
-                <a href="{{ url_for('roadmap') }}">
-                    <i class="bi bi-map"></i> Product Roadmap
-                </a>
-                <a href="{{ url_for('pricing') }}">
-                    <i class="bi bi-tag"></i> Pricing
-                </a>
-                <a href="{{ url_for('demo_script') }}">
-                    <i class="bi bi-mic"></i> Demo Script
-                </a>
-                <a href="{{ url_for('twilio_setup') }}">
-                    <i class="bi bi-telephone-outbound"></i> Twilio Setup
-                </a>
-                <a href="{{ url_for('investor_dashboard') }}">
-                    <i class="bi bi-graph-up-arrow"></i> Investor Metrics
-                </a>
-                <a href="{{ url_for('roi_calculator') }}">
-                    <i class="bi bi-calculator"></i> ROI Calculator
-                </a>
-                {% endif %}
-                <hr class="bg-white">
-                <a href="{{ url_for('logout') }}">
-                    <i class="bi bi-box-arrow-right"></i> Logout
-                </a>
-            </div>
-        </div>
-        
-        <div class="col-md-9">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2><i class="bi bi-person-plus"></i> Leads</h2>
                 {% if after_hours_count > 0 %}
@@ -199,9 +127,6 @@
                     {% endif %}
                 </div>
             </div>
-        </div>
-    </div>
-</div>
 
 <script>
 document.querySelectorAll('.status-select').forEach(select => {

@@ -2,157 +2,71 @@
 
 {% block title %}Dashboard - {{ company.name }}{% endblock %}
 
+
+{% block page_title %}Dashboard{% endblock %}
 {% block content %}
-<div class="container-fluid py-4">
-    <div class="row">
-        <div class="col-md-3">
-            <div class="sidebar">
-                <div class="p-3">
-                    <img src="{{ url_for('static', filename='images/logos-ai-logo.png') }}" alt="Logos AI" style="height: 40px; margin-bottom: 10px;">
-                    <h6 class="text-white-50">{{ company.name }}</h6>
-                    <hr class="bg-white">
-                </div>
-                <a href="{{ url_for('dashboard') }}" class="active">
-                    <i class="bi bi-speedometer2"></i> Dashboard
-                </a>
-                <a href="{{ url_for('listen_mode') }}">
-                    <i class="bi bi-ear"></i> Listen Mode
-                </a>
-                <a href="{{ url_for('conversation_preview') }}">
-                    <i class="bi bi-chat-dots"></i> Test AI
-                </a>
-                <a href="{{ url_for('leads') }}">
-                    <i class="bi bi-person-plus"></i> Leads
-                </a>
-                <a href="{{ url_for('calls') }}">
-                    <i class="bi bi-telephone"></i> Call Logs
-                </a>
-                <a href="{{ url_for('voicemails') }}">
-                    <i class="bi bi-voicemail"></i> Voicemails
-                    {% if voicemails > 0 %}
-                        <span class="badge bg-danger">{{ voicemails }}</span>
-                    {% endif %}
-                </a>
-                <a href="{{ url_for('industry_templates') }}">
-                    <i class="bi bi-lightning"></i> Templates
-                </a>
-                <a href="{{ url_for('settings') }}">
-                    <i class="bi bi-gear"></i> Settings
-                </a>
-                <a href="{{ url_for('onboarding') }}">
-                    <i class="bi bi-rocket"></i> Integrations
-                </a>
-                {% if current_user.is_admin %}
-                <hr class="bg-white">
-                <div class="p-3">
-                    <h6 class="text-white-50">Admin & Investor Tools</h6>
-                </div>
-                <a href="{{ url_for('pilots') }}">
-                    <i class="bi bi-people"></i> Pilot Customers
-                </a>
-                <a href="{{ url_for('roadmap') }}">
-                    <i class="bi bi-map"></i> Product Roadmap
-                </a>
-                <a href="{{ url_for('pricing') }}">
-                    <i class="bi bi-tag"></i> Pricing
-                </a>
-                <a href="{{ url_for('demo_script') }}">
-                    <i class="bi bi-mic"></i> Demo Script
-                </a>
-                <a href="{{ url_for('twilio_setup') }}">
-                    <i class="bi bi-telephone-outbound"></i> Twilio Setup
-                </a>
-                <a href="{{ url_for('investor_dashboard') }}">
-                    <i class="bi bi-graph-up-arrow"></i> Investor Metrics
-                </a>
-                <a href="{{ url_for('roi_calculator') }}">
-                    <i class="bi bi-calculator"></i> ROI Calculator
-                </a>
-                {% endif %}
-                <hr class="bg-white">
-                <a href="{{ url_for('logout') }}">
-                    <i class="bi bi-box-arrow-right"></i> Logout
-                </a>
-            </div>
-        </div>
-        
-        <div class="col-md-9">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2>Dashboard</h2>
-                <span class="badge bg-success fs-6"><i class="bi bi-check-circle"></i> AI Active</span>
-            </div>
-            
-            <div class="row">
+            <div class="row g-3 mb-4">
                 <div class="col-md-4">
-                    <div class="card stat-card">
-                        <div class="card-body">
-                            <h6 class="text-muted">Total Calls</h6>
-                            <h2 class="mb-0">{{ total_calls }}</h2>
-                            <small class="text-muted">All time</small>
+                    <div class="stat-block">
+                        <div class="stat-icon-wrap" style="background:#eef1fb;">
+                            <i class="bi bi-telephone-inbound" style="color:var(--brand);"></i>
+                        </div>
+                        <div class="stat-label">Total Calls</div>
+                        <div class="stat-num">{{ total_calls }}</div>
+                        <div class="stat-sub">All time</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-block">
+                        <div class="stat-icon-wrap" style="background:#f0fdf4;">
+                            <i class="bi bi-robot" style="color:#16a34a;"></i>
+                        </div>
+                        <div class="stat-label">AI Handled</div>
+                        <div class="stat-num">{{ ai_handled }}</div>
+                        <div class="stat-sub">
+                            {% if total_calls > 0 %}{{ (ai_handled / total_calls * 100)|round(1) }}% automation rate{% else %}0% automation rate{% endif %}
                         </div>
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="card stat-card success">
-                        <div class="card-body">
-                            <h6 class="text-muted">AI Handled</h6>
-                            <h2 class="mb-0">{{ ai_handled }}</h2>
-                            <small class="text-muted">
-                                {% if total_calls > 0 %}
-                                    {{ (ai_handled / total_calls * 100)|round(1) }}% automation rate
-                                {% else %}
-                                    0% automation rate
-                                {% endif %}
-                            </small>
+                    <div class="stat-block">
+                        <div class="stat-icon-wrap" style="background:#fefce8;">
+                            <i class="bi bi-voicemail" style="color:#ca8a04;"></i>
                         </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card stat-card warning">
-                        <div class="card-body">
-                            <h6 class="text-muted">New Voicemails</h6>
-                            <h2 class="mb-0">{{ voicemails }}</h2>
-                            <small class="text-muted">Unlistened</small>
-                        </div>
+                        <div class="stat-label">New Voicemails</div>
+                        <div class="stat-num">{{ voicemails }}</div>
+                        <div class="stat-sub">Unlistened</div>
                     </div>
                 </div>
             </div>
             
-            <div class="row mt-4">
+            <div class="row g-3 mt-0">
                 <div class="col-md-3">
-                    <div class="card stat-card info">
-                        <div class="card-body text-center">
-                            <h6 class="text-muted">AI Confidence</h6>
-                            <h2 class="mb-0"><span id="ai-confidence">--</span>%</h2>
-                            <small class="text-muted">Average</small>
-                        </div>
+                    <div class="stat-block">
+                        <div class="stat-label">AI Confidence</div>
+                        <div class="stat-num"><span id="ai-confidence">--</span><span style="font-size:1.1rem;font-weight:600;">%</span></div>
+                        <div class="stat-sub">Average</div>
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="card stat-card primary">
-                        <div class="card-body text-center">
-                            <h6 class="text-muted">Conversation Turns</h6>
-                            <h2 class="mb-0"><span id="avg-turns">--</span></h2>
-                            <small class="text-muted">Average</small>
-                        </div>
+                    <div class="stat-block">
+                        <div class="stat-label">Conversation Turns</div>
+                        <div class="stat-num"><span id="avg-turns">--</span></div>
+                        <div class="stat-sub">Average per call</div>
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="card stat-card warning">
-                        <div class="card-body text-center">
-                            <h6 class="text-muted">Escalated Calls</h6>
-                            <h2 class="mb-0"><span id="escalated-calls">--</span></h2>
-                            <small class="text-muted"><span id="escalation-rate">--</span>% of total</small>
-                        </div>
+                    <div class="stat-block">
+                        <div class="stat-label">Escalated</div>
+                        <div class="stat-num"><span id="escalated-calls">--</span></div>
+                        <div class="stat-sub"><span id="escalation-rate">--</span>% of total</div>
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="card stat-card success">
-                        <div class="card-body text-center">
-                            <h6 class="text-muted">AI Resolution</h6>
-                            <h2 class="mb-0"><span id="ai-resolution">--</span>%</h2>
-                            <small class="text-muted">Success Rate</small>
-                        </div>
+                    <div class="stat-block">
+                        <div class="stat-label">AI Resolution</div>
+                        <div class="stat-num"><span id="ai-resolution">--</span><span style="font-size:1.1rem;font-weight:600;">%</span></div>
+                        <div class="stat-sub">Success rate</div>
                     </div>
                 </div>
             </div>
@@ -160,12 +74,12 @@
             {% if recent_call %}
             <div class="row mt-3">
                 <div class="col-12">
-                    <div class="card" style="border-left: 4px solid #0d6efd;">
+                    <div class="card">
                         <div class="card-body py-2 px-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
                             <div class="d-flex align-items-center gap-2">
                                 <span class="badge bg-primary">Last Call</span>
                                 <span class="fw-semibold text-muted small">
-                                    📞 ***{{ recent_call.caller_number[-4:] if recent_call.caller_number and recent_call.caller_number|length >= 4 else recent_call.caller_number or 'Unknown' }}
+                                    <i class="bi bi-telephone"></i> ***{{ recent_call.caller_phone[-4:] if recent_call.caller_phone and recent_call.caller_phone|length >= 4 else recent_call.caller_phone or 'Unknown' }}
                                 </span>
                             </div>
                             <div class="d-flex align-items-center gap-3 flex-wrap">
@@ -575,16 +489,13 @@ function renderFeed(calls) {
       <div style="width:36px;height:36px;border-radius:10px;background:${meta.color}18;
                   display:flex;align-items:center;justify-content:center;flex-shrink:0;">
         <i class="bi ${meta.icon}" style="color:${meta.color};font-size:1rem;"></i>
-      </div>
       <div style="flex:1;min-width:0;">
         <div class="fw-semibold text-truncate" style="font-size:.88rem;color:#111827;">${c.caller}</div>
         <div style="font-size:.77rem;color:#9ca3af;">${meta.label} · ${aiTag}</div>
-      </div>
       <div class="text-end" style="flex-shrink:0;">
         <div><span style="background:${out.bg};color:${out.color};border-radius:20px;
                           padding:2px 10px;font-size:.73rem;font-weight:600;">${out.label}</span></div>
         <div style="font-size:.73rem;color:#9ca3af;margin-top:3px;">${c.time} · ${c.duration}s</div>
-      </div>
     </div>`;
   }).join('');
 }

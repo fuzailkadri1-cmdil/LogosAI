@@ -41,6 +41,17 @@ Logos AI is an AI-powered phone system designed for small and medium retail/eCom
 - Boutique clothing, electronics, furniture, specialty food, gift shops
 - 20-40 calls/day, losing $30-40K/year to missed after-hours calls
 
+## UI Design System (impeccable.style)
+Applied throughout the app shell:
+- **Font:** Plus Jakarta Sans (not Inter — following impeccable anti-patterns)
+- **Layout:** App shell with white left sidebar (228px) + main column. No top navbar.
+- **Colors:** Tinted neutrals (`--bg: #f5f6fc`, `--border: #e4e7f2`), brand `#2C3E8C`
+- **Stat blocks:** `.stat-block` — no left-border accent (impeccable anti-pattern removed)
+- **Toasts:** Fixed-position toast stack for flash messages (animated with cubic-bezier)
+- **Motion:** Only transform/opacity, exponential easing
+- **Topbar:** Shows `{% block page_title %}` + "AI Active" pill
+- All 12 inner templates stripped of their duplicate Bootstrap grid sidebar (sidebar lives only in base.html)
+
 ## Architecture
 
 ### Tech Stack

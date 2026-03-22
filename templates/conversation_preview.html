@@ -46,32 +46,9 @@
 </style>
 {% endblock %}
 
+
+{% block page_title %}Test AI{% endblock %}
 {% block content %}
-<div class="container-fluid py-4">
-    <div class="row">
-        <div class="col-md-3">
-            <div class="sidebar">
-                <div class="p-3">
-                    <img src="{{ url_for('static', filename='images/logos-ai-logo.png') }}" alt="Logos AI" style="height: 40px; margin-bottom: 10px;">
-                    <h6 class="text-white-50">{{ company.name }}</h6>
-                    <hr class="bg-white">
-                </div>
-                <a href="{{ url_for('dashboard') }}">
-                    <i class="bi bi-speedometer2"></i> Dashboard
-                </a>
-                <a href="{{ url_for('conversation_preview') }}" class="active">
-                    <i class="bi bi-chat-dots"></i> Preview AI
-                </a>
-                <a href="{{ url_for('calls') }}">
-                    <i class="bi bi-telephone"></i> Call Logs
-                </a>
-                <a href="{{ url_for('settings') }}">
-                    <i class="bi bi-gear"></i> Settings
-                </a>
-            </div>
-        </div>
-        
-        <div class="col-md-9">
             <h2 class="mb-4"><i class="bi bi-chat-dots"></i> Test Your Voice AI</h2>
             <p class="lead">See how your AI will respond to customer inquiries in real-time</p>
             
@@ -150,8 +127,6 @@
                 </div>
             </div>
         </div>
-    </div>
-</div>
 {% endblock %}
 
 {% block extra_js %}
@@ -227,7 +202,6 @@ function resetConversation() {
             <div class="text-center text-muted py-5">
                 <i class="bi bi-chat-quote display-3"></i>
                 <p class="mt-3">Conversation reset. Type a message to start.</p>
-            </div>
         `;
         conversationStarted = false;
         updateStateDisplay('initial');
